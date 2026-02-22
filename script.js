@@ -86,18 +86,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
   logEntries.forEach(entry => logObserver.observe(entry));
 
-  // Form submission
+  // Form submission → Google Sheets
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjNc6c6Ubv2F9VPDQo4iC6mH2ajznRYIeTNV5xwixJlz2U2fG2fq_dISsh0WzQKmJ-Rw/exec';
+
   const form = document.getElementById('raiseForm');
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('.btn-submit');
     const originalText = btn.textContent;
-    btn.textContent = 'Submitted!';
-    btn.style.background = '#22c55e';
+
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    const payload = {
+      role: form.role.value,
+      name: form.name.value,
+      artist: form.artist.value,
+      city: form.city.value,
+      email: form.email.value,
+      message: form.message.value
+    };
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      btn.textContent = 'Submitted!';
+      btn.style.background = '#22c55e';
+      form.reset();
+    } catch (err) {
+      btn.textContent = 'Error — try again';
+      btn.style.background = '#ef4444';
+    }
+
     setTimeout(() => {
       btn.textContent = originalText;
       btn.style.background = '';
-      form.reset();
+      btn.disabled = false;
     }, 3000);
   });
 

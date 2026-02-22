@@ -3,349 +3,307 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rolling GA — Before the Doors Open</title>
-  <meta name="description" content="Rolling GA documents the real moments between load-in and showtime — where artists, venues, security, and fans collide.">
+  <title>Rolling GA — When the Night Goes Live</title>
+  <meta name="description" content="Rolling GA is a documentary series about what really happens behind a live concert — from load-in to doors to encore.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:ital,wght@0,400;0,500;0,600;0,700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
+
+  <div class="grain" aria-hidden="true"></div>
 
   <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
     <a href="#" class="nav-logo">
-      <span class="logo-dot"></span>
-      <span class="logo-text">Rolling GA</span>
+      <img src="assets/logo.png" alt="Rolling GA" class="nav-logo-img">
     </a>
     <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
       <span></span><span></span><span></span>
     </button>
     <ul class="nav-links" id="navLinks">
       <li><a href="#hero">Home</a></li>
-      <li><a href="#how-it-works">How It Works</a></li>
-      <li><a href="#for-venues">Venues</a></li>
-      <li><a href="#for-artists">Artists</a></li>
-      <li><a href="#drama">Episodes</a></li>
-      <li><a href="#capture">Clips</a></li>
+      <li><a href="#concept">The Show</a></li>
+      <li><a href="#venues">Venues</a></li>
+      <li><a href="#artists">Artists</a></li>
+      <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
 
   <!-- HERO -->
   <section class="hero" id="hero">
-    <div class="hero-overlay"></div>
+    <div class="hero-letterbox hero-letterbox-top"></div>
     <div class="hero-content">
-      <h1 class="hero-title">Before the doors open,<br>everything is on the line.</h1>
-      <p class="hero-subtitle">Rolling GA documents the real moments between load-in and showtime — where artists, venues, security, and fans collide.</p>
-      <div class="hero-buttons">
-        <a href="#for-venues" class="btn btn-primary">I'm a Venue</a>
-        <a href="#for-artists" class="btn btn-primary">I'm an Artist</a>
+      <img src="assets/logo.png" alt="Rolling GA" class="hero-logo">
+      <div class="countdown">
+        <span class="countdown-label">Time to Doors</span>
+        <div class="countdown-time">
+          <span class="countdown-prefix">T&minus;</span>
+          <span class="countdown-value" id="countdownTimer">45:00</span>
+        </div>
+        <span class="countdown-live"><span class="live-dot"></span>LIVE</span>
+      </div>
+      <h1 class="hero-title">When the night goes live.</h1>
+      <p class="hero-subheadline">A documentary series about what really happens behind a live concert — from load-in to doors to encore.</p>
+      <div class="hero-ctas">
+        <a href="#venues" class="btn btn-primary">I'm a Venue</a>
+        <a href="#artists" class="btn btn-ghost">I'm an Artist</a>
       </div>
     </div>
-    <div class="hero-badge">
-      <span class="logo-dot"></span> Rolling GA
-    </div>
-  </section>
-
-  <!-- WHAT IS ROLLING GA -->
-  <section class="section what-is" id="what-is">
-    <div class="container">
-      <h2 class="section-title">What Is Rolling GA</h2>
-      <div class="what-is-statements">
-        <p class="statement"><span class="statement-bar"></span>Not a concert film</p>
-        <p class="statement"><span class="statement-bar"></span>Not a reality show</p>
-        <p class="statement statement-bold"><span class="statement-bar"></span>It's the 45 minutes before doors</p>
-      </div>
-      <div class="timeline">
-        <div class="timeline-line"></div>
-        <div class="timeline-item">
-          <div class="timeline-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="15" height="10" rx="2"/><path d="M17 7h2a2 2 0 012 2v6a2 2 0 01-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="14" cy="17" r="2"/></svg>
-          </div>
-          <span class="timeline-label">Load-In</span>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          </div>
-          <span class="timeline-label">Soundcheck</span>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          </div>
-          <span class="timeline-label">Security Brief</span>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M7 15h4"/></svg>
-          </div>
-          <span class="timeline-label">Ticketing</span>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
-          </div>
-          <span class="timeline-label">Doors</span>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </div>
-          <span class="timeline-label">Showtime</span>
-        </div>
-      </div>
-      <p class="what-is-description">Every show is a collision of pressure, coordination, and human drama. We capture the moments that determine whether the night succeeds or falls apart.</p>
+    <div class="hero-letterbox hero-letterbox-bottom"></div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
     </div>
   </section>
 
-  <!-- FOR VENUES & ARTISTS -->
-  <section class="section for-section" id="for-venues">
+  <!-- CONCEPT: THE MOMENT -->
+  <section class="section concept" id="concept">
     <div class="container">
-      <div class="for-grid">
-        <div class="for-card for-card-venues">
-          <div class="for-card-bg"></div>
-          <div class="for-card-content">
-            <div class="for-card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h4"/></svg>
-            </div>
-            <h3 class="for-card-title">For Venues</h3>
-            <p class="for-card-quote">"Your night starts long before the crowd."</p>
-            <ul class="for-card-list">
-              <li>Showcase your operation, culture, and crew</li>
-              <li>Highlight safety, professionalism, and vibe</li>
-              <li>Attract better artists and promoters</li>
-            </ul>
-            <a href="#raise-hand" class="btn btn-outline">Submit Your Venue <span>&rarr;</span></a>
-          </div>
+      <div class="section-label">01 / The Show</div>
+      <h2 class="section-heading">The Moment Everything Becomes Real</h2>
+      <div class="concept-grid">
+        <div class="concept-main">
+          <p class="concept-intro">Each episode of Rolling GA follows one real concert at an iconic venue.</p>
+          <p class="concept-list-label">We capture:</p>
+          <ul class="concept-list">
+            <li>Load-in and production setup</li>
+            <li>Doors opening and crowd flow</li>
+            <li>Security, guest services, and F&amp;B pressure</li>
+            <li>Showtime execution</li>
+            <li>Load-out and reflection</li>
+          </ul>
         </div>
-        <div class="for-card for-card-artists" id="for-artists">
-          <div class="for-card-bg"></div>
-          <div class="for-card-content">
-            <div class="for-card-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-            </div>
-            <h3 class="for-card-title">For Artists</h3>
-            <p class="for-card-quote">"The show before the show."</p>
-            <ul class="for-card-list">
-              <li>Capture the real touring experience</li>
-              <li>Tell your story beyond the stage</li>
-              <li>Build connection with fans and venues</li>
-            </ul>
-            <a href="#raise-hand" class="btn btn-outline">Apply as an Artist <span>&rarr;</span></a>
-          </div>
+        <div class="concept-manifesto">
+          <p>No scripts.</p>
+          <p>No manufactured drama.</p>
+          <p class="manifesto-gold">Just real people making a live night happen.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- WHAT WE CAPTURE -->
-  <section class="section capture" id="capture">
+  <!-- RAW SHOTS STRIP -->
+  <section class="scene-strip">
+    <div class="scene-grid">
+      <div class="scene-card">
+        <img src="assets/scene-loadout.png" alt="Production crew during load-in">
+        <span class="scene-label">Load-In</span>
+      </div>
+      <div class="scene-card">
+        <img src="assets/scene-doors.png" alt="Crowds at the venue doors">
+        <span class="scene-label">Doors</span>
+      </div>
+      <div class="scene-card">
+        <img src="assets/scene-backstage.png" alt="Artist backstage before the show">
+        <span class="scene-label">Backstage</span>
+      </div>
+      <div class="scene-card">
+        <img src="assets/scene-stage.png" alt="Live performance from side stage">
+        <span class="scene-label">Showtime</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHOOSE YOUR PATH -->
+  <section class="section perspectives" id="perspectives">
     <div class="container">
-      <h2 class="section-title">What We Capture</h2>
-      <p class="section-subtitle">The Players</p>
-      <div class="players-grid">
-        <div class="player-card">
-          <div class="player-card-header">
-            <div class="player-icon player-icon-red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-            </div>
-            <h4 class="player-name">Artist</h4>
-          </div>
-          <p class="player-quote">"If they don't show up on time, everything collapses."</p>
+      <div class="section-label">02 / Perspectives</div>
+      <h2 class="section-heading">Two Perspectives. One Night.</h2>
+      <p class="perspectives-intro">Rolling GA is built with respect for both sides of the stage.<br>Choose the perspective that fits you.</p>
+      <div class="path-cards">
+        <a href="#venues" class="path-card">
+          <span class="path-tag">Venues</span>
+          <h3 class="path-title">Your operation is the story.</h3>
+          <span class="path-arrow">&rarr;</span>
+        </a>
+        <a href="#artists" class="path-card">
+          <span class="path-tag">Artists</span>
+          <h3 class="path-title">Your night. Your context. Your moment.</h3>
+          <span class="path-arrow">&rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR VENUES — DEEP DIVE -->
+  <section class="section deep" id="venues">
+    <div class="container">
+      <div class="section-label">03 / For Venues</div>
+      <div class="deep-header">
+        <h2 class="deep-headline">Your operation is the story.</h2>
+        <p class="deep-copy">Live venues operate under pressure every night — solving problems in real time, protecting guests, and delivering unforgettable experiences.</p>
+      </div>
+      <div class="deep-purpose">
+        <p class="deep-purpose-label">Rolling GA exists to:</p>
+        <ul class="deep-purpose-list">
+          <li>Highlight venue teams as professionals</li>
+          <li>Show competence under pressure</li>
+          <li>Build pride, not expose risk</li>
+          <li>Tell the story most audiences never see</li>
+        </ul>
+      </div>
+      <div class="deep-scene">
+        <img src="assets/scene-doors.png" alt="Security managing the crowd at doors">
+        <span class="deep-scene-caption">Real operations. Real pressure. Real story.</span>
+      </div>
+      <blockquote class="deep-trust">
+        <p>This is not a "gotcha" show.</p>
+        <p><strong>The venue is never the villain.</strong></p>
+      </blockquote>
+      <div class="info-grid">
+        <div class="info-box">
+          <h4 class="info-box-title">What participation looks like</h4>
+          <ul class="info-box-list">
+            <li>One show night</li>
+            <li>Documentary-style crew</li>
+            <li>Minimal footprint</li>
+            <li>Operations always come first</li>
+            <li>Venue review on sensitive content</li>
+          </ul>
         </div>
-        <div class="player-card">
-          <div class="player-card-header">
-            <div class="player-icon player-icon-red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h4"/></svg>
-            </div>
-            <h4 class="player-name">Venue Ops</h4>
-          </div>
-          <p class="player-quote">"The stage, the sound, the safety—it all falls on them."</p>
+        <div class="info-box">
+          <h4 class="info-box-title">What venues get</h4>
+          <ul class="info-box-list">
+            <li>High-quality branded content</li>
+            <li>Staff recognition and morale</li>
+            <li>Employer branding asset</li>
+            <li>Industry credibility</li>
+            <li>Reusable clips for marketing</li>
+          </ul>
         </div>
-        <div class="player-card">
-          <div class="player-card-header">
-            <div class="player-icon player-icon-red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <h4 class="player-name">Security</h4>
-          </div>
-          <p class="player-quote">"One bad call and the night goes sideways."</p>
+      </div>
+      <div class="deep-cta">
+        <a href="#contact" class="btn btn-primary btn-lg">Talk to Us About Featuring Your Venue</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOR ARTISTS — DEEP DIVE -->
+  <section class="section deep deep-alt" id="artists">
+    <div class="container">
+      <div class="section-label">04 / For Artists</div>
+      <div class="deep-header">
+        <h2 class="deep-headline">Your night. Your context.<br>Your moment.</h2>
+        <p class="deep-copy">Artists live in the space between preparation and performance. Rolling GA captures that moment honestly — without exploitation or distortion.</p>
+      </div>
+      <div class="deep-purpose">
+        <p class="deep-purpose-label">Each episode includes a dedicated artist segment that:</p>
+        <ul class="deep-purpose-list">
+          <li>Shows who you are beyond the stage</li>
+          <li>Captures the stakes of the night</li>
+          <li>Respects your process and boundaries</li>
+          <li>Gives you real exposure tied to a story worth sharing</li>
+        </ul>
+      </div>
+      <div class="deep-scene">
+        <img src="assets/scene-backstage.png" alt="Artist in a quiet moment backstage">
+        <span class="deep-scene-caption">The moment before the moment.</span>
+      </div>
+      <blockquote class="deep-trust">
+        <p>This is not about tearing artists down.</p>
+        <p><strong>It's about showing what it takes to show up.</strong></p>
+      </blockquote>
+      <div class="info-grid">
+        <div class="info-box">
+          <h4 class="info-box-title">What participation looks like</h4>
+          <ul class="info-box-list">
+            <li>Short pre-show interview</li>
+            <li>Performance moments</li>
+            <li>No private conflicts</li>
+            <li>Respect for creative control</li>
+          </ul>
         </div>
-        <div class="player-card">
-          <div class="player-card-header">
-            <div class="player-icon player-icon-red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M7 15h4"/></svg>
-            </div>
-            <h4 class="player-name">Ticketing</h4>
-          </div>
-          <p class="player-quote">"If ticketing fails, nothing else matters."</p>
+        <div class="info-box">
+          <h4 class="info-box-title">What artists get</h4>
+          <ul class="info-box-list">
+            <li>Documentary exposure</li>
+            <li>Performance footage</li>
+            <li>Shareable story-driven content</li>
+            <li>Alignment with respected venues</li>
+          </ul>
         </div>
-        <div class="player-card">
-          <div class="player-card-header">
-            <div class="player-icon player-icon-red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10l-4 4l6 6l4-16l-18 7l4 2l2 6l3-4"/></svg>
-            </div>
-            <h4 class="player-name">Production</h4>
-          </div>
-          <p class="player-quote">"Broken gear, missing cables—they make it work anyway."</p>
-        </div>
-        <div class="player-card">
-          <div class="player-card-header">
-            <div class="player-icon player-icon-red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            </div>
-            <h4 class="player-name">Fans at the Gate</h4>
-          </div>
-          <p class="player-quote">"They've been waiting all day. Don't let them down."</p>
+      </div>
+      <div class="deep-cta">
+        <a href="#contact" class="btn btn-primary btn-lg">Be Part of an Episode</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY "ROLL G.A." -->
+  <section class="section name-section" id="roll-ga">
+    <div class="container">
+      <div class="section-label">05 / The Name</div>
+      <div class="name-content">
+        <h2 class="name-heading">Why "Roll G.A."</h2>
+        <p class="name-definition">"Roll G.A." is venue shorthand for <em>Roll General Admission</em> — the moment doors open and the night becomes real.</p>
+        <div class="name-distinction">
+          <p><strong>Rolling GA</strong> is the platform.</p>
+          <p><strong>ROLL G.A.</strong> is the moment we document.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- TIMECODE / DRAMA -->
-  <section class="section drama" id="drama">
-    <div class="drama-bg"></div>
+  <!-- CONTACT -->
+  <section class="section contact" id="contact">
     <div class="container">
-      <p class="timecode">[TIMECODE: T-45:00]</p>
-      <h2 class="section-title drama-title">Where the drama really lives.</h2>
-      <div class="drama-cards">
-        <div class="drama-card">
-          <div class="drama-card-icon drama-icon-orange">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="15" height="10" rx="2"/><path d="M17 7h2a2 2 0 012 2v6a2 2 0 01-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="14" cy="17" r="2"/></svg>
+      <div class="section-label">06 / Get In Touch</div>
+      <h2 class="section-heading">Interested in Being Part of the First Season?</h2>
+      <p class="contact-intro">We're currently speaking with select venues and artists for our pilot episodes. If this resonates, we'd love to talk.</p>
+      <form class="contact-form" id="raiseForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required>
           </div>
-          <span class="drama-card-label">Late Buses</span>
-        </div>
-        <div class="drama-card">
-          <div class="drama-card-icon drama-icon-yellow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
           </div>
-          <span class="drama-card-label">Broken Gear</span>
         </div>
-        <div class="drama-card">
-          <div class="drama-card-icon drama-icon-orange">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/></svg>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="role">I am a:</label>
+            <select id="role" name="role" required>
+              <option value="" disabled selected>Select your role</option>
+              <option value="venue">Venue</option>
+              <option value="artist">Artist / Band</option>
+              <option value="promoter">Promoter</option>
+              <option value="production">Production</option>
+              <option value="other">Other</option>
+            </select>
           </div>
-          <span class="drama-card-label">Security Calls</span>
-        </div>
-        <div class="drama-card">
-          <div class="drama-card-icon drama-icon-amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" placeholder="Enter your city">
           </div>
-          <span class="drama-card-label">Last-Minute Changes</span>
-        </div>
-        <div class="drama-card">
-          <div class="drama-card-icon drama-icon-green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <span class="drama-card-label">Sold-Out Pressure</span>
-        </div>
-      </div>
-      <div class="terminal-logs">
-        <div class="log-entry">
-          <span class="log-time">[18:15:23]</span>
-          <span class="log-text">Artist bus is 20 minutes out. Adjust soundcheck.</span>
-        </div>
-        <div class="log-entry">
-          <span class="log-time">[18:22:47]</span>
-          <span class="log-text">Main PA acting up. Backup ready if needed.</span>
-        </div>
-        <div class="log-entry">
-          <span class="log-time">[18:35:12]</span>
-          <span class="log-text">Crowd forming fast. Security to doors now.</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="section how-it-works" id="how-it-works">
-    <div class="container">
-      <h2 class="section-title">How It Works</h2>
-      <p class="section-subtitle">Simple, fast, authentic</p>
-      <div class="steps">
-        <div class="steps-line"></div>
-        <div class="step">
-          <div class="step-number">01</div>
-          <div class="step-circle">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          </div>
-          <h3 class="step-title">Apply</h3>
-          <p class="step-role">Venue or Artist</p>
-          <p class="step-desc">Submit your information and tell us your story</p>
-        </div>
-        <div class="step">
-          <div class="step-number">02</div>
-          <div class="step-circle">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-          </div>
-          <h3 class="step-title">We Roll GA</h3>
-          <p class="step-role">Small footprint crew</p>
-          <p class="step-desc">Real-time capture of the 45 minutes before doors</p>
-        </div>
-        <div class="step">
-          <div class="step-number">03</div>
-          <div class="step-circle">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15 8.5 22 9.3 17 14 18.2 21 12 17.8 5.8 21 7 14 2 9.3 9 8.5 12 2"/></svg>
-          </div>
-          <h3 class="step-title">We Publish & Promote</h3>
-          <p class="step-role">Episodes, clips, social</p>
-          <p class="step-desc">Your story reaches fans, venues, and the industry</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- RAISE YOUR HAND -->
-  <section class="section raise-hand" id="raise-hand">
-    <div class="container">
-      <h2 class="section-title">Raise Your Hand</h2>
-      <p class="section-subtitle">Tell us about your venue, your band, or your role in the scene</p>
-      <form class="raise-form" id="raiseForm">
-        <div class="form-group">
-          <label for="role">I am a:</label>
-          <select id="role" name="role" required>
-            <option value="" disabled selected>Select your role</option>
-            <option value="venue">Venue</option>
-            <option value="artist">Artist / Band</option>
-            <option value="promoter">Promoter</option>
-            <option value="security">Security</option>
-            <option value="production">Production</option>
-            <option value="fan">Fan</option>
-            <option value="other">Other</option>
-          </select>
         </div>
         <div class="form-group">
-          <label for="name">Your Name *</label>
-          <input type="text" id="name" name="name" placeholder="Enter your name" required>
+          <label for="message">Tell us more</label>
+          <textarea id="message" name="message" rows="4" placeholder="What venue, artist, or role are you involved with?"></textarea>
         </div>
-        <div class="form-group">
-          <label for="artist">Artist / Band Name *</label>
-          <input type="text" id="artist" name="artist" placeholder="Enter artist or band name" required>
-        </div>
-        <div class="form-group">
-          <label for="city">City *</label>
-          <input type="text" id="city" name="city" placeholder="Enter your city" required>
-        </div>
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required>
-        </div>
-        <div class="form-group">
-          <label for="message">Tell us more (optional)</label>
-          <textarea id="message" name="message" rows="4" placeholder="Tell us about yourself..."></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary btn-submit">Raise Your Hand</button>
+        <button type="submit" class="btn btn-primary btn-submit">Send</button>
       </form>
+      <p class="contact-note">No newsletter spam. No hard sell. Just a conversation.</p>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="footer-logo">
-        <span class="logo-dot"></span>
-        <span class="logo-text">Rolling GA</span>
+      <div class="footer-left">
+        <div class="footer-logo">
+          <img src="assets/logo.png" alt="Rolling GA" class="footer-logo-img">
+        </div>
+        <p class="footer-tagline">Inside the night live music comes alive.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#concept">The Show</a>
+        <a href="#venues">Venues</a>
+        <a href="#artists">Artists</a>
+        <a href="#contact">Contact</a>
       </div>
       <p class="footer-copy">&copy; 2026 Rolling GA. All rights reserved.</p>
     </div>

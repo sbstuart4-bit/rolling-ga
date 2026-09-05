@@ -15,8 +15,8 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { RollingGaMark } from "@/components/brand/rolling-ga-mark";
 import { DemoBoardReturn } from "@/components/demo/demo-board-return";
-import { DEMO_ARTIST_LABELS, type DemoArtistKey } from "@/lib/demo-scenario/url";
-import { DEMO_ARTISTS } from "@/lib/demo-scenario/types";
+import { DEMO_ARTIST_LABELS } from "@/lib/demo-scenario/url";
+import { DEMO_ARTISTS, type DemoArtistKey } from "@/lib/demo-scenario/types";
 import { cn } from "@/lib/utils";
 
 export const PLATFORM_OPS_NAV: { label: string; href: string; icon: LucideIcon }[] = [

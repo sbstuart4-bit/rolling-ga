@@ -24,10 +24,6 @@ async function PlatformOpsAuth({ children }: { children: React.ReactNode }) {
 }
 
 export default async function PlatformOpsLayout({ children }: LayoutProps<"/ops">) {
-  if (!demoModeEnabled()) {
-    await requireAuthWithRole(["rga_admin"], "/ops");
-  }
-
   return (
     <Suspense fallback={<div className="min-h-dvh bg-[#0c0e12]" />}>
       <PlatformOpsAuth>{children}</PlatformOpsAuth>

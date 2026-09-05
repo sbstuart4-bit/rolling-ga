@@ -1,7 +1,7 @@
 import "server-only";
 import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { artists, drops, events, products } from "@/db/schema";
+import { artists, events, products } from "@/db/schema";
 import {
   buildDemoAssetAudit,
   countAssetIssuesForArtist,
@@ -57,7 +57,7 @@ export async function listPlatformOpsArtists() {
   const rows = await Promise.all(
     FULL_ARTISTS.map(async (artist) => {
       const assetKey = DEMO_ARTIST_KEYS[artist.id]!;
-      const [{ showCount }], [{ productCount }]] = await Promise.all([
+      const [[{ showCount }], [{ productCount }]] = await Promise.all([
         db
           .select({ showCount: count() })
           .from(events)

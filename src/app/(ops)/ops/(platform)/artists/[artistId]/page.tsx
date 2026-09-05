@@ -9,16 +9,22 @@ import {
 } from "@/lib/demo-asset-audit";
 import { getPlatformOpsArtist } from "@/server/ops/queries";
 
-export async function generateMetadata(props: PageProps<"/ops/artists/[artistId]">): Promise<Metadata> {
-  const { artistId } = await props.params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ artistId: string }>;
+}): Promise<Metadata> {
+  const { artistId } = await params;
   const artist = await getPlatformOpsArtist(artistId);
   return { title: artist ? `${artist.name} — Rolling GA Ops` : "Artist not found" };
 }
 
-export default async function PlatformOpsArtistDetailPage(
-  props: PageProps<"/ops/artists/[artistId]">,
-) {
-  const { artistId } = await props.params;
+export default async function PlatformOpsArtistDetailPage({
+  params,
+}: {
+  params: Promise<{ artistId: string }>;
+}) {
+  const { artistId } = await params;
   const artist = await getPlatformOpsArtist(artistId);
   if (!artist) notFound();
 

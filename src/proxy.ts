@@ -72,6 +72,17 @@ async function grantDemoBoardAccess(request: NextRequest): Promise<NextResponse 
   return response;
 }
 
+/** Platform ops areas reachable without auth in demo mode (Asset QA, cross-artist inspection). */
+function isDemoPlatformOpsPath(pathname: string): boolean {
+  if (pathname === "/ops") return true;
+  if (pathname.startsWith("/ops/artists")) return true;
+  if (pathname === "/ops/assets") return true;
+  if (pathname === "/ops/shows") return true;
+  if (pathname === "/ops/drops") return true;
+  if (pathname === "/ops/products") return true;
+  return false;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
@@ -91,6 +102,10 @@ export async function proxy(request: NextRequest) {
   const sessionId = await readSessionIdFromRequest(request);
   const demoMode = demoModeEnabled();
   const inAppNavigation = isSameOriginReferer(request.headers, request.nextUrl.origin);
+
+  if (demoMode && isDemoPlatformOpsPath(pathname)) {
+    return NextResponse.next();
+  }
 
   if (
     shouldRedirectRootToDemoBoard({

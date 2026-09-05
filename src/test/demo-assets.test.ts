@@ -18,6 +18,7 @@ import {
   resolveProductImage,
   resolveProductImages,
 } from "@/lib/demo-product-images";
+import { isGeneratedDemoPosterSvg, resolveDropArtwork } from "@/lib/demo-drop-artwork";
 import {
   LOW_COUNTRY_PRODUCTS,
   MARISOL_PRODUCTS,
@@ -129,5 +130,30 @@ describe("demo asset audit", () => {
   it("reports no missing canonical product files", () => {
     const audit = buildDemoAssetAudit();
     expect(missingProductAssets(audit)).toEqual([]);
+  });
+});
+
+describe("resolveDropArtwork", () => {
+  it("flags generated poster svgs as filler", () => {
+    expect(isGeneratedDemoPosterSvg("/demo/poster-gold-hour-drop.svg")).toBe(true);
+    expect(isGeneratedDemoPosterSvg("/demo/poster-detroit-tonight.png")).toBe(false);
+  });
+
+  it("uses product photography instead of Nova filler posters", () => {
+    const artwork = resolveDropArtwork({
+      dropSlug: "gold-hour",
+      storedArtworkUrl: "/demo/poster-gold-hour-drop.svg",
+      fallbackProductId: "prd_nk_tee",
+      fallbackProductImages: ["/demo/product-prd-nk-tee.svg"],
+    });
+    expect(artwork).toBe("/demo/product-prd-nk-tee.png");
+  });
+
+  it("prefers canonical Degens poster pngs over stale svg", () => {
+    const artwork = resolveDropArtwork({
+      dropSlug: "detroit-tonight",
+      storedArtworkUrl: "/demo/poster-detroit-tonight.svg",
+    });
+    expect(artwork).toBe(THE_DEGENS_DEMO_ASSETS.dropPosters["detroit-tonight"]);
   });
 });

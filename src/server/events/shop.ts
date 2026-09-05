@@ -10,6 +10,7 @@ import {
   listStandaloneProductsForEvent,
 } from "@/server/catalog/queries";
 import { demoNow } from "@/server/demo/clock";
+import { enrichDropArtwork } from "@/lib/demo-drop-artwork";
 import { getDemoAwareProductEligibility } from "@/server/demo/scenario-eligibility";
 import type { EventRow } from "./queries";
 
@@ -52,7 +53,7 @@ export async function loadEventShopCatalog(event: EventRow, userId: string) {
       );
 
       return {
-        drop,
+        drop: enrichDropArtwork(drop, items[0]),
         products,
         expired: drop.endsAt !== null && drop.endsAt < now,
         isFlash: drop.endsAt !== null,

@@ -148,6 +148,7 @@ export async function createProduct(
     eventId?: string;
     tourId?: string;
     name?: string;
+    slug?: string;
     basePriceCents?: number;
     unitCostCents?: number;
     images?: string[];
@@ -160,7 +161,7 @@ export async function createProduct(
     .values({
       id,
       artistId,
-      slug: id,
+      slug: overrides.slug ?? id,
       name: overrides.name ?? "Test Product",
       category: "apparel",
       accessType: (overrides.accessType as import("@/lib/types").ProductAccessType) ?? "public",
@@ -201,6 +202,7 @@ export async function createDrop(
   overrides: {
     eventId?: string;
     status?: DropStatus;
+    slug?: string;
     startsAt?: Date;
     endsAt?: Date | null;
   } = {},
@@ -212,7 +214,7 @@ export async function createDrop(
     .values({
       id,
       artistId,
-      slug: id,
+      slug: overrides.slug ?? id,
       title: "Test Drop",
       eventId: overrides.eventId ?? null,
       status: overrides.status ?? "live",

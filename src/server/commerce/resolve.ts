@@ -10,6 +10,7 @@ import {
 import {
   availableUnits,
   isEligibleForProduct,
+  listBundleItems,
   listVariantsWithInventory,
 } from "@/server/catalog/queries";
 import { demoNow } from "@/server/demo/clock";
@@ -283,7 +284,30 @@ export async function resolveCartForCheckout(
   const lines: ResolvedLine[] = [];
 
   for (const item of items) {
-    if (item.bundleId || !item.productId) {
+    if (item.bundleId) {
+      const bundleItems = await listBundleItems(item.bundleId);
+      if (bundleItems.length === 0) {
+        return {
+          ok: false,
+          reason: "unsupported_line",
+          message: "An item in your cart can no longer be purchased. Please review your cart.",
+        };
+      }
+      for (const bundleItem of bundleItems) {
+        const result = await resolveLine({
+          productId: bundleItem.productId,
+          variantId: bundleItem.variantId,
+          quantity: bundleItem.quantity * item.quantity,
+          attendance,
+          now,
+        });
+        if (!result.ok) return result;
+        lines.push(result.line);
+      }
+      continue;
+    }
+
+    if (!item.productId) {
       return {
         ok: false,
         reason: "unsupported_line",

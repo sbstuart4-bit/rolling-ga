@@ -1,6 +1,7 @@
 import "server-only";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
+import { withDevDatabaseRecovery } from "@/db/dev-bootstrap";
 import { userRoles, users } from "@/db/schema";
 import type { PlatformRole } from "@/lib/types";
 import { demoModeEnabled } from "@/lib/demo-mode";
@@ -51,36 +52,84 @@ const CURATED_EMAILS = Object.keys(BLURBS_BY_EMAIL);
  * entries, so the query selects the curated personas by email rather than excluding the
  * crowd — user ids are opaque uuids and carry no persona information.
  */
+/** Static personas so the demo board still renders if PGlite is temporarily unavailable. */
+const STATIC_DEMO_ACCOUNTS: DemoAccount[] = [
+  {
+    email: "scott@example.com",
+    displayName: "Scott Weller",
+    roles: ["fan"],
+    blurb: BLURBS_BY_EMAIL["scott@example.com"]!,
+  },
+  {
+    email: "marcus@thedegens.example",
+    displayName: "Marcus Vale",
+    roles: ["artist_member"],
+    blurb: BLURBS_BY_EMAIL["marcus@thedegens.example"]!,
+  },
+  {
+    email: "dana@novakestrel.example",
+    displayName: "Dana Okafor",
+    roles: ["artist_member"],
+    blurb: BLURBS_BY_EMAIL["dana@novakestrel.example"]!,
+  },
+  {
+    email: "priya@thelowcountry.example",
+    displayName: "Priya Nair",
+    roles: ["artist_member"],
+    blurb: BLURBS_BY_EMAIL["priya@thelowcountry.example"]!,
+  },
+  {
+    email: "admin@rollingga.example",
+    displayName: "Rolling GA Admin",
+    roles: ["rga_admin"],
+    blurb: BLURBS_BY_EMAIL["admin@rollingga.example"]!,
+  },
+  {
+    email: "ops@rollingga.example",
+    displayName: "Jordan Pike",
+    roles: ["fulfillment_operator"],
+    blurb: BLURBS_BY_EMAIL["ops@rollingga.example"]!,
+  },
+];
+
 export async function listDemoAccounts(): Promise<DemoAccount[]> {
   if (!demoModeEnabled()) return [];
 
-  const rows = await db
-    .select({
-      email: users.email,
-      displayName: users.displayName,
-      role: userRoles.role,
-    })
-    .from(users)
-    .innerJoin(userRoles, eq(userRoles.userId, users.id))
-    .where(and(eq(users.isDemo, true), inArray(users.email, CURATED_EMAILS)));
+  try {
+    return await withDevDatabaseRecovery(async () => {
+      const rows = await db
+        .select({
+          email: users.email,
+          displayName: users.displayName,
+          role: userRoles.role,
+        })
+        .from(users)
+        .innerJoin(userRoles, eq(userRoles.userId, users.id))
+        .where(and(eq(users.isDemo, true), inArray(users.email, CURATED_EMAILS)));
 
-  const byEmail = new Map<string, DemoAccount>();
-  for (const row of rows) {
-    const existing = byEmail.get(row.email);
-    if (existing) {
-      existing.roles.push(row.role);
-    } else {
-      byEmail.set(row.email, {
-        email: row.email,
-        displayName: row.displayName,
-        roles: [row.role],
-        blurb: BLURBS_BY_EMAIL[row.email] ?? BLURBS[row.role] ?? "",
-      });
-    }
+      const byEmail = new Map<string, DemoAccount>();
+      for (const row of rows) {
+        const existing = byEmail.get(row.email);
+        if (existing) {
+          existing.roles.push(row.role);
+        } else {
+          byEmail.set(row.email, {
+            email: row.email,
+            displayName: row.displayName,
+            roles: [row.role],
+            blurb: BLURBS_BY_EMAIL[row.email] ?? BLURBS[row.role] ?? "",
+          });
+        }
+      }
+
+      if (byEmail.size === 0) return STATIC_DEMO_ACCOUNTS;
+
+      const order: PlatformRole[] = ["fan", "artist_member", "rga_admin", "fulfillment_operator"];
+      return [...byEmail.values()].sort(
+        (a, b) => order.indexOf(a.roles[0]) - order.indexOf(b.roles[0]),
+      );
+    });
+  } catch {
+    return STATIC_DEMO_ACCOUNTS;
   }
-
-  const order: PlatformRole[] = ["fan", "artist_member", "rga_admin", "fulfillment_operator"];
-  return [...byEmail.values()].sort(
-    (a, b) => order.indexOf(a.roles[0]) - order.indexOf(b.roles[0]),
-  );
 }

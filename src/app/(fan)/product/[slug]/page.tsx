@@ -19,6 +19,7 @@ import {
 } from "@/server/attendance/queries";
 import {
   getProductBySlug,
+  getProductBySlugOnly,
   isEligibleForProduct,
   listVariantsWithInventory,
   availableUnits,
@@ -33,8 +34,10 @@ import { getSavedApparelSize } from "@/server/fans/preferences";
 export async function generateMetadata(props: PageProps<"/product/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
   const { a: artistId } = await props.searchParams;
-  if (typeof artistId !== "string") return {};
-  const product = await getProductBySlug(artistId, slug);
+  const product =
+    typeof artistId === "string"
+      ? await getProductBySlug(artistId, slug)
+      : await getProductBySlugOnly(slug);
   return product ? { title: product.name } : { title: "Product not found" };
 }
 
@@ -51,13 +54,15 @@ export async function generateMetadata(props: PageProps<"/product/[slug]">): Pro
  */
 export default async function ProductPage(props: PageProps<"/product/[slug]">) {
   const { slug } = await props.params;
-  const { a: artistId, e: eventSlug } = await props.searchParams;
+  const { a: artistIdParam, e: eventSlug } = await props.searchParams;
   const ctx = await requireAuth(`/product/${slug}`);
 
-  if (typeof artistId !== "string") notFound();
-
-  const product = await getProductBySlug(artistId, slug);
+  const product =
+    typeof artistIdParam === "string"
+      ? await getProductBySlug(artistIdParam, slug)
+      : await getProductBySlugOnly(slug);
   if (!product) notFound();
+  const artistId = product.artistId;
 
   const eventPage = await resolveEventTakeoverContext(
     typeof eventSlug === "string" ? eventSlug : undefined,

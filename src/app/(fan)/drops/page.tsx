@@ -11,6 +11,8 @@ import { artists, drops, dropProducts, products } from "@/db/schema";
 import { and, asc, desc, eq, lte } from "drizzle-orm";
 import { demoNow } from "@/server/demo/clock";
 import { resolveProductImage } from "@/lib/demo-product-images";
+import { resolveDropArtwork } from "@/lib/demo-drop-artwork";
+import { resolveDropProductPresentation, isDropVisibleInDemoScenario, shouldShowDropCountdown } from "@/lib/merch-experience/drop-presentation";
 import { getActiveDemoScenarioContext } from "@/server/demo/scenario-state";
 import { loadEventPage } from "@/server/events/context";
 import { getFanShowContextSlug } from "@/server/fans/show-context";
@@ -46,6 +48,7 @@ export default async function DropsPage() {
       startsAt: drops.startsAt,
       endsAt: drops.endsAt,
       exclusivityType: drops.exclusivityType,
+      eventId: drops.eventId,
       artistId: drops.artistId,
       artistName: artists.name,
     })
@@ -55,7 +58,15 @@ export default async function DropsPage() {
     .orderBy(desc(drops.displayPriority), desc(drops.startsAt))
     .limit(40);
 
-  const featured = allDrops[0];
+  const scopedDrops = demoScenario
+    ? allDrops.filter((drop) => isDropVisibleInDemoScenario(drop, demoScenario.show.eventId))
+    : allDrops;
+
+  const featured = scopedDrops[0];
+  const featuredCountdown =
+    demoScenario && featured
+      ? shouldShowDropCountdown(featured, demoScenario.show.eventId, now)
+      : Boolean(featured?.endsAt && featured.endsAt > now);
 
   const content = (
     <div className="mx-auto max-w-lg">
@@ -79,7 +90,7 @@ export default async function DropsPage() {
         )}
       </header>
 
-      {allDrops.length === 0 ? (
+      {scopedDrops.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 px-5 py-28 text-center">
           <p className="text-4xl">📦</p>
           <p className="font-display text-lg">No active drops</p>
@@ -87,7 +98,7 @@ export default async function DropsPage() {
         </div>
       ) : (
         <div className="px-5 pt-5">
-          {featured?.endsAt && featured.endsAt > now && (
+          {featuredCountdown && featured?.endsAt && (
             <div
               className={
                 eventPage
@@ -111,13 +122,14 @@ export default async function DropsPage() {
           )}
 
           <ul className="space-y-4">
-            {allDrops.map((drop) => (
+            {scopedDrops.map((drop) => (
               <DropCard
                 key={drop.id}
                 drop={drop}
                 now={now}
                 eventSlug={eventPage?.event.slug}
                 scoped={Boolean(eventPage)}
+                demoScenario={demoScenario}
               />
             ))}
           </ul>
@@ -138,19 +150,23 @@ async function DropCard({
   now,
   eventSlug,
   scoped,
+  demoScenario,
 }: {
   drop: {
     id: string;
     slug: string;
     title: string;
+    artworkUrl: string | null;
     artistId: string;
     artistName: string;
+    eventId: string | null;
     endsAt: Date | null;
     exclusivityType: string;
   };
   now: Date;
   eventSlug?: string;
   scoped: boolean;
+  demoScenario: Awaited<ReturnType<typeof getActiveDemoScenarioContext>>;
 }) {
   const items = await db
     .select({
@@ -158,6 +174,8 @@ async function DropCard({
       productSlug: products.slug,
       name: products.name,
       images: products.images,
+      accessType: products.accessType,
+      eventId: products.eventId,
       basePriceCents: products.basePriceCents,
       dropPriceCents: dropProducts.dropPriceCents,
     })
@@ -167,7 +185,16 @@ async function DropCard({
     .orderBy(asc(dropProducts.displayOrder))
     .limit(6);
 
-  const productQuery = eventSlug ? `?a=${drop.artistId}&e=${eventSlug}` : `?a=${drop.artistId}`;
+  const hero = items[0];
+  const artwork = resolveDropArtwork({
+    dropSlug: drop.slug,
+    storedArtworkUrl: drop.artworkUrl,
+    fallbackProductId: hero?.productId,
+    fallbackProductImages: hero?.images,
+  });
+
+  const eventQuery = eventSlug ? `?e=${eventSlug}` : "";
+  const productLink = (slug: string) => `/product/${slug}${eventQuery}`;
 
   return (
     <li
@@ -177,6 +204,19 @@ async function DropCard({
           : "overflow-hidden rounded-2xl border border-border bg-card"
       }
     >
+      {artwork && (
+        <Link href={`/drop/${drop.slug}${eventQuery}`} className="block">
+          <div
+            className={
+              scoped
+                ? "relative aspect-[16/9] w-full bg-artist-bg"
+                : "relative aspect-[16/9] w-full bg-muted"
+            }
+          >
+            <Image src={artwork} alt="" fill className="object-cover" sizes="(max-width: 512px) 100vw, 512px" />
+          </div>
+        </Link>
+      )}
       <div className={scoped ? "border-b border-artist-border px-4 py-3" : "border-b border-border px-4 py-3"}>
         {!scoped && <p className="eyebrow text-primary">{drop.artistName}</p>}
         <h2 className="font-display text-lg tracking-wide">{drop.title}</h2>
@@ -191,6 +231,18 @@ async function DropCard({
         {items.map((item) => {
           const price = item.dropPriceCents ?? item.basePriceCents;
           const image = resolveProductImage(item.productId, item.images);
+          const presentation =
+            demoScenario &&
+            resolveDropProductPresentation(
+              {
+                accessType: item.accessType,
+                eventId: item.eventId,
+                dropEventId: drop.eventId,
+              },
+              demoScenario.experience,
+              demoScenario.show.eventId,
+            );
+          const href = productLink(item.productSlug);
           return (
             <li key={item.productId} className="flex items-center gap-4 p-4">
               <div
@@ -201,34 +253,68 @@ async function DropCard({
                 }
               >
                 {image ? (
-                  <Image src={image} alt="" fill className="object-contain p-1" sizes="80px" />
+                  <Image
+                    src={image}
+                    alt=""
+                    fill
+                    className={
+                      presentation?.teaser
+                        ? "object-contain p-1 opacity-60 saturate-[0.7]"
+                        : "object-contain p-1"
+                    }
+                    sizes="80px"
+                  />
                 ) : (
                   <div className="flex size-full items-center justify-center text-2xl">👕</div>
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{item.name}</p>
-                <p
+                {presentation?.teaser ? (
+                  <p
+                    className={
+                      scoped
+                        ? "text-sm font-medium text-artist-muted"
+                        : "text-sm font-medium text-muted-foreground"
+                    }
+                  >
+                    {presentation.actionLabel}
+                  </p>
+                ) : (
+                  <p
+                    className={
+                      scoped
+                        ? "tabular text-lg font-semibold text-artist-accent"
+                        : "tabular text-lg font-semibold text-primary"
+                    }
+                  >
+                    {formatMoney(price)}
+                  </p>
+                )}
+              </div>
+              {presentation && !presentation.canBuy ? (
+                <span
                   className={
                     scoped
-                      ? "tabular text-lg font-semibold text-artist-accent"
-                      : "tabular text-lg font-semibold text-primary"
+                      ? "shrink-0 rounded-full border border-artist-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-artist-muted"
+                      : "shrink-0 rounded-full border border-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
                   }
                 >
-                  {formatMoney(price)}
-                </p>
-              </div>
-              <Button
-                asChild
-                size="sm"
-                className={
-                  scoped
-                    ? "shrink-0 bg-artist-accent uppercase tracking-wider text-artist-accent-fg hover:bg-artist-accent/90"
-                    : "shrink-0 bg-primary uppercase tracking-wider hover:bg-primary/90"
-                }
-              >
-                <Link href={`/product/${item.productSlug}${productQuery}`}>Buy now</Link>
-              </Button>
+                  {presentation.actionLabel}
+                </span>
+              ) : (
+                <Button
+                  asChild
+                  size="sm"
+                  className={
+                    scoped
+                      ? "shrink-0 bg-artist-accent uppercase tracking-wider text-artist-accent-fg hover:bg-artist-accent/90"
+                      : "shrink-0 bg-primary uppercase tracking-wider hover:bg-primary/90"
+                  }
+                >
+                  <Link href={href}>{presentation?.actionLabel ?? "Buy now"}</Link>
+                </Button>
+              )}
             </li>
           );
         })}
@@ -237,7 +323,7 @@ async function DropCard({
       {items.length === 0 && (
         <div className="p-4 text-center text-sm text-muted-foreground">
           <Link
-            href={`/drop/${drop.slug}?artistId=${drop.artistId}${eventSlug ? `&e=${eventSlug}` : ""}`}
+            href={`/drop/${drop.slug}${eventQuery}`}
             className={scoped ? "text-artist-accent hover:underline" : "text-primary hover:underline"}
           >
             View drop

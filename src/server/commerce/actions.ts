@@ -11,6 +11,7 @@ import { getAuthContext } from "@/server/auth/session";
 import { getOrCreateCart } from "./cart";
 import { resolveValidatedCommerceEvent, commerceSourceForEvent } from "./attribution";
 import { loadAttendanceFacts, resolveLine, resolveCartForCheckout } from "./resolve";
+import { listBundleItems } from "@/server/catalog/queries";
 import type { CheckoutRequest } from "@/server/payments/provider";
 
 export interface CartActionState {
@@ -127,6 +128,89 @@ export async function addToCartAction(
     const size = normalizeApparelSize(parsed.data.preferredApparelSize);
     if (size) await saveApparelSizeForUser(ctx.userId, size);
   }
+  return { ok: true };
+}
+
+const addBundleSchema = z.object({
+  bundleId: z.string().min(1),
+  artistId: z.string().min(1),
+  eventId: z.string().optional(),
+  eventSlug: z.string().optional(),
+});
+
+/** Adds every product in a bundle as individual cart lines (bundle price is informational). */
+export async function addBundleToCartAction(
+  _prev: CartActionState,
+  formData: FormData,
+): Promise<CartActionState> {
+  const ctx = await getAuthContext();
+  assertUser(ctx);
+
+  const parsed = addBundleSchema.safeParse({
+    bundleId: formData.get("bundleId"),
+    artistId: formData.get("artistId"),
+    eventId: optionalField(formData.get("eventId")),
+    eventSlug: optionalField(formData.get("eventSlug")),
+  });
+  if (!parsed.success) return { error: "Invalid request." };
+
+  const { bundleId, artistId } = parsed.data;
+  const items = await listBundleItems(bundleId);
+  if (items.length === 0) return { error: "This bundle is no longer available." };
+
+  const eventResolution = await resolveValidatedCommerceEvent({
+    eventId: parsed.data.eventId,
+    eventSlug: parsed.data.eventSlug,
+    artistId,
+    productId: items[0]!.productId,
+  });
+  if (eventResolution.error) return { error: eventResolution.error };
+
+  const eventId = eventResolution.eventId;
+  const attendance = await loadAttendanceFacts(ctx.userId);
+  const cart = await getOrCreateCart(ctx.userId, eventId ?? null);
+
+  for (const item of items) {
+    const resolved = await resolveLine({
+      productId: item.productId,
+      variantId: item.variantId ?? undefined,
+      eventId,
+      quantity: item.quantity,
+      expectedArtistId: artistId,
+      expectedProductSlug: item.productSlug,
+      attendance,
+    });
+    if (!resolved.ok) return { error: resolved.message };
+
+    const line = resolved.line;
+    const existing = await db
+      .select()
+      .from(cartItems)
+      .where(and(eq(cartItems.cartId, cart.id), eq(cartItems.variantId, line.variantId)))
+      .limit(1);
+
+    if (existing[0]) {
+      await db
+        .update(cartItems)
+        .set({
+          quantity: sql`${cartItems.quantity} + ${item.quantity}`,
+          unitPriceCents: line.unitPriceCents,
+          sourceEventId: eventId ?? existing[0].sourceEventId,
+        })
+        .where(eq(cartItems.id, existing[0].id));
+    } else {
+      await db.insert(cartItems).values({
+        cartId: cart.id,
+        productId: line.productId,
+        variantId: line.variantId,
+        sourceEventId: eventId,
+        quantity: item.quantity,
+        unitPriceCents: line.unitPriceCents,
+      });
+    }
+  }
+
+  revalidatePath("/cart");
   return { ok: true };
 }
 

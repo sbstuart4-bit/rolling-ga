@@ -7,6 +7,7 @@ import { PostShowStoreCountdown } from "@/components/fan/post-show-store-countdo
 import { EventShopProductCard } from "@/components/fan/event-shop/event-shop-product-card";
 import { Button } from "@/components/ui/button";
 import { formatDateTime, formatEventDateStamp, formatMoney } from "@/lib/format";
+import { AddBundleToCartButton } from "@/components/fan/add-bundle-to-cart-button";
 import { eventShopProductTag } from "@/lib/event-shop-present";
 import type { DropExclusivityType } from "@/lib/types";
 
@@ -292,13 +293,17 @@ export function EventShopStandaloneSection({
 export function EventShopBundleSection({
   eventSlug,
   artistId,
+  eventId,
   bundle,
   items,
   savingsCents,
+  canPurchase = true,
 }: {
   eventSlug: string;
   artistId: string;
+  eventId: string;
   bundle: {
+    id: string;
     slug: string;
     name: string;
     description: string | null;
@@ -311,6 +316,7 @@ export function EventShopBundleSection({
     basePriceCents: number;
   }>;
   savingsCents: number;
+  canPurchase?: boolean;
 }) {
   return (
     <section id="bundle" className="space-y-4">
@@ -351,6 +357,19 @@ export function EventShopBundleSection({
           </span>
         )}
       </div>
+
+      {canPurchase ? (
+        <AddBundleToCartButton
+          bundleId={bundle.id}
+          artistId={artistId}
+          eventId={eventId}
+          eventSlug={eventSlug}
+        />
+      ) : (
+        <Button asChild variant="outline" size="lg" className="w-full border-artist-border">
+          <Link href={`/event/${eventSlug}/verify`}>Verify to unlock bundle</Link>
+        </Button>
+      )}
     </section>
   );
 }

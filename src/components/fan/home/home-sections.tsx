@@ -6,9 +6,17 @@ import { Button } from "@/components/ui/button";
 import { formatEventDate, formatEventDateShort, formatEventTime } from "@/lib/format";
 import { demoNow } from "@/server/demo/clock";
 
-export function HomeSectionLabel({ children }: { children: React.ReactNode }) {
+export function HomeSectionLabel({
+  children,
+  scoped = false,
+}: {
+  children: React.ReactNode;
+  scoped?: boolean;
+}) {
   return (
-    <h2 className="eyebrow mb-3 text-muted-foreground">{children}</h2>
+    <h2 className={scoped ? "eyebrow mb-3 text-artist-muted" : "eyebrow mb-3 text-muted-foreground"}>
+      {children}
+    </h2>
   );
 }
 
@@ -19,6 +27,7 @@ export function HomeFeaturedShow({
   verificationOpen,
   slug,
   isLive = true,
+  scoped = false,
 }: {
   event: {
     artistName: string;
@@ -33,10 +42,11 @@ export function HomeFeaturedShow({
   verificationOpen: boolean;
   slug: string;
   isLive?: boolean;
+  scoped?: boolean;
 }) {
   return (
     <section className="relative">
-      <HomeSectionLabel>{isLive ? "Live now" : "Upcoming"}</HomeSectionLabel>
+      <HomeSectionLabel scoped={scoped}>{isLive ? "Live now" : "Upcoming"}</HomeSectionLabel>
 
       {hero && (
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
@@ -50,16 +60,28 @@ export function HomeFeaturedShow({
 
       <div className={hero ? "-mt-14 relative px-1 pb-2" : "pb-2"}>
         <h1 className="display-xl text-4xl md:text-5xl">{event.artistName}</h1>
-        <p className="mt-2 text-sm font-medium uppercase tracking-wider text-muted-foreground">
+        <p
+          className={
+            scoped
+              ? "mt-2 text-sm font-medium uppercase tracking-wider text-artist-muted"
+              : "mt-2 text-sm font-medium uppercase tracking-wider text-muted-foreground"
+          }
+        >
           {event.venueCity.toUpperCase()} &middot; {event.venueName.toUpperCase()}
         </p>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className={scoped ? "mt-1 text-sm text-artist-muted" : "mt-1 text-sm text-muted-foreground"}>
           {formatEventDate(event.startsAt, event.timezone)} &middot;{" "}
           {formatEventTime(event.startsAt, event.timezone)}
         </p>
       </div>
 
-      <div className="mt-4 space-y-3 rounded-2xl border border-border bg-card p-5">
+      <div
+        className={
+          scoped
+            ? "mt-4 space-y-3 rounded-2xl border border-artist-border bg-artist-surface p-5"
+            : "mt-4 space-y-3 rounded-2xl border border-border bg-card p-5"
+        }
+      >
         {isVerified ? (
           <>
             <div className="flex items-start gap-3">
@@ -111,6 +133,7 @@ export function HomeFeaturedShow({
 export function HomeUpcomingSection({
   events,
   excludeSlug,
+  scoped = false,
 }: {
   events: Array<{
     slug: string;
@@ -120,19 +143,24 @@ export function HomeUpcomingSection({
     timezone: string;
   }>;
   excludeSlug?: string;
+  scoped?: boolean;
 }) {
   const list = events.filter((event) => event.slug !== excludeSlug).slice(0, 3);
   if (list.length === 0) return null;
 
   return (
     <section>
-      <HomeSectionLabel>Upcoming</HomeSectionLabel>
+      <HomeSectionLabel scoped={scoped}>Upcoming</HomeSectionLabel>
       <ul className="space-y-2">
         {list.map((event) => (
           <li key={event.slug}>
             <Link
               href={`/event/${event.slug}`}
-              className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"
+              className={
+                scoped
+                  ? "flex items-center gap-3 rounded-xl border border-artist-border bg-artist-surface px-4 py-3 transition-colors hover:border-artist-accent/40"
+                  : "flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"
+              }
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{event.artistName}</p>
@@ -155,6 +183,7 @@ export function HomeUpcomingSection({
 export function HomeDropsSection({
   drops,
   eventSlug,
+  scoped = false,
 }: {
   drops: Array<{
     slug: string;
@@ -163,8 +192,10 @@ export function HomeDropsSection({
     endsAt: Date | null;
     artistId: string;
     artistName: string;
+    showCountdown?: boolean;
   }>;
   eventSlug?: string;
+  scoped?: boolean;
 }) {
   if (drops.length === 0) return null;
 
@@ -172,18 +203,23 @@ export function HomeDropsSection({
 
   return (
     <section>
-      <HomeSectionLabel>New drops</HomeSectionLabel>
+      <HomeSectionLabel scoped={scoped}>New drops</HomeSectionLabel>
       <ul className="space-y-3">
         {drops.slice(0, 4).map((drop) => {
           const href = eventSlug
             ? `/drop/${drop.slug}?artistId=${drop.artistId}&e=${eventSlug}`
             : `/drop/${drop.slug}?artistId=${drop.artistId}`;
+          const showCountdown = drop.showCountdown ?? false;
 
           return (
             <li key={drop.slug}>
               <Link
                 href={href}
-                className="flex items-center gap-4 overflow-hidden rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-accent/30"
+                className={
+                  scoped
+                    ? "flex items-center gap-4 overflow-hidden rounded-2xl border border-artist-border bg-artist-surface p-4 transition-colors hover:bg-artist-bg/40"
+                    : "flex items-center gap-4 overflow-hidden rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-accent/30"
+                }
               >
                 {drop.artworkUrl ? (
                   <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-muted">
@@ -196,9 +232,15 @@ export function HomeDropsSection({
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{drop.title}</p>
-                  <p className="text-sm text-muted-foreground">{drop.artistName}</p>
-                  {drop.endsAt && drop.endsAt > now && (
-                    <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-primary">
+                  {!scoped && <p className="text-sm text-muted-foreground">{drop.artistName}</p>}
+                  {showCountdown && drop.endsAt && drop.endsAt > now && (
+                    <p
+                      className={
+                        scoped
+                          ? "mt-1 flex items-center gap-1 text-xs font-semibold text-artist-accent"
+                          : "mt-1 flex items-center gap-1 text-xs font-semibold text-primary"
+                      }
+                    >
                       <Timer className="size-3" aria-hidden />
                       <FlashDropCountdown endsAt={drop.endsAt.toISOString()} />
                     </p>

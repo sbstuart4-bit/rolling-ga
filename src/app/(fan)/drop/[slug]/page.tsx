@@ -9,7 +9,7 @@ import { EventCommerceBody } from "@/components/fan/event-commerce-chrome";
 import { cn } from "@/lib/utils";
 import { requireAuth } from "@/server/auth/request";
 import { listAttendedArtistIds, listAttendedEventIds, listAttendedTourIds } from "@/server/attendance/queries";
-import { getDropBySlug, listDropProducts, isEligibleForProduct, listVariantsWithInventory, availableUnits } from "@/server/catalog/queries";
+import { getDropBySlug, getDropBySlugOnly, listDropProducts, isEligibleForProduct, listVariantsWithInventory, availableUnits } from "@/server/catalog/queries";
 import {
   isEventScopedJourney,
   resolveCartEventId,
@@ -21,25 +21,30 @@ import { FlashDropLanding } from "@/components/fan/flash-drop-landing";
 import { EditorialDropProducts, type EditorialProduct } from "@/components/fan/editorial-drop-products";
 import { AddToCartButton } from "@/components/fan/add-to-cart-button";
 import { formatEventDateStamp } from "@/lib/format";
+import { resolveDropArtwork } from "@/lib/demo-drop-artwork";
 import { demoNow } from "@/server/demo/clock";
 
 export async function generateMetadata(props: PageProps<"/drop/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
   const { artistId } = await props.searchParams;
-  if (typeof artistId !== "string") return {};
-  const drop = await getDropBySlug(artistId, slug);
+  const drop =
+    typeof artistId === "string"
+      ? await getDropBySlug(artistId, slug)
+      : await getDropBySlugOnly(slug);
   return drop ? { title: drop.title } : { title: "Drop not found" };
 }
 
 export default async function DropPage(props: PageProps<"/drop/[slug]">) {
   const { slug } = await props.params;
-  const { artistId, e: eventSlug } = await props.searchParams;
+  const { artistId: artistIdParam, e: eventSlug } = await props.searchParams;
   const ctx = await requireAuth(`/drop/${slug}`);
 
-  if (typeof artistId !== "string") notFound();
-
-  const drop = await getDropBySlug(artistId, slug);
+  const drop =
+    typeof artistIdParam === "string"
+      ? await getDropBySlug(artistIdParam, slug)
+      : await getDropBySlugOnly(slug);
   if (!drop) notFound();
+  const artistId = drop.artistId;
 
   const eventPage = await resolveEventTakeoverContext(
     typeof eventSlug === "string" ? eventSlug : undefined,
@@ -117,6 +122,16 @@ export default async function DropPage(props: PageProps<"/drop/[slug]">) {
     };
   });
 
+  const heroProduct = dropItems[0];
+  const dropArtwork = resolveDropArtwork({
+    dropSlug: drop.slug,
+    storedArtworkUrl: drop.artworkUrl,
+    fallbackProductId: heroProduct?.id,
+    fallbackProductImages: heroProduct?.images,
+  });
+  const showStandaloneArtwork =
+    Boolean(dropArtwork && !showFlashLanding && !(scoped && editorialProducts.length > 0));
+
   return (
     <EventScopedTakeover
       eventPage={eventPage}
@@ -142,9 +157,9 @@ export default async function DropPage(props: PageProps<"/drop/[slug]">) {
               </div>
             )}
 
-            {drop.artworkUrl && !showFlashLanding && (
+            {showStandaloneArtwork && dropArtwork && (
               <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
-                <Image src={drop.artworkUrl} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" />
+                <Image src={dropArtwork} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" />
               </div>
             )}
 
@@ -186,9 +201,9 @@ export default async function DropPage(props: PageProps<"/drop/[slug]">) {
               </div>
             )}
 
-            {drop.artworkUrl && !showFlashLanding && (
+            {showStandaloneArtwork && dropArtwork && (
               <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-artist-border">
-                <Image src={drop.artworkUrl} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" />
+                <Image src={dropArtwork} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" />
               </div>
             )}
 

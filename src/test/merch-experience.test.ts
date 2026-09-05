@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
+import { resolveDropProductPresentation, isDropVisibleInDemoScenario, shouldShowDropCountdown } from "@/lib/merch-experience/drop-presentation";
 import {
   fanStateHasAttendanceCredential,
   fanStateIsGoing,
@@ -116,5 +117,74 @@ describe("resolveMerchExperience", () => {
   it("time alone does not unlock venue-exclusive merchandise", () => {
     const state = experience(detroit, "doors_open", "unknown", "outside_venue");
     expect(state.showExclusivePurchasable).toBe(false);
+  });
+});
+
+describe("resolveDropProductPresentation", () => {
+  it("T-30 Toronto tee on drops is teaser not buy now", () => {
+    const toronto = getDemoShow("atlas-toronto")!;
+    const state = experience(toronto, "t_minus_30", "unknown");
+    const presentation = resolveDropProductPresentation(
+      {
+        accessType: "event_specific",
+        eventId: toronto.eventId,
+        dropEventId: toronto.eventId,
+      },
+      state,
+      toronto.eventId,
+    );
+    expect(presentation.canBuy).toBe(false);
+    expect(presentation.teaser).toBe(true);
+    expect(presentation.actionLabel).toBe("Coming soon");
+  });
+
+  it("T-30 cross-show exclusive is teaser not unlocks at the show", () => {
+    const detroit = getDemoShow("atlas-detroit")!;
+    const toronto = getDemoShow("atlas-toronto")!;
+    const state = experience(detroit, "t_minus_30", "unknown");
+    const presentation = resolveDropProductPresentation(
+      {
+        accessType: "event_specific",
+        eventId: toronto.eventId,
+        dropEventId: toronto.eventId,
+      },
+      state,
+      detroit.eventId,
+    );
+    expect(presentation.teaser).toBe(true);
+    expect(presentation.actionLabel).toBe("Coming soon");
+  });
+});
+
+describe("demo drops visibility", () => {
+  it("T-30 Detroit hides Toronto preview drop", () => {
+    const detroit = getDemoShow("atlas-detroit")!;
+    const toronto = getDemoShow("atlas-toronto")!;
+    expect(isDropVisibleInDemoScenario({ eventId: null }, detroit.eventId)).toBe(true);
+    expect(isDropVisibleInDemoScenario({ eventId: detroit.eventId }, detroit.eventId)).toBe(true);
+    expect(isDropVisibleInDemoScenario({ eventId: toronto.eventId }, detroit.eventId)).toBe(false);
+  });
+
+  it("only flash and post-show drops get countdown banners", () => {
+    const detroit = getDemoShow("atlas-detroit")!;
+    const now = experience(detroit, "encore", "at_venue", "inside_venue").venuePresenceActive
+      ? new Date()
+      : new Date(detroit.endsAt.getTime() + 60_000);
+    const endsAt = new Date(now.getTime() + 60 * 60_000);
+
+    expect(
+      shouldShowDropCountdown(
+        { endsAt, exclusivityType: "standard", eventId: detroit.eventId },
+        detroit.eventId,
+        now,
+      ),
+    ).toBe(false);
+    expect(
+      shouldShowDropCountdown(
+        { endsAt, exclusivityType: "flash", eventId: detroit.eventId },
+        detroit.eventId,
+        now,
+      ),
+    ).toBe(true);
   });
 });

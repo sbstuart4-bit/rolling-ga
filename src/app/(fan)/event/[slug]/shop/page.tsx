@@ -128,9 +128,11 @@ export default async function EventShopPage(props: PageProps<"/event/[slug]/shop
                 key={bundle.id}
                 eventSlug={slug}
                 artistId={event.artistId}
+                eventId={event.id}
                 bundle={bundle}
                 items={items}
                 savingsCents={savingsCents}
+                canPurchase={isVerifiedAttendee && storeOpen}
               />
             ))}
 

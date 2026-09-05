@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { RollingGaMark } from "@/components/brand/rolling-ga-mark";
 import { DemoBoardReturn } from "@/components/demo/demo-board-return";
 import { initialsOf } from "@/lib/format";
@@ -18,14 +18,6 @@ export function FanHeader({
         <Link href="/" className="min-w-0 flex-1" aria-label="Rolling GA home">
           <RollingGaMark />
         </Link>
-
-        <button
-          type="button"
-          className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          aria-label="Notifications"
-        >
-          <Bell className="size-[18px]" aria-hidden />
-        </button>
 
         <Link
           href="/cart"

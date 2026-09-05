@@ -24,6 +24,7 @@ async function loadLiveEvents(now: Date) {
     .select({
       id: events.id,
       slug: events.slug,
+      artistId: artists.id,
       artistName: artists.name,
       artistSlug: artists.slug,
       venueCity: venues.city,
@@ -47,6 +48,7 @@ async function loadUpcomingEvents(now: Date) {
     .select({
       id: events.id,
       slug: events.slug,
+      artistId: artists.id,
       artistName: artists.name,
       artistSlug: artists.slug,
       venueCity: venues.city,
@@ -83,6 +85,27 @@ async function loadRecentShows(userId: string, now: Date) {
     .where(and(eq(verifiedAttendance.userId, userId), gte(events.startsAt, since)))
     .orderBy(desc(events.startsAt))
     .limit(6);
+}
+
+export async function loadNewDropsForArtist(artistId: string, now = demoNow()) {
+  return db
+    .select({
+      id: drops.id,
+      slug: drops.slug,
+      title: drops.title,
+      artworkUrl: drops.artworkUrl,
+      startsAt: drops.startsAt,
+      endsAt: drops.endsAt,
+      exclusivityType: drops.exclusivityType,
+      eventId: drops.eventId,
+      artistId: drops.artistId,
+      artistName: artists.name,
+    })
+    .from(drops)
+    .innerJoin(artists, eq(artists.id, drops.artistId))
+    .where(and(eq(drops.artistId, artistId), eq(drops.status, "live"), lte(drops.startsAt, now)))
+    .orderBy(desc(drops.displayPriority), desc(drops.startsAt))
+    .limit(8);
 }
 
 async function loadNewDrops(userId: string, now: Date) {

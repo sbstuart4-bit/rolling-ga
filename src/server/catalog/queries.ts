@@ -84,6 +84,17 @@ export async function getProductBySlug(artistId: string, slug: string) {
   return row ? enrichProductRow(row) : null;
 }
 
+/** Resolve a product from slug alone when the artist id is omitted from the URL. */
+export async function getProductBySlugOnly(slug: string) {
+  const rows = await db
+    .select(productCore)
+    .from(products)
+    .where(and(eq(products.slug, slug), eq(products.active, true)))
+    .limit(2);
+  if (rows.length !== 1) return null;
+  return enrichProductRow(rows[0]!);
+}
+
 export async function listVariantsWithInventory(productId: string) {
   return db
     .select({
@@ -304,6 +315,18 @@ export async function getDropBySlug(artistId: string, slug: string) {
     .where(and(eq(drops.artistId, artistId), eq(drops.slug, slug)))
     .limit(1);
   return row ?? null;
+}
+
+/** Resolve a drop from slug alone when the artist id is omitted from the URL. */
+export async function getDropBySlugOnly(slug: string) {
+  const rows = await db
+    .select(dropCore)
+    .from(drops)
+    .innerJoin(artists, eq(artists.id, drops.artistId))
+    .where(eq(drops.slug, slug))
+    .limit(2);
+  if (rows.length !== 1) return null;
+  return rows[0]!;
 }
 
 export async function listDropProducts(dropId: string) {

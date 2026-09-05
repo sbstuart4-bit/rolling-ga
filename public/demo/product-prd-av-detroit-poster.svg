@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-label="Detroit Show Poster">
+  <defs>
+    <linearGradient id="seamless" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#151517"/>
+      <stop offset="62%" stop-color="#0B0B0C"/>
+      <stop offset="100%" stop-color="#151517"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#seamless)"/>
+  <ellipse cx="600" cy="1290" rx="330" ry="46" fill="#F3F3F0" opacity="0.08"/>
+  
+  <rect x="360" y="330" width="480" height="900" fill="#151517" stroke="#F3F3F0" stroke-width="6" opacity="0.96"/>
+  <rect x="420" y="400" width="360" height="520" fill="#D8FF3E" opacity="0.85"/>
+  <rect x="420" y="980" width="240" height="18" fill="#F3F3F0" opacity="0.6"/>
+  <rect x="420" y="1030" width="150" height="18" fill="#F3F3F0" opacity="0.35"/>
+  <text x="600" y="1420" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif"
+        font-size="26" font-weight="600" letter-spacing="8"
+        fill="#F3F3F0" opacity="0.42">PRINT</text>
+</svg>

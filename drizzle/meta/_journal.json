@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788542194787,
+      "tag": "0000_pg_baseline",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788542264734,
+      "tag": "0001_updated_at_trigger",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788552000000,
+      "tag": "0002_commerce_attribution",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Austin">
+  <rect width="1600" height="1000" fill="#F4F1EA"/>
+  <circle cx="1180" cy="440" r="140" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.34"/>
+  <circle cx="1180" cy="440" r="218" fill="none" stroke="#A2543A" stroke-width="2" opacity="0.30"/>
+  <circle cx="1180" cy="440" r="296" fill="none" stroke="#2F5D50" stroke-width="3" opacity="0.26"/>
+  <circle cx="1180" cy="440" r="374" fill="none" stroke="#A2543A" stroke-width="3" opacity="0.22"/>
+  <circle cx="1180" cy="440" r="452" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.18"/>
+  <circle cx="1180" cy="440" r="530" fill="none" stroke="#A2543A" stroke-width="1" opacity="0.14"/>
+  <circle cx="1180" cy="440" r="608" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.10"/>
+  <rect x="0" y="0" width="1600" height="1000" fill="#F4F1EA" opacity="0.15"/>
+  <text x="96" y="620" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="210"
+        font-weight="800" letter-spacing="-10" fill="#221F1A">AUSTIN</text>
+  <rect x="100" y="668" width="220" height="10" fill="#2F5D50"/>
+</svg>

@@ -1,0 +1,120 @@
+/** Demo timeline year — every seeded show lands on this calendar. */
+export const DEMO_YEAR = 2026;
+
+/** Demo clock always resets to June 1 at 9:00 AM local. */
+export const DEMO_ANCHOR_MONTH = 6;
+export const DEMO_ANCHOR_DAY = 1;
+
+/** The Degens' flagship demo show — slide the clock here to walk through live → post-show. */
+export const DEMO_SHOW_MONTH = 6;
+export const DEMO_SHOW_DAY = 30;
+
+export const HOUR_MS = 60 * 60 * 1000;
+export const DAY_MS = 24 * HOUR_MS;
+
+/** June 1 → ~August 29 — enough room after the June 30 show. */
+export const DEMO_CLOCK_MAX_DAYS = 90;
+export const DEMO_CLOCK_RANGE_MS = DEMO_CLOCK_MAX_DAYS * DAY_MS;
+export const DEMO_CLOCK_MAX_HOURS = 23;
+
+export function demoAnchorDate(): Date {
+  return new Date(DEMO_YEAR, DEMO_ANCHOR_MONTH - 1, DEMO_ANCHOR_DAY, 9, 0, 0, 0);
+}
+
+export function demoShowDate(): Date {
+  return new Date(DEMO_YEAR, DEMO_SHOW_MONTH - 1, DEMO_SHOW_DAY, 20, 0, 0, 0);
+}
+
+/** Flagship demo show slug — The Degens at Detroit on the seeded calendar. */
+export function demoDetroitEventSlug(): string {
+  return `the-degens-signal-decay-detroit-${DEMO_YEAR}`;
+}
+
+/** Builds a timestamp on the demo calendar (month is 1–12). */
+export function demoCalendarDate(
+  month: number,
+  day: number,
+  hour = 0,
+  minute = 0,
+  year = DEMO_YEAR,
+): Date {
+  return new Date(year, month - 1, day, hour, minute, 0, 0);
+}
+
+export function offsetToDaysAndHours(offsetMs: number): { days: number; hours: number } {
+  const clamped = Math.max(0, Math.min(offsetMs, DEMO_CLOCK_RANGE_MS));
+  const days = Math.floor(clamped / DAY_MS);
+  const hours = Math.floor((clamped % DAY_MS) / HOUR_MS);
+  return { days, hours };
+}
+
+export function daysAndHoursToOffset(days: number, hours: number): number {
+  return Math.max(
+    0,
+    Math.min(DEMO_CLOCK_RANGE_MS, days * DAY_MS + hours * HOUR_MS),
+  );
+}
+
+/** Offset from the June 1 anchor to a timestamp on the demo calendar. */
+export function demoClockOffsetForDate(date: Date): number {
+  return Math.max(0, Math.min(DEMO_CLOCK_RANGE_MS, date.getTime() - demoAnchorDate().getTime()));
+}
+
+export function demoClockDaysAndHoursForDate(date: Date): { days: number; hours: number } {
+  return offsetToDaysAndHours(demoClockOffsetForDate(date));
+}
+
+/** The Degens Detroit — doors open, verification window, and live set (seeded show times). */
+export function demoDetroitDoorsOpen(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 17, 0));
+}
+
+export function demoDetroitLive(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 20, 0));
+}
+
+export function demoDetroitPostShow(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 23, 30));
+}
+
+/** Day index on the demo clock when The Degens play Detroit (June 30). */
+export function demoShowDayIndex(): number {
+  return demoDetroitLive().days;
+}
+
+const DEMO_CLOCK_DATE_FMT = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+});
+
+const DEMO_CLOCK_TIME_FMT = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+/** Calendar date at a demo clock day/hour offset from the June 1 anchor. */
+export function demoClockDateAt(days: number, hours: number): Date {
+  return new Date(demoAnchorDate().getTime() + days * DAY_MS + hours * HOUR_MS);
+}
+
+export function formatDemoClockDate(days: number, hours: number): string {
+  return DEMO_CLOCK_DATE_FMT.format(demoClockDateAt(days, hours));
+}
+
+export function formatDemoClockTime(hours: number): string {
+  return DEMO_CLOCK_TIME_FMT.format(demoClockDateAt(0, hours));
+}
+
+export function formatDemoClockPosition(days: number, hours: number): string {
+  return `${formatDemoClockDate(days, hours)} · ${formatDemoClockTime(hours)}`;
+}
+
+export function isDemoShowNight(days: number, hours: number): boolean {
+  const pos = demoClockDateAt(days, hours);
+  const show = demoShowDate();
+  return (
+    pos.getFullYear() === show.getFullYear() &&
+    pos.getMonth() === show.getMonth() &&
+    pos.getDate() === show.getDate()
+  );
+}

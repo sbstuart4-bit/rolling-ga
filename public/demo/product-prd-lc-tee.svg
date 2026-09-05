@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-label="River Sessions Tee">
+  <defs>
+    <linearGradient id="seamless" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="62%" stop-color="#F4F1EA"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#seamless)"/>
+  <ellipse cx="600" cy="1290" rx="330" ry="46" fill="#221F1A" opacity="0.08"/>
+  
+  <path d="M380 430 L520 360 Q600 410 680 360 L820 430 L770 560 L720 535 L720 1240 L480 1240 L480 535 L430 560 Z"
+        fill="#221F1A" opacity="0.93"/>
+  <rect x="520" y="700" width="160" height="160" rx="12" fill="#2F5D50" opacity="0.9"/>
+  <text x="600" y="1420" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif"
+        font-size="26" font-weight="600" letter-spacing="8"
+        fill="#221F1A" opacity="0.42">APPAREL</text>
+</svg>

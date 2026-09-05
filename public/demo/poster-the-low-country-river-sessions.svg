@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="River Sessions">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F4F1EA"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="1230" cy="330" r="120" fill="none" stroke="#A2543A" stroke-width="2" opacity="0.40"/>
+  <circle cx="1230" cy="330" r="216" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.36"/>
+  <circle cx="1230" cy="330" r="312" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.33"/>
+  <circle cx="1230" cy="330" r="408" fill="none" stroke="#A2543A" stroke-width="4" opacity="0.30"/>
+  <circle cx="1230" cy="330" r="504" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.26"/>
+  <circle cx="1230" cy="330" r="600" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.23"/>
+  <circle cx="1230" cy="330" r="696" fill="none" stroke="#A2543A" stroke-width="2" opacity="0.19"/>
+  <circle cx="1230" cy="330" r="792" fill="none" stroke="#2F5D50" stroke-width="4" opacity="0.15"/>
+  <circle cx="1230" cy="330" r="888" fill="none" stroke="#2F5D50" stroke-width="2" opacity="0.12"/>
+  <rect width="1600" height="1000" filter="url(#grain)" opacity="0.05"/>
+  <text x="96" y="800" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="132"
+        font-weight="800" letter-spacing="-5" fill="#221F1A">RIVER SESSIONS</text>
+  <text x="100" y="856" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="30"
+        font-weight="600" letter-spacing="10" fill="#2F5D50">THE LOW COUNTRY · 2025</text>
+</svg>

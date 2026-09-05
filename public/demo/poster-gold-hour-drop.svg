@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Gold Hour">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#17110C"/>
+      <stop offset="100%" stop-color="#231A12"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <line x1="0" y1="0" x2="0" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.04"/>
+  <line x1="64" y1="0" x2="64" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.14"/>
+  <line x1="128" y1="0" x2="128" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.15"/>
+  <line x1="192" y1="0" x2="192" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.12"/>
+  <line x1="256" y1="0" x2="256" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.07"/>
+  <line x1="320" y1="0" x2="320" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.05"/>
+  <line x1="384" y1="0" x2="384" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.08"/>
+  <line x1="448" y1="0" x2="448" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.08"/>
+  <line x1="512" y1="0" x2="512" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.13"/>
+  <line x1="576" y1="0" x2="576" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.08"/>
+  <line x1="640" y1="0" x2="640" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.16"/>
+  <line x1="704" y1="0" x2="704" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.07"/>
+  <line x1="768" y1="0" x2="768" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.16"/>
+  <line x1="832" y1="0" x2="832" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.15"/>
+  <line x1="896" y1="0" x2="896" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.14"/>
+  <line x1="960" y1="0" x2="960" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.12"/>
+  <line x1="1024" y1="0" x2="1024" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.05"/>
+  <line x1="1088" y1="0" x2="1088" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.15"/>
+  <line x1="1152" y1="0" x2="1152" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.07"/>
+  <line x1="1216" y1="0" x2="1216" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.12"/>
+  <line x1="1280" y1="0" x2="1280" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.08"/>
+  <line x1="1344" y1="0" x2="1344" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.13"/>
+  <line x1="1408" y1="0" x2="1408" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.04"/>
+  <line x1="1472" y1="0" x2="1472" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.10"/>
+  <line x1="1536" y1="0" x2="1536" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.09"/>
+  <line x1="1600" y1="0" x2="1600" y2="1000" stroke="#E9B24C" stroke-width="1" opacity="0.03"/>
+  <rect x="900" y="120" width="560" height="560" fill="#E9B24C" opacity="0.16"/>
+  <rect x="980" y="200" width="400" height="400" fill="#E4674A" opacity="0.2"/>
+  <rect width="1600" height="1000" filter="url(#grain)" opacity="0.05"/>
+  <text x="96" y="800" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="132"
+        font-weight="800" letter-spacing="-5" fill="#FBF3E6">GOLD HOUR</text>
+  <text x="100" y="856" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="30"
+        font-weight="600" letter-spacing="10" fill="#E9B24C">GOLD HOUR</text>
+</svg>

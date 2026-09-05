@@ -1,0 +1,66 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { hasDemoBoardAccess } from "@/lib/demo-board-access";
+import { createSession, destroySession } from "@/server/auth/session";
+import { demoDetroitEventSlug, demoDetroitLive } from "@/lib/demo-calendar";
+import { setDemoClockDaysAndHours } from "./clock";
+import { setFanShowContextSlug } from "@/server/fans/show-context";
+import { demoModeEnabled } from "./accounts";
+
+const SCOTT_EMAIL = "scott@example.com";
+
+/** Where each curated persona lands — the part of the product their role actually owns. */
+const PERSONA_DESTINATIONS: Record<string, string> = {
+  "scott@example.com": "/",
+  "marcus@thedegens.example": "/studio/live",
+  "dana@novakestrel.example": "/studio/drops",
+  "priya@thelowcountry.example": "/studio/tour",
+  "admin@rollingga.example": "/studio/insights",
+  "ops@rollingga.example": "/ops/events",
+};
+
+/**
+ * Signs straight in as a curated demo persona — no password required. This only ever
+ * works in demo mode, and only for the handful of accounts on the demo board, never for
+ * the crowd fill data that backs the CRM and insights numbers.
+ */
+export async function startPersonaAction(formData: FormData): Promise<void> {
+  if (!demoModeEnabled()) redirect("/welcome");
+  if (!(await hasDemoBoardAccess())) redirect("/demo");
+
+  const email = String(formData.get("email") ?? "");
+  const destination = PERSONA_DESTINATIONS[email];
+  if (!destination) redirect("/demo");
+
+  const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
+  if (!user) redirect("/demo");
+
+  await destroySession();
+  await createSession(user.id);
+  redirect(destination);
+}
+
+/** One-click fan walkthrough: Detroit live on the demo clock, signed in as Scott. */
+export async function startScottDetroitLiveAction(): Promise<void> {
+  if (!demoModeEnabled()) redirect("/welcome");
+  if (!(await hasDemoBoardAccess())) redirect("/demo");
+
+  const { days, hours } = demoDetroitLive();
+  setDemoClockDaysAndHours(days, hours);
+
+  const [user] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, SCOTT_EMAIL))
+    .limit(1);
+  if (!user) redirect("/demo");
+
+  await destroySession();
+  await createSession(user.id);
+  await setFanShowContextSlug(demoDetroitEventSlug());
+  redirect(`/event/${demoDetroitEventSlug()}`);
+}

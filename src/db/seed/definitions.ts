@@ -1,0 +1,578 @@
+import type { ProductAccessType, ProductCategory } from "@/lib/types";
+import type { ArtworkPalette } from "./artwork";
+
+/**
+ * Every artist, venue and product below is fictional. Palettes are the raw material for
+ * the takeover engine and for the generated artwork, so the two always agree.
+ */
+
+export interface ArtistDefinition {
+  id: string;
+  slug: string;
+  name: string;
+  bio: string;
+  palette: ArtworkPalette;
+  mutedForeground: string;
+  accentForeground: string;
+  border: string;
+  fontId: string;
+  showMessaging: string;
+  merchPhotographyNote: string;
+}
+
+export const THE_DEGENS: ArtistDefinition = {
+  id: "art_the_degens",
+  slug: "the-degens",
+  name: "The Degens",
+  bio: "Detroit-born chaos crew. Loud rooms, no filter, merch that sells out before the second chorus.",
+  palette: {
+    background: "#0B0B0C",
+    surface: "#151517",
+    foreground: "#F3F3F0",
+    accent: "#D8FF3E",
+    accentSecondary: "#FF4A28",
+  },
+  mutedForeground: "#8B8B85",
+  accentForeground: "#0B0B0C",
+  border: "#28282C",
+  fontId: "space-grotesk",
+  showMessaging: "No encore unless we mean it.",
+  merchPhotographyNote: "Hard flash, black seamless, no lifestyle shots.",
+};
+
+/** @deprecated Use THE_DEGENS */
+export const ATLAS_VOID = THE_DEGENS;
+
+export const NOVA_KESTREL: ArtistDefinition = {
+  id: "art_nova_kestrel",
+  slug: "nova-kestrel",
+  name: "Nova Kestrel",
+  bio: "Songwriter and bandleader. Big rooms, brass section, everybody singing the bridge.",
+  palette: {
+    background: "#17110C",
+    surface: "#231A12",
+    foreground: "#FBF3E6",
+    accent: "#E9B24C",
+    accentSecondary: "#E4674A",
+  },
+  mutedForeground: "#B8A58A",
+  accentForeground: "#1A130B",
+  border: "#35281B",
+  fontId: "dm-serif",
+  showMessaging: "Stay for the last song. It's the one about you.",
+  merchPhotographyNote: "Warm tungsten, soft shadow, gold leaf details in focus.",
+};
+
+export const LOW_COUNTRY: ArtistDefinition = {
+  id: "art_low_country",
+  slug: "the-low-country",
+  name: "The Low Country",
+  bio: "Americana trio. Two guitars, one pedal steel, and a room that goes quiet on its own.",
+  palette: {
+    background: "#F4F1EA",
+    surface: "#FFFFFF",
+    foreground: "#221F1A",
+    accent: "#2F5D50",
+    accentSecondary: "#A2543A",
+  },
+  mutedForeground: "#6C6559",
+  accentForeground: "#F4F1EA",
+  border: "#DED8CB",
+  fontId: "editorial",
+  showMessaging: "Thanks for listening quietly.",
+  merchPhotographyNote: "Daylight, linen backdrop, visible weave and stitching.",
+};
+
+export const MARISOL_REYES: ArtistDefinition = {
+  id: "art_marisol_reyes",
+  slug: "marisol-reyes",
+  name: "Marisol Reyes",
+  bio: "Bolero and synth. Two records, one very long tour.",
+  palette: {
+    background: "#120E1B",
+    surface: "#1C1628",
+    foreground: "#F1ECFA",
+    accent: "#B892FF",
+    accentSecondary: "#57E2C4",
+  },
+  mutedForeground: "#9990AC",
+  accentForeground: "#120E1B",
+  border: "#2C2440",
+  fontId: "editorial",
+  showMessaging: "Gracias por venir.",
+  merchPhotographyNote: "Deep violet gels, single hard key light.",
+};
+
+export const FULL_ARTISTS = [THE_DEGENS, NOVA_KESTREL, LOW_COUNTRY, MARISOL_REYES];
+
+/** Artists that exist only to give the fan's passport real history and variety. */
+export const HISTORICAL_ARTISTS = [
+  { id: "art_pale_horses", slug: "pale-horses", name: "Pale Horses" },
+  { id: "art_kite_anchor", slug: "kite-and-anchor", name: "Kite & Anchor" },
+  { id: "art_vantablack", slug: "dj-vantablack", name: "DJ Vantablack" },
+  { id: "art_ossuary", slug: "the-ossuary", name: "The Ossuary" },
+];
+
+export interface VenueDefinition {
+  id: string;
+  name: string;
+  city: string;
+  region: string;
+  lat: number;
+  lng: number;
+  timezone: string;
+  capacity: number;
+  geofenceRadiusMeters: number;
+}
+
+export const VENUES: VenueDefinition[] = [
+  {
+    id: "ven_ironworks_detroit",
+    name: "The Ironworks",
+    city: "Detroit",
+    region: "MI",
+    lat: 42.3314,
+    lng: -83.0458,
+    timezone: "America/Detroit",
+    capacity: 4200,
+    geofenceRadiusMeters: 450,
+  },
+  {
+    id: "ven_harbourline_toronto",
+    name: "Harbourline Hall",
+    city: "Toronto",
+    region: "ON",
+    lat: 43.6426,
+    lng: -79.3871,
+    timezone: "America/Toronto",
+    capacity: 3600,
+    geofenceRadiusMeters: 400,
+  },
+  {
+    id: "ven_foundry_chicago",
+    name: "The Foundry",
+    city: "Chicago",
+    region: "IL",
+    lat: 41.8827,
+    lng: -87.6233,
+    timezone: "America/Chicago",
+    capacity: 3900,
+    geofenceRadiusMeters: 420,
+  },
+  {
+    id: "ven_cedar_vine_nashville",
+    name: "Cedar & Vine",
+    city: "Nashville",
+    region: "TN",
+    lat: 36.1612,
+    lng: -86.7775,
+    timezone: "America/Chicago",
+    capacity: 2800,
+    geofenceRadiusMeters: 380,
+  },
+  {
+    id: "ven_riverbend_austin",
+    name: "Riverbend Yard",
+    city: "Austin",
+    region: "TX",
+    lat: 30.2649,
+    lng: -97.7466,
+    timezone: "America/Chicago",
+    capacity: 5200,
+    geofenceRadiusMeters: 600,
+  },
+  {
+    id: "ven_peachtree_atlanta",
+    name: "Peachtree Rooms",
+    city: "Atlanta",
+    region: "GA",
+    lat: 33.7628,
+    lng: -84.3877,
+    timezone: "America/New_York",
+    capacity: 3100,
+    geofenceRadiusMeters: 400,
+  },
+  {
+    id: "ven_warehouse_nine_brooklyn",
+    name: "Warehouse Nine",
+    city: "Brooklyn",
+    region: "NY",
+    lat: 40.7061,
+    lng: -73.9969,
+    timezone: "America/New_York",
+    capacity: 2400,
+    geofenceRadiusMeters: 350,
+  },
+  {
+    id: "ven_alpine_denver",
+    name: "Alpine Theatre",
+    city: "Denver",
+    region: "CO",
+    lat: 39.7476,
+    lng: -104.9955,
+    timezone: "America/Denver",
+    capacity: 2900,
+    geofenceRadiusMeters: 380,
+  },
+];
+
+export interface ProductDefinition {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string;
+  story: string;
+  category: ProductCategory;
+  accessType: ProductAccessType;
+  priceCents: number;
+  costCents: number;
+  producedQuantity?: number;
+  sizes?: string[];
+  /** Restrict to one show. Resolved to an event id by the seeder. */
+  eventKey?: string;
+  tourKey?: string;
+  stockPerVariant?: number;
+}
+
+export const THE_DEGENS_PRODUCTS: ProductDefinition[] = [
+  {
+    id: "prd_av_tour_tee",
+    slug: "signal-decay-tour-tee",
+    name: "Signal Decay Tour Tee",
+    tagline: "The whole route on the back.",
+    story:
+      "Heavyweight cotton, screen printed in two passes so the type sits on the fabric rather than in it. Every routed city on the reverse, in order.",
+    category: "apparel",
+    accessType: "public",
+    priceCents: 4500,
+    costCents: 1100,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    tourKey: "signal-decay",
+    stockPerVariant: 340,
+  },
+  {
+    id: "prd_av_hoodie",
+    slug: "signal-decay-hoodie",
+    name: "Signal Decay Hoodie",
+    tagline: "For the walk back to the car.",
+    story:
+      "Garment-dyed, heavy fleece, boxed shoulder. Cut deliberately roomy — the band wear theirs a size up.",
+    category: "apparel",
+    accessType: "public",
+    priceCents: 8500,
+    costCents: 2600,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    tourKey: "signal-decay",
+    stockPerVariant: 160,
+  },
+  {
+    id: "prd_av_vinyl",
+    slug: "static-field-lp",
+    name: "Static Field — LP",
+    tagline: "Cut at half speed.",
+    story:
+      "180g pressing of the third record, remastered for vinyl and cut at half speed. Includes the two b-sides that only ever existed on the soundboard.",
+    category: "music",
+    accessType: "public",
+    priceCents: 4200,
+    costCents: 1400,
+    producedQuantity: 3000,
+    stockPerVariant: 420,
+  },
+  {
+    id: "prd_av_cap",
+    slug: "void-crew-cap",
+    name: "Void Crew Cap",
+    tagline: "Standard issue.",
+    story: "The cap the crew actually wear. Unstructured six-panel, embroidered mark, brass slide.",
+    category: "headwear",
+    accessType: "public",
+    priceCents: 3800,
+    costCents: 900,
+    stockPerVariant: 260,
+  },
+  {
+    id: "prd_av_pin",
+    slug: "tour-pin",
+    name: "Signal Decay Tour Pin",
+    tagline: "Small, sharp, cheap.",
+    story: "Hard enamel on brass, rubber clutch. The one thing that fits in a jacket pocket.",
+    category: "accessory",
+    accessType: "public",
+    priceCents: 1500,
+    costCents: 300,
+    stockPerVariant: 900,
+  },
+  {
+    id: "prd_av_detroit_tee",
+    slug: "detroit-encore-tee",
+    name: "Detroit Encore Tee",
+    tagline: "For those who were there.",
+    story:
+      "Printed overnight from the Detroit setlist, including the song they had not played since 2024. Not restocked, not reprinted, not sold anywhere else.",
+    category: "apparel",
+    accessType: "event_specific",
+    priceCents: 5500,
+    costCents: 1400,
+    producedQuantity: 500,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    eventKey: "atlas-detroit",
+    stockPerVariant: 74,
+  },
+  {
+    id: "prd_av_detroit_poster",
+    slug: "detroit-show-poster",
+    name: "Detroit Show Poster",
+    tagline: "Numbered from the run.",
+    story:
+      "Three-colour screen print, 18 × 24, hand numbered from an edition of 300. Pulled the morning of the show at a shop four miles from the venue.",
+    category: "print",
+    accessType: "event_specific",
+    priceCents: 3000,
+    costCents: 500,
+    producedQuantity: 300,
+    eventKey: "atlas-detroit",
+    stockPerVariant: 148,
+  },
+  {
+    id: "prd_av_detroit_pin",
+    slug: "detroit-city-pin",
+    name: "Detroit City Pin",
+    tagline: "One city, one pin.",
+    story: "City-specific enamel pin, produced only for the Detroit date.",
+    category: "accessory",
+    accessType: "event_specific",
+    priceCents: 1500,
+    costCents: 300,
+    producedQuantity: 500,
+    eventKey: "atlas-detroit",
+    stockPerVariant: 210,
+  },
+  {
+    id: "prd_av_detroit_anniversary_hoodie",
+    slug: "detroit-anniversary-hoodie",
+    name: "Detroit Anniversary Hoodie",
+    tagline: "For the room that night.",
+    story:
+      "Released on the anniversary of the Ironworks show — only for verified Detroit attendees. Heavy fleece, city mark on the sleeve.",
+    category: "apparel",
+    accessType: "verified_attendee",
+    priceCents: 7000,
+    costCents: 2200,
+    producedQuantity: 300,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    eventKey: "atlas-detroit",
+    stockPerVariant: 60,
+  },
+  {
+    id: "prd_av_toronto_tee",
+    slug: "toronto-exclusive-tee",
+    name: "Toronto Exclusive Tee",
+    tagline: "Unlocks at Harbourline Hall.",
+    story:
+      "The Toronto-only print. It will be purchasable to anyone who verifies at the show, and to nobody else.",
+    category: "apparel",
+    accessType: "event_specific",
+    priceCents: 5500,
+    costCents: 1400,
+    producedQuantity: 400,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    eventKey: "atlas-toronto",
+    stockPerVariant: 80,
+  },
+  {
+    id: "prd_av_returning_print",
+    slug: "second-time-print",
+    name: "Second Time Print",
+    tagline: "For anyone who came back.",
+    story:
+      "A quiet thank-you to the people on their second Degens show or beyond. Two-colour risograph, edition of 250.",
+    category: "print",
+    accessType: "previous_attendee",
+    priceCents: 3500,
+    costCents: 700,
+    producedQuantity: 250,
+    stockPerVariant: 190,
+  },
+];
+
+export const NOVA_KESTREL_PRODUCTS: ProductDefinition[] = [
+  {
+    id: "prd_nk_tee",
+    slug: "gold-hour-tee",
+    name: "Gold Hour Tee",
+    tagline: "Brass section included.",
+    story: "Soft-washed cotton with a gold discharge print that keeps the fabric drape.",
+    category: "apparel",
+    accessType: "public",
+    priceCents: 4200,
+    costCents: 1000,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    tourKey: "gold-hour",
+    stockPerVariant: 280,
+  },
+  {
+    id: "prd_nk_book",
+    slug: "gold-hour-tour-book",
+    name: "Gold Hour Tour Book",
+    tagline: "Ninety-six pages, no ads.",
+    story:
+      "Photography and handwritten lyric sheets from the first leg, printed on uncoated stock and section sewn.",
+    category: "collectible",
+    accessType: "public",
+    priceCents: 3500,
+    costCents: 900,
+    producedQuantity: 2000,
+    stockPerVariant: 300,
+  },
+  {
+    id: "prd_nk_nashville_tee",
+    slug: "nashville-night-tee",
+    name: "Nashville Night Tee",
+    tagline: "You stayed for the last song.",
+    story:
+      "Printed for the Cedar & Vine night only. The artwork is the actual setlist, in the order it was played.",
+    category: "apparel",
+    accessType: "event_specific",
+    priceCents: 5200,
+    costCents: 1300,
+    producedQuantity: 400,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    eventKey: "nova-nashville",
+    stockPerVariant: 46,
+  },
+  {
+    id: "prd_nk_scarf",
+    slug: "gold-hour-scarf",
+    name: "Gold Hour Scarf",
+    tagline: "Woven, not printed.",
+    story: "Jacquard woven in a mill that has made football scarves for sixty years.",
+    category: "accessory",
+    accessType: "verified_attendee",
+    priceCents: 4800,
+    costCents: 1500,
+    stockPerVariant: 220,
+  },
+  {
+    id: "prd_nk_single",
+    slug: "gold-hour-7-inch",
+    name: "Gold Hour 7\u2033",
+    tagline: "Two songs, one of them new.",
+    story: "Seven inch on translucent amber, with a song that is not on any record.",
+    category: "music",
+    accessType: "public",
+    priceCents: 2400,
+    costCents: 800,
+    producedQuantity: 1500,
+    stockPerVariant: 340,
+  },
+];
+
+export const LOW_COUNTRY_PRODUCTS: ProductDefinition[] = [
+  {
+    id: "prd_lc_tee",
+    slug: "river-sessions-tee",
+    name: "River Sessions Tee",
+    tagline: "Undyed, unbleached.",
+    story: "Natural cotton, single-colour print, and nothing else on the garment.",
+    category: "apparel",
+    accessType: "public",
+    priceCents: 3800,
+    costCents: 950,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    tourKey: "river-sessions",
+    stockPerVariant: 240,
+  },
+  {
+    id: "prd_lc_austin_print",
+    slug: "austin-anniversary-print",
+    name: "Austin Anniversary Print",
+    tagline: "One year ago tonight.",
+    story:
+      "Letterpress print struck on the anniversary of the Riverbend Yard show, for the people who were actually standing there. Edition of 200.",
+    category: "print",
+    accessType: "event_specific",
+    priceCents: 6500,
+    costCents: 1800,
+    producedQuantity: 200,
+    eventKey: "low-austin",
+    stockPerVariant: 176,
+  },
+  {
+    id: "prd_lc_vinyl",
+    slug: "river-sessions-lp",
+    name: "River Sessions — LP",
+    tagline: "Recorded in one room.",
+    story: "Eleven songs, two microphones, no overdubs. Pressed on 140g black.",
+    category: "music",
+    accessType: "public",
+    priceCents: 3900,
+    costCents: 1300,
+    stockPerVariant: 260,
+  },
+  {
+    id: "prd_lc_tote",
+    slug: "river-sessions-tote",
+    name: "River Sessions Tote",
+    tagline: "Holds a record.",
+    story: "16oz canvas, boxed base, long handles. Sized around a twelve inch sleeve.",
+    category: "accessory",
+    accessType: "public",
+    priceCents: 2800,
+    costCents: 700,
+    stockPerVariant: 300,
+  },
+];
+
+export const MARISOL_PRODUCTS: ProductDefinition[] = [
+  {
+    id: "prd_mr_tee",
+    slug: "violeta-tour-tee",
+    name: "Violeta Tour Tee",
+    tagline: "From the 2025 run.",
+    story: "The tee from the Violeta tour, still in the warehouse in the smaller sizes.",
+    category: "apparel",
+    accessType: "public",
+    priceCents: 4000,
+    costCents: 1000,
+    sizes: ["S", "M", "L", "XL"],
+    stockPerVariant: 90,
+  },
+  {
+    id: "prd_mr_print",
+    slug: "violeta-print",
+    name: "Violeta Print",
+    tagline: "Signed edition.",
+    story: "Signed and numbered from an edition of 150. A handful remain.",
+    category: "print",
+    accessType: "public",
+    priceCents: 5500,
+    costCents: 1600,
+    producedQuantity: 150,
+    stockPerVariant: 24,
+  },
+];
+
+export const FAN_FIRST_NAMES = [
+  "Scott", "Priya", "Marcus", "Dana", "Elena", "Theo", "Aisha", "Rowan", "Marisa", "Devon",
+  "Ines", "Cassius", "Nadia", "Owen", "Talia", "Jonas", "Amara", "Felix", "Naomi", "Rafael",
+  "Sloane", "Bianca", "Emeka", "Lucia", "Hugo", "Yara", "Miles", "Freya", "Caleb", "Sunniva",
+  "Otis", "Delphine", "Kwame", "Solveig", "Ravi", "Marlowe", "Anouk", "Tobias", "Imani", "Soren",
+];
+
+export const FAN_LAST_NAMES = [
+  "Weller", "Raman", "Okafor", "Lindqvist", "Mbeki", "Castellanos", "Doyle", "Nakamura",
+  "Brennan", "Adeyemi", "Volkov", "Ferreira", "Hollis", "Bauer", "Ivanova", "Sattar",
+  "Quintero", "Novak", "Osei", "Laurent", "Whitfield", "Petrova", "Anand", "Rossi",
+];
+
+export const US_CITIES_FOR_SHIPPING = [
+  { city: "Detroit", region: "MI", postal: "48226" },
+  { city: "Ann Arbor", region: "MI", postal: "48104" },
+  { city: "Toledo", region: "OH", postal: "43604" },
+  { city: "Chicago", region: "IL", postal: "60614" },
+  { city: "Cleveland", region: "OH", postal: "44113" },
+  { city: "Grand Rapids", region: "MI", postal: "49503" },
+  { city: "Columbus", region: "OH", postal: "43215" },
+  { city: "Windsor", region: "ON", postal: "N9A 1A1" },
+];

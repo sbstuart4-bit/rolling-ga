@@ -14,6 +14,7 @@ const FILTER_LABELS: Record<string, string> = {
   unmapped: "Unmapped",
   broken: "Broken",
   unused: "Unused",
+  placeholder: "Placeholders",
 };
 
 const STATUS_CLASS: Record<DemoAssetStatus, string> = {
@@ -59,6 +60,8 @@ export function OpsAssetQaGrid({
         return entry.status === "broken" || entry.status === "missing";
       case "unused":
         return entry.status === "unused";
+      case "placeholder":
+        return entry.status === "placeholder_active";
       default:
         return true;
     }
@@ -158,6 +161,14 @@ function AssetCard({ entry }: { entry: DemoAssetAuditEntry }) {
           </p>
         )}
         <p className={statusClass}>{entry.statusLabel}</p>
+        {entry.unmappedReason && (
+          <p className="text-muted-foreground">
+            Reason: {entry.unmappedReason.replace(/_/g, " ")}
+          </p>
+        )}
+        {entry.duplicateOf && (
+          <p className="text-muted-foreground">Pairs with: {entry.duplicateOf}</p>
+        )}
         {entry.referenceLocations[0] && (
           <p className="text-muted-foreground">{entry.referenceLocations[0]}</p>
         )}

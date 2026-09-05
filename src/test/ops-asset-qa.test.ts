@@ -3,6 +3,7 @@ import {
   auditDemoAssetFile,
   buildDemoAssetAudit,
   buildArtistQaMatrix,
+  classifyUnmappedAssets,
   computeAssetStatus,
   missingProductAssets,
   summarizeDemoAssetAudit,
@@ -16,9 +17,10 @@ describe("Rolling GA Ops asset QA", () => {
     expect(entry.entityId).toBe("prd_nk_tee");
   });
 
-  it("flags unmapped product PNGs with no seeded record", () => {
+  it("assigns mapped status to all P1.1 product PNGs", () => {
     const entry = auditDemoAssetFile("product-prd-nk-hat.png");
-    expect(entry.status).toBe("unmapped");
+    expect(entry.status).toBe("mapped");
+    expect(entry.entityId).toBe("prd_nk_hat");
   });
 
   it("summarizes audit totals for all four artists", () => {
@@ -61,6 +63,17 @@ describe("Rolling GA Ops asset QA", () => {
       expect(matrix.results.length).toBe(7);
       expect(matrix.results.some((r) => r.surface === "product_grid")).toBe(true);
     }
+  });
+
+  it("reports no unmapped product PNGs for full seeded catalog", () => {
+    const audit = buildDemoAssetAudit();
+    const classified = classifyUnmappedAssets(audit);
+    expect(classified.noCatalogEntity.filter((e) => e.assetType === "product")).toHaveLength(0);
+  });
+
+  it("pairs PNG product files with their SVG placeholders", () => {
+    const entry = auditDemoAssetFile("product-prd-nk-tee.png");
+    expect(entry.duplicateOf).toBe("product-prd-nk-tee.svg");
   });
 
   it("marks referenced SVG placeholders as placeholder_active", () => {

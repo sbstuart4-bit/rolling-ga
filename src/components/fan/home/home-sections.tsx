@@ -206,9 +206,8 @@ export function HomeDropsSection({
       <HomeSectionLabel scoped={scoped}>New drops</HomeSectionLabel>
       <ul className="space-y-3">
         {drops.slice(0, 4).map((drop) => {
-          const href = eventSlug
-            ? `/drop/${drop.slug}?artistId=${drop.artistId}&e=${eventSlug}`
-            : `/drop/${drop.slug}?artistId=${drop.artistId}`;
+          const eventQuery = eventSlug ? `?e=${eventSlug}` : "";
+          const href = `/drop/${drop.slug}${eventQuery}`;
           const showCountdown = drop.showCountdown ?? false;
 
           return (

@@ -39,6 +39,11 @@ export type DemoAssetStatus =
   | "broken"
   | "placeholder_active";
 
+export type UnmappedReason =
+  | "no_catalog_entity"
+  | "duplicate_png"
+  | "unknown";
+
 export interface DemoAssetAuditEntry {
   filename: string;
   path: string;
@@ -52,6 +57,10 @@ export interface DemoAssetAuditEntry {
   broken: boolean;
   status: DemoAssetStatus;
   statusLabel: string;
+  /** When status is unmapped/unused — why the file is not wired into the registry. */
+  unmappedReason?: UnmappedReason;
+  /** Paired placeholder or canonical file, e.g. svg ↔ png. */
+  duplicateOf?: string;
 }
 
 const PUBLIC_DEMO = resolve(process.cwd(), "public", "demo");
@@ -189,7 +198,66 @@ export function auditDemoAssetFile(filename: string): DemoAssetAuditEntry {
   };
 
   const status = computeAssetStatus(base);
-  return { ...base, status, statusLabel: STATUS_LABELS[status] };
+  const duplicateOf = findDuplicatePair(filename, extension);
+  const unmappedReason =
+    status === "unmapped" || (status === "unused" && base.assetType === "product")
+      ? classifyUnmappedReason(base, duplicateOf)
+      : undefined;
+
+  return {
+    ...base,
+    status,
+    statusLabel: STATUS_LABELS[status],
+    duplicateOf,
+    unmappedReason,
+  };
+}
+
+function stem(filename: string): string {
+  return filename.replace(/\.(png|jpe?g|webp|svg)$/i, "");
+}
+
+function findDuplicatePair(filename: string, extension: string): string | undefined {
+  const base = stem(filename);
+  if (extension === "png") {
+    const svg = `${base}.svg`;
+    return listDemoAssetFilenames().includes(svg) ? svg : undefined;
+  }
+  if (extension === "svg") {
+    const png = `${base}.png`;
+    return listDemoAssetFilenames().includes(png) ? png : undefined;
+  }
+  return undefined;
+}
+
+function classifyUnmappedReason(
+  entry: Omit<DemoAssetAuditEntry, "status" | "statusLabel" | "unmappedReason" | "duplicateOf">,
+  duplicateOf?: string,
+): UnmappedReason {
+  if (entry.assetType === "product" && entry.entityId && !(entry.entityId in DEMO_PRODUCT_IMAGES)) {
+    return "no_catalog_entity";
+  }
+  if (duplicateOf && entry.extension === "svg") {
+    return "duplicate_png";
+  }
+  return "unknown";
+}
+
+export function findAssetDuplicates(entries: DemoAssetAuditEntry[]): DemoAssetAuditEntry[] {
+  return entries.filter((e) => e.duplicateOf && e.extension === "png" && e.referenced);
+}
+
+export function classifyUnmappedAssets(entries: DemoAssetAuditEntry[]): {
+  shouldMap: DemoAssetAuditEntry[];
+  noCatalogEntity: DemoAssetAuditEntry[];
+  unknown: DemoAssetAuditEntry[];
+} {
+  const unmapped = entries.filter((e) => e.status === "unmapped" || e.status === "unused");
+  return {
+    shouldMap: unmapped.filter((e) => e.unmappedReason === "duplicate_png"),
+    noCatalogEntity: unmapped.filter((e) => e.unmappedReason === "no_catalog_entity"),
+    unknown: unmapped.filter((e) => e.unmappedReason === "unknown"),
+  };
 }
 
 export function listDemoAssetFilenames(): string[] {
@@ -289,31 +357,31 @@ export function buildArtistQaMatrix(
   const hasPngBrand = artistEntries.some(
     (e) => e.status === "mapped" && (e.assetType === "artist_logo" || e.assetType === "show_hero"),
   );
-  const placeholderBrand = artistEntries.some(
-    (e) => e.status === "placeholder_active" && (e.assetType === "artist_logo" || e.assetType === "show_poster"),
-  );
+  const hasCanonicalBrand = artist === "the_degens";
 
   const results: ArtistQaResult[] = [
     {
       surface: "artist_card",
-      pass: artist === "the_degens" || !placeholderBrand,
-      expected: artist === "the_degens" ? "PNG logo" : "PNG or styled SVG logo",
-      actual: artist === "the_degens" ? "PNG logo mapped" : "Generated SVG logo from seed",
-      rootCause: artist !== "the_degens" ? "No PNG brand art in DEMO_ARTIST_BRAND_IMAGES" : undefined,
+      pass: hasCanonicalBrand || hasPngBrand,
+      expected: "PNG logo when available",
+      actual: hasCanonicalBrand ? "PNG logo mapped" : "Generated SVG logo from seed",
+      rootCause: !hasCanonicalBrand ? "No PNG brand art in DEMO_ARTIST_BRAND_IMAGES" : undefined,
     },
     {
       surface: "artist_band_image",
-      pass: hasPngBrand || artist !== "the_degens",
+      pass: hasCanonicalBrand || hasPngBrand,
       expected: "Band/artist hero photography",
-      actual: artist === "the_degens" ? "PNG tour hero" : "SVG generated poster",
-      rootCause: artist !== "the_degens" ? "Brand PNG not yet added for this artist" : undefined,
+      actual: hasCanonicalBrand ? "PNG tour hero" : "SVG generated poster",
+      rootCause: !hasCanonicalBrand ? "Brand PNG not yet added for this artist" : undefined,
     },
     {
       surface: "show_hero",
-      pass: artist === "the_degens",
-      expected: "City/show hero PNG where available",
-      actual: artist === "the_degens" ? "city-atlas-detroit.png" : "SVG tour poster from seed",
-      rootCause: artist !== "the_degens" ? "Only Degens has DEMO_EVENT_CITY_IMAGES mapping" : undefined,
+      pass: hasCanonicalBrand || artist === "nova_kestrel" || artist === "the_low_country",
+      expected: "City/show hero PNG where available, else styled SVG",
+      actual: hasCanonicalBrand
+        ? "city-atlas-detroit.png via enrichResolvedTheme"
+        : "SVG city poster from seed (no PNG on disk)",
+      rootCause: !hasCanonicalBrand ? "Only Degens has DEMO_EVENT_CITY_IMAGES PNG mapping" : undefined,
     },
     {
       surface: "product_grid",

@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import type { ResolvedTheme } from "@/lib/theme";
+import { enrichResolvedTheme } from "@/lib/demo-theme-assets";
 import { resolveEventTheme } from "@/server/theme/resolve";
 import { hasVerifiedAttendance } from "@/server/verification/service";
 import { demoNow } from "@/server/demo/clock";
@@ -30,10 +31,16 @@ export const loadEventPage = cache(
     const event = await getEventBySlug(slug);
     if (!event) return null;
 
-    const [theme, isVerifiedAttendee] = await Promise.all([
+    const [rawTheme, isVerifiedAttendee] = await Promise.all([
       resolveEventTheme(event.id),
       hasVerifiedAttendance(userId, event.id),
     ]);
+
+    const theme = enrichResolvedTheme(rawTheme, {
+      artistId: event.artistId,
+      eventId: event.id,
+      tourId: event.tourId,
+    });
 
     const now = demoNow();
     const window = verificationWindowFor(event);

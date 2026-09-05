@@ -104,7 +104,7 @@ function EditorialHeroProduct({
             fill
             sizes="(min-width: 768px) 672px, 100vw"
             className={cn(
-              "object-cover transition-transform duration-500 group-hover:scale-[1.02]",
+              "object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02]",
               product.locked && "opacity-80 saturate-[0.65]",
             )}
           />
@@ -204,7 +204,7 @@ function EditorialRowProduct({
         )}
       >
         {product.images?.[0] ? (
-          <Image src={product.images[0]} alt="" fill sizes="56px" className="object-cover" />
+          <Image src={product.images[0]} alt="" fill sizes="56px" className="object-contain p-0.5" />
         ) : null}
       </div>
       <div className="min-w-0 flex-1">

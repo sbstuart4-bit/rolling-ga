@@ -19,6 +19,8 @@ import {
   resolveProductImages,
 } from "@/lib/demo-product-images";
 import { isGeneratedDemoPosterSvg, resolveDropArtwork } from "@/lib/demo-drop-artwork";
+import { enrichResolvedTheme } from "@/lib/demo-theme-assets";
+import type { ResolvedTheme } from "@/lib/theme";
 import {
   LOW_COUNTRY_PRODUCTS,
   MARISOL_PRODUCTS,
@@ -81,7 +83,7 @@ describe("resolveProductImages", () => {
 
 describe("THE_DEGENS_DEMO_ASSETS", () => {
   it("maps every Degens product id to a png under /demo/", () => {
-    expect(Object.keys(THE_DEGENS_DEMO_ASSETS.products)).toHaveLength(11);
+    expect(Object.keys(THE_DEGENS_DEMO_ASSETS.products)).toHaveLength(12);
     for (const url of Object.values(THE_DEGENS_DEMO_ASSETS.products)) {
       expect(url).toMatch(/^\/demo\/product-prd-av-.+\.png$/);
     }
@@ -118,13 +120,10 @@ describe("demo asset audit", () => {
     expect(entry.broken).toBe(false);
   });
 
-  it("flags unmapped product pngs", () => {
+  it("reports no unmapped product pngs for seeded catalog", () => {
     const audit = buildDemoAssetAudit();
     const unmapped = unmappedProductAssets(audit);
-    const filenames = unmapped.map((e) => e.filename);
-    expect(filenames).toContain("product-prd-nk-hat.png");
-    expect(filenames).toContain("product-prd-mr-vinyl.png");
-    expect(filenames).not.toContain("product-prd-nk-tee.png");
+    expect(unmapped).toHaveLength(0);
   });
 
   it("reports no missing canonical product files", () => {
@@ -155,5 +154,121 @@ describe("resolveDropArtwork", () => {
       storedArtworkUrl: "/demo/poster-detroit-tonight.svg",
     });
     expect(artwork).toBe(THE_DEGENS_DEMO_ASSETS.dropPosters["detroit-tonight"]);
+  });
+
+  it("uses Low Country product photo for river-sessions drop", () => {
+    const artwork = resolveDropArtwork({
+      dropSlug: "river-sessions",
+      storedArtworkUrl: "/demo/poster-river-sessions-drop.svg",
+      fallbackProductId: "prd_lc_tee",
+      fallbackProductImages: ["/demo/product-prd-lc-tee.svg"],
+    });
+    expect(artwork).toBe("/demo/product-prd-lc-tee.png");
+  });
+});
+
+describe("all four demo artists — product photography", () => {
+  const byArtist = [
+    { label: "The Degens", products: THE_DEGENS_PRODUCTS },
+    { label: "Nova Kestrel", products: NOVA_KESTREL_PRODUCTS },
+    { label: "The Low Country", products: LOW_COUNTRY_PRODUCTS },
+    { label: "Marisol Reyes", products: MARISOL_PRODUCTS },
+  ] as const;
+
+  for (const { label, products } of byArtist) {
+    it(`${label}: every seeded product resolves to PNG, never stale SVG`, () => {
+      for (const product of products) {
+        const svg = `/demo/product-${product.id.replace(/_/g, "-")}.svg`;
+        const resolved = resolveProductImage(product.id, [svg]);
+        expect(resolved, product.id).toMatch(/^\/demo\/product-.+\.png$/);
+        expect(resolved, product.id).not.toMatch(/\.svg$/);
+      }
+    });
+  }
+
+  it("does not cross-resolve product assets between artists", () => {
+    expect(resolveProductImage("prd_nk_tee", null)).not.toBe(
+      resolveProductImage("prd_lc_tee", null),
+    );
+    expect(resolveProductImage("prd_mr_print", null)).not.toBe(
+      resolveProductImage("prd_av_tour_tee", null),
+    );
+  });
+});
+
+describe("enrichResolvedTheme", () => {
+  const emptyProvenance = {
+    background: null,
+    surface: null,
+    foreground: null,
+    mutedForeground: null,
+    accent: null,
+    accentForeground: null,
+    accentSecondary: null,
+    border: null,
+    fontId: null,
+  } satisfies ResolvedTheme["provenance"];
+
+  it("prefers Degens PNG brand and city art over stale SVG", () => {
+    const base: ResolvedTheme = {
+      background: null,
+      surface: null,
+      foreground: null,
+      mutedForeground: null,
+      accent: null,
+      accentForeground: null,
+      accentSecondary: null,
+      border: null,
+      fontId: null,
+      logoUrl: "/demo/logo-the-degens.svg",
+      heroImageUrl: "/demo/poster-atlas-void-brand.svg",
+      cityArtworkUrl: "/demo/city-atlas-detroit.svg",
+      tourArtworkUrl: null,
+      merchPhotographyNote: null,
+      showMessaging: null,
+      localMessage: null,
+      provenance: emptyProvenance,
+    };
+
+    const enriched = enrichResolvedTheme(base, {
+      artistId: "art_the_degens",
+      eventId: "evt_atlas_detroit",
+      tourId: "tor_signal_decay",
+    });
+
+    expect(enriched.logoUrl).toBe(THE_DEGENS_DEMO_ASSETS.logo);
+    expect(enriched.heroImageUrl).toBe(THE_DEGENS_DEMO_ASSETS.tourHero);
+    expect(enriched.cityArtworkUrl).toBe(THE_DEGENS_DEMO_ASSETS.cityDetroit);
+  });
+
+  it("leaves Nova SVG in place when no canonical PNG exists", () => {
+    const base: ResolvedTheme = {
+      background: null,
+      surface: null,
+      foreground: null,
+      mutedForeground: null,
+      accent: null,
+      accentForeground: null,
+      accentSecondary: null,
+      border: null,
+      fontId: null,
+      logoUrl: "/demo/logo-nova-kestrel.svg",
+      heroImageUrl: "/demo/poster-nova-kestrel-brand.svg",
+      cityArtworkUrl: "/demo/city-nova-nashville.svg",
+      tourArtworkUrl: null,
+      merchPhotographyNote: null,
+      showMessaging: null,
+      localMessage: null,
+      provenance: emptyProvenance,
+    };
+
+    const enriched = enrichResolvedTheme(base, {
+      artistId: "art_nova_kestrel",
+      eventId: "evt_nova_nashville",
+      tourId: "tor_gold_hour",
+    });
+
+    expect(enriched.logoUrl).toBe("/demo/logo-nova-kestrel.svg");
+    expect(enriched.cityArtworkUrl).toBe("/demo/city-nova-nashville.svg");
   });
 });

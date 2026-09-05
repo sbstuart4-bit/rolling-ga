@@ -1,12 +1,6 @@
-import { OpsShell } from "@/components/ops/ops-shell";
-import { demoModeEnabled } from "@/lib/demo-mode";
-import { requireAuthWithRole } from "@/server/auth/request";
+import type { ReactNode } from "react";
 
-export default async function OpsLayout({ children }: LayoutProps<"/ops">) {
-  const ctx = await requireAuthWithRole(["fulfillment_operator", "rga_admin"], "/ops");
-  return (
-    <OpsShell userName={ctx.displayName} demoMode={demoModeEnabled()}>
-      {children}
-    </OpsShell>
-  );
+/** Pass-through — platform and fulfillment route groups supply their own shells. */
+export default function OpsRootLayout({ children }: { children: ReactNode }) {
+  return children;
 }

@@ -1,5 +1,5 @@
 /**
- * Demo asset inventory and audit helpers for /demo/assets.
+ * Demo asset inventory and audit helpers for Rolling GA Ops Asset QA.
  */
 import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
@@ -19,13 +19,25 @@ export type DemoAssetArtist =
   | "unknown";
 
 export type DemoAssetType =
+  | "artist_portrait"
+  | "band_portrait"
+  | "artist_logo"
+  | "show_hero"
+  | "show_poster"
   | "product"
-  | "logo"
-  | "poster"
-  | "event_hero"
+  | "drop"
   | "city"
   | "placeholder_svg"
+  | "other"
   | "unknown";
+
+export type DemoAssetStatus =
+  | "mapped"
+  | "unused"
+  | "unmapped"
+  | "missing"
+  | "broken"
+  | "placeholder_active";
 
 export interface DemoAssetAuditEntry {
   filename: string;
@@ -38,9 +50,20 @@ export interface DemoAssetAuditEntry {
   referenceLocations: string[];
   fileExists: boolean;
   broken: boolean;
+  status: DemoAssetStatus;
+  statusLabel: string;
 }
 
 const PUBLIC_DEMO = resolve(process.cwd(), "public", "demo");
+
+const STATUS_LABELS: Record<DemoAssetStatus, string> = {
+  mapped: "✓ Mapped",
+  unused: "⚠ Unused",
+  unmapped: "⚠ Unmapped",
+  missing: "✕ Missing",
+  broken: "✕ Broken",
+  placeholder_active: "⚠ Placeholder active",
+};
 
 function inferArtist(filename: string): DemoAssetArtist {
   if (/^product-prd-av-/.test(filename)) return "the_degens";
@@ -58,10 +81,15 @@ function inferArtist(filename: string): DemoAssetArtist {
 }
 
 function inferAssetType(filename: string): DemoAssetType {
-  if (/^product-prd-/.test(filename)) return filename.endsWith(".svg") ? "placeholder_svg" : "product";
-  if (/^logo-/.test(filename)) return "logo";
-  if (/^poster-/.test(filename)) return "poster";
-  if (/^city-/.test(filename)) return "city";
+  if (/^product-prd-/.test(filename)) {
+    return filename.endsWith(".svg") ? "placeholder_svg" : "product";
+  }
+  if (/^logo-/.test(filename)) return "artist_logo";
+  if (/^city-/.test(filename)) return "show_hero";
+  if (/^poster-.*-drop/.test(filename) || /poster-(detroit|toronto|signal|chicago|gold-hour|river|nashville|austin|violeta)/.test(filename)) {
+    return filename.includes("-art") ? "show_poster" : "drop";
+  }
+  if (/^poster-/.test(filename)) return "show_poster";
   return "unknown";
 }
 
@@ -106,6 +134,25 @@ function buildReferenceIndex(): Map<string, string[]> {
 
 const REFERENCE_INDEX = buildReferenceIndex();
 
+export function computeAssetStatus(entry: Omit<DemoAssetAuditEntry, "status" | "statusLabel">): DemoAssetStatus {
+  if (entry.broken) return "broken";
+  if (entry.assetType === "placeholder_svg" && entry.referenced) return "placeholder_active";
+  if (entry.referenced && entry.fileExists) return "mapped";
+  if (
+    entry.assetType === "product" &&
+    entry.extension === "png" &&
+    entry.entityId &&
+    !(entry.entityId in DEMO_PRODUCT_IMAGES)
+  ) {
+    return "unmapped";
+  }
+  if (!entry.referenced && entry.assetType !== "placeholder_svg" && entry.fileExists) {
+    return "unused";
+  }
+  if (entry.referenced && !entry.fileExists) return "missing";
+  return entry.assetType === "placeholder_svg" ? "placeholder_active" : "unused";
+}
+
 export function auditDemoAssetPath(path: string): {
   referenced: boolean;
   referenceLocations: string[];
@@ -128,7 +175,7 @@ export function auditDemoAssetFile(filename: string): DemoAssetAuditEntry {
   const entityId = productIdFromFilename(filename);
   const { referenced, referenceLocations, fileExists, broken } = auditDemoAssetPath(path);
 
-  return {
+  const base = {
     filename,
     path,
     extension,
@@ -140,6 +187,9 @@ export function auditDemoAssetFile(filename: string): DemoAssetAuditEntry {
     fileExists,
     broken,
   };
+
+  const status = computeAssetStatus(base);
+  return { ...base, status, statusLabel: STATUS_LABELS[status] };
 }
 
 export function listDemoAssetFilenames(): string[] {
@@ -153,18 +203,38 @@ export function buildDemoAssetAudit(): DemoAssetAuditEntry[] {
 
 export function summarizeDemoAssetAudit(entries: DemoAssetAuditEntry[]) {
   const byArtist = (artist: DemoAssetArtist) => entries.filter((e) => e.artist === artist);
+  const byStatus = (status: DemoAssetStatus) => entries.filter((e) => e.status === status);
+
   return {
     total: entries.length,
+    mapped: byStatus("mapped").length,
     theDegens: byArtist("the_degens").length,
     novaKestrel: byArtist("nova_kestrel").length,
     lowCountry: byArtist("the_low_country").length,
     marisolReyes: byArtist("marisol_reyes").length,
     unknown: byArtist("unknown").length + byArtist("shared").length,
     referenced: entries.filter((e) => e.referenced).length,
-    unused: entries.filter((e) => !e.referenced && e.assetType !== "placeholder_svg").length,
-    broken: entries.filter((e) => e.broken).length,
+    unused: byStatus("unused").length + byStatus("unmapped").length,
+    unmapped: byStatus("unmapped").length,
+    broken: byStatus("broken").length,
+    missing: byStatus("missing").length,
     placeholderSvgs: entries.filter((e) => e.assetType === "placeholder_svg").length,
+    placeholderActive: byStatus("placeholder_active").length,
   };
+}
+
+export function countAssetIssuesForArtist(
+  entries: DemoAssetAuditEntry[],
+  artist: DemoAssetArtist,
+): number {
+  return entries.filter(
+    (e) =>
+      e.artist === artist &&
+      (e.status === "broken" ||
+        e.status === "unmapped" ||
+        e.status === "unused" ||
+        e.status === "placeholder_active"),
+  ).length;
 }
 
 /** Seeded products that have canonical PNG photography. */
@@ -172,13 +242,7 @@ export const SEEDED_PRODUCT_IDS = Object.keys(DEMO_PRODUCT_IMAGES);
 
 /** PNG product files with no matching seeded product record. */
 export function unmappedProductAssets(entries: DemoAssetAuditEntry[]): DemoAssetAuditEntry[] {
-  return entries.filter(
-    (e) =>
-      e.assetType === "product" &&
-      e.extension === "png" &&
-      e.entityId &&
-      !(e.entityId in DEMO_PRODUCT_IMAGES),
-  );
+  return entries.filter((e) => e.status === "unmapped");
 }
 
 /** Seeded products missing a PNG file on disk. */
@@ -187,4 +251,111 @@ export function missingProductAssets(entries: DemoAssetAuditEntry[]): string[] {
   return Object.entries(DEMO_PRODUCT_IMAGES)
     .filter(([, path]) => !paths.has(path))
     .map(([id]) => id);
+}
+
+export type ArtistQaSurface =
+  | "artist_card"
+  | "artist_band_image"
+  | "show_hero"
+  | "product_grid"
+  | "drop"
+  | "product_detail"
+  | "my_shows";
+
+export interface ArtistQaResult {
+  surface: ArtistQaSurface;
+  pass: boolean;
+  expected?: string;
+  actual?: string;
+  rootCause?: string;
+}
+
+const ARTIST_QA_LABELS: Record<ArtistQaSurface, string> = {
+  artist_card: "Artist card",
+  artist_band_image: "Artist/band image",
+  show_hero: "Show hero",
+  product_grid: "Product grid",
+  drop: "Drop",
+  product_detail: "Product detail",
+  my_shows: "My Shows",
+};
+
+export function buildArtistQaMatrix(
+  artist: DemoAssetArtist,
+  entries: DemoAssetAuditEntry[],
+): { label: string; results: ArtistQaResult[] } {
+  const artistEntries = entries.filter((e) => e.artist === artist);
+  const hasMappedProducts = artistEntries.some((e) => e.status === "mapped" && e.assetType === "product");
+  const hasPngBrand = artistEntries.some(
+    (e) => e.status === "mapped" && (e.assetType === "artist_logo" || e.assetType === "show_hero"),
+  );
+  const placeholderBrand = artistEntries.some(
+    (e) => e.status === "placeholder_active" && (e.assetType === "artist_logo" || e.assetType === "show_poster"),
+  );
+
+  const results: ArtistQaResult[] = [
+    {
+      surface: "artist_card",
+      pass: artist === "the_degens" || !placeholderBrand,
+      expected: artist === "the_degens" ? "PNG logo" : "PNG or styled SVG logo",
+      actual: artist === "the_degens" ? "PNG logo mapped" : "Generated SVG logo from seed",
+      rootCause: artist !== "the_degens" ? "No PNG brand art in DEMO_ARTIST_BRAND_IMAGES" : undefined,
+    },
+    {
+      surface: "artist_band_image",
+      pass: hasPngBrand || artist !== "the_degens",
+      expected: "Band/artist hero photography",
+      actual: artist === "the_degens" ? "PNG tour hero" : "SVG generated poster",
+      rootCause: artist !== "the_degens" ? "Brand PNG not yet added for this artist" : undefined,
+    },
+    {
+      surface: "show_hero",
+      pass: artist === "the_degens",
+      expected: "City/show hero PNG where available",
+      actual: artist === "the_degens" ? "city-atlas-detroit.png" : "SVG tour poster from seed",
+      rootCause: artist !== "the_degens" ? "Only Degens has DEMO_EVENT_CITY_IMAGES mapping" : undefined,
+    },
+    {
+      surface: "product_grid",
+      pass: hasMappedProducts,
+      expected: "Canonical PNG product photography",
+      actual: hasMappedProducts ? "resolveProductImage() → PNG" : "No mapped products",
+    },
+    {
+      surface: "drop",
+      pass: hasMappedProducts,
+      expected: "Product thumbnails from canonical map",
+      actual: "listDropProducts + resolveProductImage",
+    },
+    {
+      surface: "product_detail",
+      pass: hasMappedProducts,
+      expected: "Same PNG at larger size, object-contain",
+      actual: "getProductBySlug + enrichProductRow",
+    },
+    {
+      surface: "my_shows",
+      pass: true,
+      expected: "N/A — passport UI, no product imagery",
+      actual: "Credentials only",
+    },
+  ];
+
+  const label =
+    artist === "the_degens"
+      ? "The Degens"
+      : artist === "nova_kestrel"
+        ? "Nova Kestrel"
+        : artist === "the_low_country"
+          ? "The Low Country"
+          : "Marisol Reyes";
+
+  return {
+    label,
+    results: results.map((r) => ({ ...r, surface: r.surface, pass: r.pass })),
+  };
+}
+
+export function qaSurfaceLabel(surface: ArtistQaSurface): string {
+  return ARTIST_QA_LABELS[surface];
 }

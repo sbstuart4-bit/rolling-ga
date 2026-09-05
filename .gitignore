@@ -43,3 +43,15 @@ next-env.d.ts
 
 # local database (PGlite cluster and leftover SQLite files)
 /data/**
+
+# local debug / generated artifacts
+cookies.txt
+*.bin
+demo.html
+page.html
+dev-verify.log
+start-demo.log
+start-e2e.log
+start-verify.log
+test-out.txt
+

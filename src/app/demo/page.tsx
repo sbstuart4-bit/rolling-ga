@@ -5,6 +5,7 @@ import { Disc3, Mic2, ShieldCheck, Truck } from "lucide-react";
 import { AuthSplashBackdrop } from "@/components/auth/auth-splash-backdrop";
 import { RollingGaLogo } from "@/components/brand/rolling-ga-mark";
 import { DemoPerspectiveSelector } from "@/components/demo/demo-perspective-selector";
+import { GuidedDemoModeSelector } from "@/components/demo/guided-demo-mode-selector";
 import { DemoOpsControls } from "@/components/demo/demo-ops-controls";
 import { DemoClockControls } from "@/components/demo/demo-clock-controls";
 import { DemoScenarioControls } from "@/components/demo/demo-scenario-controls";
@@ -85,6 +86,8 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
 
         {perspective === "fan" && (
           <>
+            <GuidedDemoModeSelector />
+
             <DemoScenarioControls initialScenario={scenario} boardAccess={boardAccess} />
 
             <DemoClockControls

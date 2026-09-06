@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { FanAppShell } from "@/components/fan/fan-app-shell";
+import { GuidedDemoShell } from "@/components/demo/guided-demo-shell";
 import { requireAuth } from "@/server/auth/request";
 import { countCartItems } from "@/server/commerce/cart";
 import { fanHasLiveVerifiedShow } from "@/server/fans/live-tab";
@@ -23,8 +24,10 @@ export default async function FanLayout({ children }: LayoutProps<"/">) {
   ]);
 
   return (
-    <FanAppShell displayName={ctx.displayName} cartCount={cartCount} liveVerifiedShow={liveVerifiedShow}>
-      <main className="min-h-full">{children}</main>
-    </FanAppShell>
+    <GuidedDemoShell>
+      <FanAppShell displayName={ctx.displayName} cartCount={cartCount} liveVerifiedShow={liveVerifiedShow}>
+        <main className="min-h-full">{children}</main>
+      </FanAppShell>
+    </GuidedDemoShell>
   );
 }

@@ -1,7 +1,28 @@
 /** Shared demo-mode check — safe in proxy, server components, and actions. */
-export function demoModeEnabled(): boolean {
-  if (process.env.NODE_ENV !== "production") return true;
+
+function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+/** Full demo board at `/demo`, root redirect, and hosted board gate (`ROLLING_GA_DEMO=1`). */
+export function fullDemoBoardEnabled(): boolean {
+  if (!isProductionRuntime()) return true;
   return process.env.ROLLING_GA_DEMO === "1";
+}
+
+/**
+ * Public marketing guided demo on a production marketing host (`ROLLING_GA_PUBLIC_GUIDED_DEMO=1`).
+ * Enables guided-demo machinery without redirecting anonymous `/` visitors to the demo board.
+ */
+export function publicGuidedDemoEnabled(): boolean {
+  if (!isProductionRuntime()) return false;
+  return process.env.ROLLING_GA_PUBLIC_GUIDED_DEMO === "1";
+}
+
+/** Guided demo, demo clock, scenario engine, and seeded persona login. */
+export function demoModeEnabled(): boolean {
+  if (!isProductionRuntime()) return true;
+  return fullDemoBoardEnabled() || publicGuidedDemoEnabled();
 }
 
 /** Where anonymous visitors land in demo vs production. */
@@ -21,8 +42,7 @@ export function isSameOriginReferer(headers: Headers, origin: string): boolean {
 }
 
 /**
- * Demo mode opens at the persona picker. Fresh visits to `/` (bookmark, dev server root,
- * typed URL) redirect to `/demo`; in-app links to `/` keep the fan home feed.
+ * Demo board opens at `/` for fresh visits. Public guided-demo-only hosts keep marketing at `/`.
  */
 export function shouldRedirectRootToDemoBoard({
   pathname,

@@ -46,7 +46,7 @@ export async function startGuidedDemoAction(formData: FormData): Promise<void> {
 }
 
 export async function guidedDemoNextAction(formData: FormData): Promise<void> {
-  if (!demoModeEnabled()) redirect("/welcome");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
   const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
   const currentStep = Number.parseInt(String(formData.get("step") ?? "1"), 10);
@@ -66,7 +66,7 @@ export async function guidedDemoNextAction(formData: FormData): Promise<void> {
 }
 
 export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
-  if (!demoModeEnabled()) redirect("/welcome");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
   const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
   const currentStep = Number.parseInt(String(formData.get("step") ?? "1"), 10);
@@ -80,7 +80,7 @@ export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
 }
 
 export async function guidedDemoGoToStepAction(formData: FormData): Promise<void> {
-  if (!demoModeEnabled()) redirect("/welcome");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
   const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
   const stepNumber = Number.parseInt(String(formData.get("step") ?? "1"), 10);
@@ -93,7 +93,7 @@ export async function guidedDemoGoToStepAction(formData: FormData): Promise<void
 }
 
 export async function toggleGuidedDemoAutoplayAction(formData: FormData): Promise<void> {
-  if (!demoModeEnabled()) redirect("/welcome");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
   const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
   const step = Number.parseInt(String(formData.get("step") ?? "1"), 10);
@@ -107,7 +107,7 @@ export async function toggleGuidedDemoAutoplayAction(formData: FormData): Promis
 }
 
 export async function toggleGuidedDemoPresenterAction(formData: FormData): Promise<void> {
-  if (!demoModeEnabled()) redirect("/welcome");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
   const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
   const step = Number.parseInt(String(formData.get("step") ?? "1"), 10);
@@ -121,7 +121,7 @@ export async function toggleGuidedDemoPresenterAction(formData: FormData): Promi
 }
 
 export async function exitGuidedDemoAction(): Promise<void> {
-  if (!demoModeEnabled()) redirect("/welcome");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
   await clearGuidedDemoSession();
   revalidatePath("/", "layout");
   redirect("/demo?perspective=fan");

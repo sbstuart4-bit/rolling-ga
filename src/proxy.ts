@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { DEMO_BOARD_ACCESS_COOKIE, SESSION_COOKIE_NAME } from "@/lib/auth-cookies";
 import {
   demoModeEnabled,
+  fullDemoBoardEnabled,
   isSameOriginReferer,
   shouldRedirectRootToDemoBoard,
   unauthenticatedEntryPath,
@@ -101,6 +102,7 @@ export async function proxy(request: NextRequest) {
 
   const sessionId = await readSessionIdFromRequest(request);
   const demoMode = demoModeEnabled();
+  const fullDemoBoard = fullDemoBoardEnabled();
   const inAppNavigation = isSameOriginReferer(request.headers, request.nextUrl.origin);
 
   if (demoMode && isDemoPlatformOpsPath(pathname)) {
@@ -110,7 +112,7 @@ export async function proxy(request: NextRequest) {
   if (
     shouldRedirectRootToDemoBoard({
       pathname,
-      demoMode,
+      demoMode: fullDemoBoard,
       hasSession: Boolean(sessionId),
       inAppNavigation,
     })
@@ -124,7 +126,7 @@ export async function proxy(request: NextRequest) {
 
   if (sessionId) return NextResponse.next();
 
-  if (shouldRewriteRootToMarketing({ pathname, hasSession: false, demoMode })) {
+  if (shouldRewriteRootToMarketing({ pathname, hasSession: false, demoMode: fullDemoBoard })) {
     return NextResponse.rewrite(new URL("/home", request.url));
   }
 

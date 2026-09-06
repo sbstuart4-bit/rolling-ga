@@ -55,7 +55,7 @@ export function isPublicPath(pathname: string): boolean {
 
 /**
  * Production visitors without a session should see the marketing homepage at `/`.
- * Demo mode keeps the existing bounce to `/demo`. Authenticated `/` stays the fan home.
+ * Full demo board mode redirects anonymous `/` to `/demo` instead.
  */
 export function shouldRewriteRootToMarketing({
   pathname,

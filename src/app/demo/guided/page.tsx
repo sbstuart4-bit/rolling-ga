@@ -32,9 +32,16 @@ export default async function GuidedDemoChooserPage({
           </Link>
           <h1 className="mt-8 font-display text-2xl tracking-wide">Demo not available</h1>
           <p className="mt-3 max-w-sm text-sm text-muted-foreground text-balance">
-            The Nova Kestrel guided demo is not enabled on this deployment yet. No account is
-            required — once demo mode is turned on, the homepage button drops you straight into the
-            journey as demo fan Scott Weller.
+            The Nova Kestrel guided demo is not enabled on this deployment yet. Set{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+              ROLLING_GA_PUBLIC_GUIDED_DEMO=1
+            </code>{" "}
+            (or{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+              ROLLING_GA_DEMO=1
+            </code>
+            ) on the host. No account is required — the homepage button signs in as demo fan Scott
+            Weller and opens Step 1 automatically.
           </p>
           <Button asChild className="mt-8 uppercase tracking-wider">
             <Link href="/home">Back to homepage</Link>

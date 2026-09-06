@@ -59,6 +59,7 @@ export async function setGuidedDemoSession(session: GuidedDemoSession): Promise<
   jar.set(GUIDED_DEMO_COOKIE, encodeSession(session), {
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 8,
   });

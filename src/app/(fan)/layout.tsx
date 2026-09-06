@@ -7,6 +7,7 @@ import {
   guidedStepContextSummary,
 } from "@/server/demo/guided-demo-state";
 import { syncGuidedDemoClock } from "@/server/demo/guided-demo-apply";
+import { bootstrapGuidedDemoAuthIfNeeded } from "@/server/demo/guided-demo-bootstrap";
 import { hydrateDemoClockFromCookie } from "@/server/demo/clock";
 import { requireAuth } from "@/server/auth/request";
 import { countCartItems } from "@/server/commerce/cart";
@@ -17,6 +18,7 @@ import { fanHasLiveVerifiedShow } from "@/server/fans/live-tab";
  * on desktop so Live never becomes a website layout.
  */
 export default async function FanLayout({ children }: LayoutProps<"/">) {
+  await bootstrapGuidedDemoAuthIfNeeded();
   const ctx = await requireAuth();
 
   // New fans (created via /sign-up, not the seeded demo accounts) finish the

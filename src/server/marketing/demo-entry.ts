@@ -4,6 +4,12 @@ import { redirect } from "next/navigation";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { startGuidedDemoAction } from "@/server/demo/guided-demo-actions";
 
+function redirectIfDemoSeedMissing(error: unknown): never | void {
+  if (error instanceof Error && error.message.includes("not seeded")) {
+    redirect("/demo/guided?unavailable=seed");
+  }
+}
+
 /**
  * Marketing's primary conversion path: drop the visitor into the Nova Kestrel
  * guided demo instead of asking them to pick a persona first.
@@ -17,7 +23,13 @@ export async function experienceNovaKestrelAction(): Promise<void> {
   const formData = new FormData();
   formData.set("journeyId", "nova-nashville");
   formData.set("publicMarketingEntry", "1");
-  await startGuidedDemoAction(formData);
+
+  try {
+    await startGuidedDemoAction(formData);
+  } catch (error) {
+    redirectIfDemoSeedMissing(error);
+    throw error;
+  }
 }
 
 /**
@@ -30,5 +42,11 @@ export async function experienceDegensDetroitAction(): Promise<void> {
   const formData = new FormData();
   formData.set("journeyId", "degens-detroit");
   formData.set("publicMarketingEntry", "1");
-  await startGuidedDemoAction(formData);
+
+  try {
+    await startGuidedDemoAction(formData);
+  } catch (error) {
+    redirectIfDemoSeedMissing(error);
+    throw error;
+  }
 }

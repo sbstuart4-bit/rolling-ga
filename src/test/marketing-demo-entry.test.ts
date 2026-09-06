@@ -19,6 +19,16 @@ describe("production demo mode flags", () => {
     expect(unauthenticatedEntryPath()).toBe("/demo");
   });
 
+  it("accepts true as an enabled flag value", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ROLLING_GA_PUBLIC_GUIDED_DEMO", "true");
+
+    const { publicGuidedDemoEnabled, demoModeEnabled } = await import("@/lib/demo-mode");
+
+    expect(publicGuidedDemoEnabled()).toBe(true);
+    expect(demoModeEnabled()).toBe(true);
+  });
+
   it("keeps marketing root rewrite when only public guided demo is enabled", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("ROLLING_GA_DEMO", "");
@@ -79,7 +89,7 @@ describe("public marketing guided demo entry", () => {
       ensureScottSession: vi.fn(),
     }));
     vi.doMock("@/lib/guided-demo", () => ({
-      resolveGuidedRoute: () => "/event/nova-nashville-cedar-vine",
+      resolveGuidedRoute: () => "/event/nova-kestrel-gold-hour-nashville-2026",
     }));
     vi.doMock("@/server/demo/guided-demo-state", () => ({
       guidedDemoQuery: () => "guided=nova-nashville&step=1",
@@ -93,7 +103,7 @@ describe("public marketing guided demo entry", () => {
     formData.set("publicMarketingEntry", "1");
 
     await expect(startGuidedDemoAction(formData)).rejects.toThrow(
-      "redirect:/event/nova-nashville-cedar-vine?guided=nova-nashville&step=1",
+      "redirect:/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=1",
     );
 
     expect(boardAccess).not.toHaveBeenCalled();

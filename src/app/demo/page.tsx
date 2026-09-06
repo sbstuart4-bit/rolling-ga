@@ -54,7 +54,7 @@ const SUBTITLE: Record<ReturnType<typeof parseDemoPerspective>, string> = {
 };
 
 export default async function DemoBoardPage(props: PageProps<"/demo">) {
-  if (!demoModeEnabled()) redirect("/welcome");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
   const searchParams = await props.searchParams;
   const perspective = parseDemoPerspective(searchParams.perspective);

@@ -20,7 +20,8 @@ export default async function GuidedDemoChooserPage({
 }) {
   const params = await searchParams;
   const demoEnabled = demoModeEnabled();
-  const unavailable = params.unavailable === "1" || !demoEnabled;
+  const seedMissing = params.unavailable === "seed";
+  const unavailable = params.unavailable === "1" || seedMissing || !demoEnabled;
 
   if (unavailable) {
     return (
@@ -30,18 +31,30 @@ export default async function GuidedDemoChooserPage({
           <Link href="/home" className="inline-block" aria-label="Rolling GA home">
             <RollingGaLogo size="default" />
           </Link>
-          <h1 className="mt-8 font-display text-2xl tracking-wide">Demo not available</h1>
+          <h1 className="mt-8 font-display text-2xl tracking-wide">
+            {seedMissing ? "Demo data not ready" : "Demo not available"}
+          </h1>
           <p className="mt-3 max-w-sm text-sm text-muted-foreground text-balance">
-            The Nova Kestrel guided demo is not enabled on this deployment yet. Set{" "}
-            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
-              ROLLING_GA_PUBLIC_GUIDED_DEMO=1
-            </code>{" "}
-            (or{" "}
-            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
-              ROLLING_GA_DEMO=1
-            </code>
-            ) on the host. No account is required — the homepage button signs in as demo fan Scott
-            Weller and opens Step 1 automatically.
+            {seedMissing ? (
+              <>
+                Demo mode is enabled, but the seeded demo fan (Scott Weller) is missing from the
+                production database. Run migrations and the demo seed against this database, then
+                redeploy.
+              </>
+            ) : (
+              <>
+                The Nova Kestrel guided demo is not enabled on this deployment yet. Set{" "}
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                  ROLLING_GA_PUBLIC_GUIDED_DEMO=1
+                </code>{" "}
+                (or{" "}
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                  ROLLING_GA_DEMO=1
+                </code>
+                ) on the host. No account is required — the homepage button signs in as demo fan
+                Scott Weller and opens Step 1 automatically.
+              </>
+            )}
           </p>
           <Button asChild className="mt-8 uppercase tracking-wider">
             <Link href="/home">Back to homepage</Link>

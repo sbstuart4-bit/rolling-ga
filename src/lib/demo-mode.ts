@@ -4,10 +4,22 @@ function isProductionRuntime(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
+/** Read env at runtime — bracket access avoids Next.js build-time inlining in edge proxy. */
+function runtimeEnv(name: string): string | undefined {
+  const env = process.env;
+  const value = env[name];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function envFlagEnabled(name: string): boolean {
+  const value = runtimeEnv(name);
+  return value === "1" || value === "true";
+}
+
 /** Full demo board at `/demo`, root redirect, and hosted board gate (`ROLLING_GA_DEMO=1`). */
 export function fullDemoBoardEnabled(): boolean {
   if (!isProductionRuntime()) return true;
-  return process.env.ROLLING_GA_DEMO === "1";
+  return envFlagEnabled("ROLLING_GA_DEMO");
 }
 
 /**
@@ -16,7 +28,7 @@ export function fullDemoBoardEnabled(): boolean {
  */
 export function publicGuidedDemoEnabled(): boolean {
   if (!isProductionRuntime()) return false;
-  return process.env.ROLLING_GA_PUBLIC_GUIDED_DEMO === "1";
+  return envFlagEnabled("ROLLING_GA_PUBLIC_GUIDED_DEMO");
 }
 
 /** Guided demo, demo clock, scenario engine, and seeded persona login. */

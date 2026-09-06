@@ -12,7 +12,8 @@ import { and, asc, desc, eq, lte } from "drizzle-orm";
 import { demoNow } from "@/server/demo/clock";
 import { resolveProductImage } from "@/lib/demo-product-images";
 import { resolveDropArtwork } from "@/lib/demo-drop-artwork";
-import { resolveDropProductPresentation, isDropVisibleInDemoScenario, shouldShowDropCountdown } from "@/lib/merch-experience/drop-presentation";
+import { resolveDropProductPresentation, isDropVisibleInDemoScenario, shouldShowDropCountdown, shouldShowDropsMerch } from "@/lib/merch-experience/drop-presentation";
+import { relativeDayLabel } from "@/lib/format";
 import { getActiveDemoScenarioContext } from "@/server/demo/scenario-state";
 import { loadEventPage } from "@/server/events/context";
 import { getFanShowContextSlug } from "@/server/fans/show-context";
@@ -62,14 +63,30 @@ export default async function DropsPage() {
     ? allDrops.filter((drop) => isDropVisibleInDemoScenario(drop, demoScenario.show.eventId))
     : allDrops;
 
-  const featured = scopedDrops[0];
+  const showMerch =
+    !demoScenario || shouldShowDropsMerch(demoScenario.experience);
+  const visibleDrops = showMerch ? scopedDrops : [];
+
+  const dropsHeading = eventPage
+    ? demoScenario && !showMerch
+      ? `${eventPage.event.artistName} · Coming soon`
+      : (() => {
+          const relative = relativeDayLabel(eventPage.event.startsAt, now);
+          if (relative === "Today" || relative === "Tomorrow") {
+            return `${eventPage.event.artistName} · Tonight\u2019s Drop`;
+          }
+          return `${eventPage.event.artistName} · Drops`;
+        })()
+    : "Tonight\u2019s Drop";
+
+  const featured = visibleDrops[0];
   const featuredCountdown =
     demoScenario && featured
       ? shouldShowDropCountdown(featured, demoScenario.show.eventId, now)
       : Boolean(featured?.endsAt && featured.endsAt > now);
 
   const content = (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto max-w-lg pb-safe-tabs">
       <header
         className={
           eventPage
@@ -77,9 +94,7 @@ export default async function DropsPage() {
             : "sticky top-0 z-10 border-b border-border bg-[#121212]/95 px-5 py-4 backdrop-blur"
         }
       >
-        <h1 className="font-display text-xl tracking-wider">
-          {eventPage ? `${eventPage.event.artistName} · Tonight\u2019s Drop` : "Tonight\u2019s Drop"}
-        </h1>
+        <h1 className="font-display text-xl tracking-wider">{dropsHeading}</h1>
         {eventPage && (
           <p className="mt-0.5 text-xs text-artist-muted">
             {eventPage.event.venueCity} ·{" "}
@@ -90,11 +105,25 @@ export default async function DropsPage() {
         )}
       </header>
 
-      {scopedDrops.length === 0 ? (
+      {visibleDrops.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 px-5 py-28 text-center">
           <p className="text-4xl">📦</p>
-          <p className="font-display text-lg">No active drops</p>
-          <p className="text-sm text-muted-foreground">Check back when a show is live.</p>
+          <p className="font-display text-lg">
+            {demoScenario && !showMerch ? "Merch opens soon" : "No active drops"}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {demoScenario && !showMerch
+              ? demoScenario.experience.primaryMessage
+              : "Check back when a show is live."}
+          </p>
+          {eventPage && demoScenario && !showMerch ? (
+            <Link
+              href={`/event/${eventPage.event.slug}`}
+              className="text-sm font-medium text-artist-accent hover:underline"
+            >
+              Back to the show
+            </Link>
+          ) : null}
         </div>
       ) : (
         <div className="px-5 pt-5">
@@ -122,7 +151,7 @@ export default async function DropsPage() {
           )}
 
           <ul className="space-y-4">
-            {scopedDrops.map((drop) => (
+            {visibleDrops.map((drop) => (
               <DropCard
                 key={drop.id}
                 drop={drop}

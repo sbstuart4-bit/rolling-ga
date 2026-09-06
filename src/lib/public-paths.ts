@@ -4,9 +4,13 @@
  */
 export const MARKETING_PATHS = [
   "/home",
+  "/i-was-there",
   "/product",
   "/for-artists",
+  "/for-fans",
   "/how-it-works",
+  "/partners",
+  "/about",
   "/pilot",
 ] as const;
 

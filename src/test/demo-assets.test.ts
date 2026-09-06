@@ -9,6 +9,7 @@ import {
 } from "@/lib/demo-asset-audit";
 import {
   DEMO_PRODUCT_IMAGES,
+  NOVA_KESTREL_DEMO_ASSETS,
   THE_DEGENS_DEMO_ASSETS,
   demoProductImage,
 } from "@/lib/demo-assets";
@@ -241,7 +242,7 @@ describe("enrichResolvedTheme", () => {
     expect(enriched.cityArtworkUrl).toBe(THE_DEGENS_DEMO_ASSETS.cityDetroit);
   });
 
-  it("leaves Nova SVG in place when no canonical PNG exists", () => {
+  it("replaces Nova SVG placeholders with canonical hero photography", () => {
     const base: ResolvedTheme = {
       background: null,
       surface: null,
@@ -269,6 +270,8 @@ describe("enrichResolvedTheme", () => {
     });
 
     expect(enriched.logoUrl).toBe("/demo/logo-nova-kestrel.svg");
-    expect(enriched.cityArtworkUrl).toBe("/demo/city-nova-nashville.svg");
+    expect(enriched.heroImageUrl).toBe(NOVA_KESTREL_DEMO_ASSETS.hero);
+    expect(enriched.cityArtworkUrl).toBe(NOVA_KESTREL_DEMO_ASSETS.hero);
+    expect(enriched.tourArtworkUrl).toBe(NOVA_KESTREL_DEMO_ASSETS.hero);
   });
 });

@@ -39,7 +39,16 @@ export function StudioDesktopFrame({ className }: { className?: string }) {
                 )}
               >
                 <p className="text-sm font-medium">{item.label}</p>
-                <p className="truncate text-[11px] text-muted-foreground">{item.description}</p>
+                {/* The highlighted rows sit on a lifted background, so muted
+                    grey drops under 4.5:1 against it. */}
+                <p
+                  className={cn(
+                    "truncate text-[11px]",
+                    index === 4 || index === 5 ? "text-foreground/80" : "text-muted-foreground",
+                  )}
+                >
+                  {item.description}
+                </p>
               </li>
             ))}
           </ul>
@@ -58,7 +67,7 @@ export function StudioDesktopFrame({ className }: { className?: string }) {
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-xl border border-white/10 bg-[#121212] p-4">
               <p className="eyebrow mb-4 text-muted-foreground">Activate an audience</p>
-              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Chip>Detroit attendees</Chip>
                 <span className="text-muted-foreground" aria-hidden>
                   +
@@ -106,7 +115,7 @@ function Chip({ children, accent = false }: { children: string; accent?: boolean
   return (
     <span
       className={cn(
-        "rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em]",
+        "whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em]",
         accent
           ? "border-primary/40 bg-primary/15 text-primary"
           : "border-white/10 bg-white/5 text-foreground",

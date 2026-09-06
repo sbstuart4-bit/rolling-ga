@@ -43,4 +43,6 @@ export interface MerchExperienceState {
   hasAttendanceCredential: boolean;
   /** True when venue presence would unlock live show merch. */
   venuePresenceActive: boolean;
+  /** True when fan holds a post-show credential (attended or returning fan after the show). */
+  holdsShowCredential: boolean;
 }

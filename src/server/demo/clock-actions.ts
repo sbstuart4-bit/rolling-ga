@@ -5,12 +5,14 @@ import { resetDemoDatabase } from "@/db/reset-demo-data";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { destroySession } from "@/server/auth/session";
 import {
-  demoDetroitDoorsOpen,
-  demoDetroitLive,
-  demoDetroitPostShow,
+  demoNovaNashvilleDoorsOpen,
+  demoNovaNashvilleLive,
+  demoNovaNashvillePostShow,
 } from "@/lib/demo-calendar";
 import {
   advanceDemoClock,
+  clearDemoClockCookie,
+  persistDemoClockOffset,
   resetDemoClock,
   setDemoClockDaysAndHours,
   DAY_MS,
@@ -25,6 +27,7 @@ import {
 function applyClockMutation(mutate: () => void): void {
   if (!demoModeEnabled()) return;
   mutate();
+  void persistDemoClockOffset();
   revalidatePath("/demo");
 }
 
@@ -45,24 +48,46 @@ export async function rewindDemoClockByDayAction(): Promise<void> {
 }
 
 export async function resetDemoClockAction(): Promise<void> {
-  applyClockMutation(() => resetDemoClock());
+  if (!demoModeEnabled()) return;
+  resetDemoClock();
+  await clearDemoClockCookie();
+  revalidatePath("/demo");
 }
 
 export async function setDemoClockAction(days: number, hours: number): Promise<void> {
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
 }
 
+export async function jumpToNovaNashvilleDoorsOpenAction(): Promise<void> {
+  const { days, hours } = demoNovaNashvilleDoorsOpen();
+  applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
+}
+
+export async function jumpToNovaNashvilleLiveAction(): Promise<void> {
+  const { days, hours } = demoNovaNashvilleLive();
+  applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
+}
+
+export async function jumpToNovaNashvillePostShowAction(): Promise<void> {
+  const { days, hours } = demoNovaNashvillePostShow();
+  applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
+}
+
+/** @deprecated Degens-specific preset — prefer Nashville presets for the flagship demo. */
 export async function jumpToDetroitDoorsOpenAction(): Promise<void> {
+  const { demoDetroitDoorsOpen } = await import("@/lib/demo-calendar");
   const { days, hours } = demoDetroitDoorsOpen();
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
 }
 
 export async function jumpToDetroitLiveAction(): Promise<void> {
+  const { demoDetroitLive } = await import("@/lib/demo-calendar");
   const { days, hours } = demoDetroitLive();
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
 }
 
 export async function jumpToDetroitPostShowAction(): Promise<void> {
+  const { demoDetroitPostShow } = await import("@/lib/demo-calendar");
   const { days, hours } = demoDetroitPostShow();
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
 }
@@ -73,6 +98,7 @@ export async function resetDemoDataAction(): Promise<void> {
 
   await resetDemoDatabase();
   resetDemoClock();
+  await clearDemoClockCookie();
   await destroySession();
 
   revalidatePath("/demo");

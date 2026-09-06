@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/format";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { requireAuth } from "@/server/auth/request";
+import { hasEarnedCredential } from "@/lib/fan-experience/access-state";
 import { loadEventPage } from "@/server/events/context";
 import { getActiveEventToken } from "@/server/events/queries";
 import { staffCodeForToken } from "@/server/verification/verifiers";
@@ -35,7 +36,7 @@ export default async function VerifyPage(props: PageProps<"/event/[slug]/verify"
 
   if (!page) notFound();
 
-  if (page.isVerifiedAttendee) {
+  if (hasEarnedCredential(page.fanExperience)) {
     redirect(`/event/${slug}/credential`);
   }
 

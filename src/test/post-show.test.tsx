@@ -23,6 +23,7 @@ import {
   isAttendeeStoreOpen,
   isPostShowPhase,
 } from "@/lib/post-show-commerce";
+import { hasEarnedCredential } from "@/lib/fan-experience/access-state";
 import { resolveLine, loadAttendanceFacts } from "@/server/commerce/resolve";
 import { loadEventPage } from "@/server/events/context";
 import { listEventContent } from "@/server/events/queries";
@@ -96,7 +97,12 @@ describe("PostShowVerifiedExperience", () => {
       msUntilPostShowClose: 3_600_000,
     },
     theme: { background: "#000", foreground: "#fff", accent: "#7c3aed" },
-    isVerifiedAttendee: true,
+    fanExperience: {
+      access: "postshow_open",
+      credential: "earned",
+      purchase: "none",
+      experience: null,
+    },
     verification: { opensAt: new Date(), closesAt: new Date(), open: false },
   };
 
@@ -228,8 +234,8 @@ describe("post-show commerce enforcement", () => {
     const verifiedPage = await loadEventPage(event.slug, verified.id);
     const visitorPage = await loadEventPage(event.slug, visitor.id);
 
-    expect(verifiedPage?.isVerifiedAttendee).toBe(true);
-    expect(visitorPage?.isVerifiedAttendee).toBe(false);
+    expect(hasEarnedCredential(verifiedPage!.fanExperience)).toBe(true);
+    expect(hasEarnedCredential(visitorPage!.fanExperience)).toBe(false);
 
     const postShowTiming = resolveEventState(
       {

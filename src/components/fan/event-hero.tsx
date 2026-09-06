@@ -45,7 +45,7 @@ export function EventHero({
           fill
           priority
           sizes="100vw"
-          className="-z-10 object-cover"
+          className="-z-10 object-cover object-top"
         />
       ) : (
         <div className="absolute inset-0 -z-10 bg-artist-surface" aria-hidden />
@@ -55,7 +55,7 @@ export function EventHero({
         aria-hidden
       />
 
-      <div className="mx-auto flex min-h-[17rem] max-w-lg flex-col justify-end gap-3 px-4 pb-6 pt-20">
+      <div className="mx-auto flex min-h-[20rem] max-w-lg flex-col justify-end gap-3 px-4 pb-6 pt-20">
         <div className="flex flex-wrap items-center gap-2">
           <StatePill state={state} label={stateLabel} />
           {eyebrow && <span className="eyebrow text-artist-muted">{eyebrow}</span>}

@@ -72,7 +72,12 @@ const mockEventPage = {
     foreground: "#f5f5f5",
     accent: "#7c3aed",
   },
-  isVerifiedAttendee: true,
+  fanExperience: {
+    access: "live_unlocked" as const,
+    credential: "none" as const,
+    purchase: "none" as const,
+    experience: null,
+  },
   verification: {
     opensAt: new Date(),
     closesAt: new Date(),

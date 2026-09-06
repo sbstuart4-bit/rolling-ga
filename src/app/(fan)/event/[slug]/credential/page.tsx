@@ -11,6 +11,7 @@ import { PostShowStoreCountdown } from "@/components/fan/post-show-store-countdo
 import { requireAuth } from "@/server/auth/request";
 import { getCredential } from "@/server/attendance/queries";
 import { loadShowAccessHub } from "@/server/fans/passport-access";
+import { hasEarnedCredential, canPurchaseShowExclusives } from "@/lib/fan-experience/access-state";
 import { loadEventPage } from "@/server/events/context";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,7 @@ export default async function CredentialPage(props: PageProps<"/event/[slug]/cre
   const page = await loadEventPage(slug, ctx.userId);
 
   if (!page) notFound();
-  if (!page.isVerifiedAttendee) redirect(`/event/${slug}/verify`);
+  if (!hasEarnedCredential(page.fanExperience)) redirect(`/event/${slug}/verify`);
 
   const credential = await getCredential(ctx.userId, page.event.id);
   if (!credential) redirect(`/event/${slug}/verify`);
@@ -46,8 +47,10 @@ export default async function CredentialPage(props: PageProps<"/event/[slug]/cre
   const access = await loadShowAccessHub(ctx.userId, page.event.id, page.event.artistId);
 
   const fresh = isFreshVerification(searchParams.just_verified);
-  const { timing } = page;
-  const shopOpen = timing.state === "live" || timing.state === "recently_ended";
+  const { timing, fanExperience } = page;
+  const canShopFromCredential =
+    canPurchaseShowExclusives(fanExperience.access) &&
+    (timing.state === "live" || timing.state === "recently_ended");
 
   const credentialData = {
     id: credential.credentialId,
@@ -84,12 +87,12 @@ export default async function CredentialPage(props: PageProps<"/event/[slug]/cre
       </div>
 
       <div className={cn("space-y-2", fresh && "celebration-reveal-delay-3")}>
-        {shopOpen && (
+        {canShopFromCredential && (
           <Button asChild variant={fresh ? "moment" : "default"} size="lg" className={cn(!fresh && "h-13 w-full bg-artist-accent text-base font-semibold text-artist-accent-fg hover:bg-artist-accent/90")}>
             <Link href={`/event/${slug}/shop`}>
               <Store className="size-4" aria-hidden />
               {fresh
-                ? "Enter the show"
+                ? "Open tonight's shop"
                 : timing.state === "live"
                   ? "Enter tonight\u2019s experience"
                   : "Shop before it closes"}

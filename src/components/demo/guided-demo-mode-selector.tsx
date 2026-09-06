@@ -38,7 +38,7 @@ export function GuidedDemoModeSelector({ className }: { className?: string }) {
             <span className="text-xs font-semibold uppercase tracking-wider">Run guided demo</span>
           </div>
           <p className="mt-2 flex-1 text-sm text-muted-foreground">
-            Step through The Degens — Detroit story with narration while the real product updates
+            Step through Nova Kestrel — Nashville with narration while the real product updates
             around you.
           </p>
           <Button asChild className="mt-4 h-10 w-full uppercase tracking-wider">

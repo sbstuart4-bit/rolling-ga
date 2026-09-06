@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Disc3, Mic2, ShieldCheck } from "lucide-react";
 import type { DemoPerspective } from "@/lib/demo-perspective";
-import { DEMO_PERSPECTIVE_LABELS } from "@/lib/demo-perspective";
+import { DEMO_PERSPECTIVE_LABELS, demoPerspectiveHref } from "@/lib/demo-perspective";
 import { cn } from "@/lib/utils";
 
 const PERSPECTIVE_META: Record<
@@ -26,24 +26,26 @@ const PERSPECTIVE_META: Record<
 
 export function DemoPerspectiveSelector({ active }: { active: DemoPerspective }) {
   return (
-    <section className="space-y-3">
+    <section className="relative z-10 space-y-3">
       <p className="eyebrow text-muted-foreground">Choose perspective</p>
       <div className="grid gap-3 sm:grid-cols-3">
         {(Object.keys(PERSPECTIVE_META) as DemoPerspective[]).map((key) => {
           const { icon: Icon, description } = PERSPECTIVE_META[key];
           const isActive = active === key;
-          const href = key === "fan" ? "/demo" : `/demo?perspective=${key}`;
+          const href = `${demoPerspectiveHref(key)}#demo-perspective-content`;
 
           return (
             <Link
               key={key}
               href={href}
+              scroll
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex flex-col gap-2 rounded-2xl border p-4 text-left transition-colors",
+                "flex cursor-pointer flex-col gap-2 rounded-2xl border p-4 text-left transition-colors",
+                "bg-card hover:bg-accent/40",
                 isActive
-                  ? "border-primary/50 bg-primary/10 ring-1 ring-primary/30"
-                  : "border-border bg-card hover:border-primary/30",
+                  ? "border-primary ring-2 ring-primary/35"
+                  : "border-border hover:border-primary/40",
               )}
             >
               <span

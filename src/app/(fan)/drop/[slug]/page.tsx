@@ -22,6 +22,7 @@ import { EditorialDropProducts, type EditorialProduct } from "@/components/fan/e
 import { AddToCartButton } from "@/components/fan/add-to-cart-button";
 import { formatEventDateStamp } from "@/lib/format";
 import { resolveDropArtwork } from "@/lib/demo-drop-artwork";
+import { resolveProductImages } from "@/lib/demo-product-images";
 import { demoNow } from "@/server/demo/clock";
 
 export async function generateMetadata(props: PageProps<"/drop/[slug]">): Promise<Metadata> {
@@ -114,8 +115,10 @@ export default async function DropPage(props: PageProps<"/drop/[slug]">) {
       slug: item.slug,
       name: item.name,
       tagline: item.tagline,
-      images: item.images,
+      images: resolveProductImages(item.id, item.images),
       priceCents: price,
+      accessType: item.accessType,
+      category: item.category,
       href,
       locked: !eligibility.eligible,
       metadataLabel,
@@ -217,11 +220,15 @@ export default async function DropPage(props: PageProps<"/drop/[slug]">) {
 
         {editorialProducts.length > 0 && (
           <div className="mb-8">
-            <EditorialDropProducts products={editorialProducts} scoped={scoped} />
+            <EditorialDropProducts
+              products={editorialProducts}
+              dropExclusivity={drop.exclusivityType}
+              scoped={scoped}
+            />
           </div>
         )}
 
-        {!expired && (
+        {!expired && editorialProducts.length === 0 && (
           <section className="space-y-4">
             <h2 className={cn("eyebrow", scoped ? "text-artist-muted" : "text-muted-foreground")}>
               Add to {scoped ? "my drop" : "cart"}

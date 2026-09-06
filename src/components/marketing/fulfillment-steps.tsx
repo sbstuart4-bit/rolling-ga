@@ -1,15 +1,21 @@
-import { Home, Package, Smartphone, Truck, Warehouse } from "lucide-react";
 import { FULFILLMENT_STEPS } from "@/components/marketing/marketing-fixtures";
-import { FlowDiagram } from "@/components/marketing/visual/flow-diagram";
 
-const FLOW_STEPS = [
-  { icon: Smartphone, title: FULFILLMENT_STEPS[0].title },
-  { icon: Warehouse, title: FULFILLMENT_STEPS[1].title, detail: "Centralized ops" },
-  { icon: Package, title: FULFILLMENT_STEPS[2].title, detail: "Overnight pick + pack" },
-  { icon: Truck, title: FULFILLMENT_STEPS[3].title, detail: "Carrier handoff" },
-  { icon: Home, title: FULFILLMENT_STEPS[4].title, detail: "Fan doorstep" },
-];
-
+/**
+ * The path a post-show order takes, as a numbered list on hairline rules.
+ *
+ * Previously an icon flow diagram. Five steps do not need five icons to be
+ * understood, and the diagram read as software when the rest of the site does
+ * not.
+ */
 export function FulfillmentSteps() {
-  return <FlowDiagram steps={FLOW_STEPS} direction="horizontal" />;
+  return (
+    <ol className="grid max-w-6xl sm:grid-cols-2 lg:grid-cols-5">
+      {FULFILLMENT_STEPS.map((step, index) => (
+        <li key={step.title} className="border-t border-world-rule py-6 pr-8">
+          <p className="mk-kicker text-world-muted">{String(index + 1).padStart(2, "0")}</p>
+          <p className="mk-display mt-4 text-lg leading-tight">{step.title}</p>
+        </li>
+      ))}
+    </ol>
+  );
 }

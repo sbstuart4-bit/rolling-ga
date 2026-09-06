@@ -1,5 +1,13 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * A single soft wash of stage light from the top of a section.
+ *
+ * This used to be a pair of pulsing purple orbs. It is kept as a named
+ * component because the de-emphasised marketing pages still call it, but it now
+ * borrows the surrounding world's accent at low opacity and does not animate —
+ * light falling into a room, not a SaaS gradient.
+ */
 export function MarketingGlow({
   className,
   variant = "primary",
@@ -7,27 +15,19 @@ export function MarketingGlow({
   className?: string;
   variant?: "primary" | "accent" | "warm";
 }) {
-  const orbClass = {
-    primary: "bg-[#7b3cff]/25",
-    accent: "bg-[#D8FF3E]/15",
-    warm: "bg-[#FF4A28]/12",
+  const wash = {
+    primary:
+      "radial-gradient(ellipse 60% 42% at 50% -8%, color-mix(in srgb, var(--world-accent) 9%, transparent), transparent 70%)",
+    accent:
+      "radial-gradient(ellipse 55% 40% at 22% -6%, color-mix(in srgb, var(--world-accent) 11%, transparent), transparent 70%)",
+    warm: "radial-gradient(ellipse 58% 40% at 50% 106%, color-mix(in srgb, var(--world-red) 10%, transparent), transparent 70%)",
   } as const;
 
   return (
-    <div className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)} aria-hidden>
-      <div
-        className={cn(
-          "absolute -left-1/4 top-0 size-[min(80vw,36rem)] rounded-full blur-3xl animate-glow-pulse",
-          orbClass[variant],
-        )}
-      />
-      <div
-        className={cn(
-          "absolute -right-1/4 bottom-0 size-[min(70vw,28rem)] rounded-full blur-3xl animate-glow-pulse",
-          orbClass[variant],
-        )}
-        style={{ animationDelay: "2s" }}
-      />
-    </div>
+    <div
+      aria-hidden
+      className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}
+      style={{ background: wash[variant] }}
+    />
   );
 }

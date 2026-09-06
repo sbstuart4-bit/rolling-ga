@@ -6,14 +6,21 @@ import { ShowsTabs, type ShowEntry } from "@/components/fan/shows-tabs";
 import { requireAuth } from "@/server/auth/request";
 import { loadPassportWithAccess } from "@/server/fans/passport-access";
 import { resolveEventState } from "@/lib/event-state";
+import { getActiveDemoScenarioContext } from "@/server/demo/scenario-state";
 import { demoNow } from "@/server/demo/clock";
 
 export const metadata: Metadata = { title: "My Shows — Rolling GA" };
 
 export default async function MyShowsPage() {
   const ctx = await requireAuth("/shows");
-  const passport = await loadPassportWithAccess(ctx.userId);
+  const [passport, demoScenario] = await Promise.all([
+    loadPassportWithAccess(ctx.userId),
+    getActiveDemoScenarioContext(),
+  ]);
   const now = demoNow();
+  const welcomeBack =
+    demoScenario?.scenario.fanHistory === "second_show" &&
+    demoScenario.scenario.fanState === "attended";
 
   const shows: ShowEntry[] = passport.map((entry) => {
     const state = resolveEventState(
@@ -43,7 +50,11 @@ export default async function MyShowsPage() {
     <div className="mx-auto max-w-lg">
       <header className="sticky top-0 z-10 border-b border-border bg-[#121212]/95 px-5 py-4 backdrop-blur">
         <h1 className="font-display text-xl tracking-wider">My Shows</h1>
-        <p className="mt-0.5 text-xs text-muted-foreground">My access — credentials and ongoing unlocks</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {welcomeBack
+            ? "Welcome back — your show history and credentials live here"
+            : "My access — credentials and ongoing unlocks"}
+        </p>
       </header>
 
       {shows.length === 0 ? (

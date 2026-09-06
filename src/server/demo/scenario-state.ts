@@ -14,6 +14,7 @@ import {
 } from "@/lib/merch-experience/resolver";
 import type { MerchExperienceState } from "@/lib/merch-experience/types";
 import { resolveTimePhaseDate } from "@/lib/demo-scenario/time-phases";
+import { getActiveGuidedDemoContext } from "./guided-demo-state";
 
 export interface DemoScenarioContext {
   scenario: DemoScenario;
@@ -67,6 +68,18 @@ export async function getPersistedDemoScenario(): Promise<DemoScenario | null> {
   return readScenarioCookie();
 }
 
+/**
+ * Active scenario for fan surfaces — guided demo step wins over the board cookie
+ * so tab navigation cannot drift from the presenter step.
+ */
+export async function getEffectiveDemoScenario(): Promise<DemoScenario | null> {
+  const guided = await getActiveGuidedDemoContext();
+  if (guided) {
+    return guided.step.scenario;
+  }
+  return getPersistedDemoScenario();
+}
+
 export async function setDemoScenarioCookie(scenario: DemoScenario): Promise<void> {
   if (!demoModeEnabled()) return;
   const jar = await cookies();
@@ -112,7 +125,7 @@ export function buildDemoScenarioContext(scenario: DemoScenario): DemoScenarioCo
 /** Resolve scenario context for fan pages when a scenario cookie is active. */
 export async function getActiveDemoScenarioContext(): Promise<DemoScenarioContext | null> {
   if (!demoModeEnabled()) return null;
-  const scenario = await getPersistedDemoScenario();
+  const scenario = await getEffectiveDemoScenario();
   if (!scenario) return null;
 
   const ctx = buildDemoScenarioContext(scenario);

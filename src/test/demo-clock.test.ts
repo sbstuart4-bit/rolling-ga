@@ -11,10 +11,13 @@ import {
   HOUR_MS,
   demoDetroitDoorsOpen,
   demoDetroitLive,
+  demoNovaNashvilleDoorsOpen,
+  demoNovaNashvilleLive,
   formatDemoClockDate,
   formatDemoClockPosition,
   isDemoShowNight,
   demoDetroitEventSlug,
+  demoNovaNashvilleEventSlug,
 } from "@/lib/demo-calendar";
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
@@ -97,6 +100,24 @@ describe("demo clock mutations", () => {
   });
 });
 
+describe("Nashville clock presets", () => {
+  it("maps doors open to day 11 hour 8", () => {
+    expect(demoNovaNashvilleDoorsOpen()).toEqual({ days: 11, hours: 8 });
+  });
+
+  it("maps live set to day 11 hour 11", () => {
+    expect(demoNovaNashvilleLive()).toEqual({ days: 11, hours: 11 });
+  });
+
+  it("sets the clock to Nashville live via preset action", async () => {
+    await setDemoClockAction(0, 0);
+    const { jumpToNovaNashvilleLiveAction } = await import("@/server/demo/clock-actions");
+    await jumpToNovaNashvilleLiveAction();
+
+    expect(getDemoClockState()).toMatchObject({ days: 11, hours: 11 });
+  });
+});
+
 describe("Detroit clock presets", () => {
   it("maps doors open to day 29 hour 8", () => {
     expect(demoDetroitDoorsOpen()).toEqual({ days: 29, hours: 8 });
@@ -117,19 +138,22 @@ describe("Detroit clock presets", () => {
 });
 
 describe("demo clock labels", () => {
-  it("formats slider position as a calendar date and time", () => {
-    const { days, hours } = demoDetroitLive();
-    expect(formatDemoClockDate(days, hours)).toBe("Jun 30");
-    expect(formatDemoClockPosition(days, hours)).toMatch(/Jun 30 · 8:00 PM/);
-  });
-
-  it("detects show night by calendar date", () => {
-    const { days, hours } = demoDetroitLive();
+  it("formats flagship Nashville show night", () => {
+    const { days, hours } = demoNovaNashvilleLive();
+    expect(formatDemoClockDate(days, hours)).toBe("Jun 12");
+    expect(formatDemoClockPosition(days, hours)).toMatch(/Jun 12 · 8:00 PM/);
     expect(isDemoShowNight(days, hours)).toBe(true);
     expect(isDemoShowNight(days - 1, hours)).toBe(false);
   });
 
-  it("builds the Detroit event slug", () => {
+  it("formats Detroit show night separately from flagship", () => {
+    const { days, hours } = demoDetroitLive();
+    expect(formatDemoClockDate(days, hours)).toBe("Jun 30");
+    expect(isDemoShowNight(days, hours)).toBe(false);
+  });
+
+  it("builds event slugs", () => {
+    expect(demoNovaNashvilleEventSlug()).toBe("nova-kestrel-gold-hour-nashville-2026");
     expect(demoDetroitEventSlug()).toBe("the-degens-signal-decay-detroit-2026");
   });
 });

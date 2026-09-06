@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BadgeCheck, ChevronRight, MapPin, QrCode, Timer } from "lucide-react";
-import { FlashDropCountdown } from "@/components/fan/flash-drop-countdown";
+import { ArrowRight, BadgeCheck, Lock, MapPin } from "lucide-react";
+import type { FanExperienceState } from "@/lib/fan-experience/access-state";
+import { resolveNowNextAction } from "@/lib/fan-experience/now-next";
 import { Button } from "@/components/ui/button";
 import { formatEventDate, formatEventDateShort, formatEventTime } from "@/lib/format";
-import { demoNow } from "@/server/demo/clock";
+import type { EventState } from "@/lib/types";
 
 export function HomeSectionLabel({
   children,
@@ -23,11 +24,12 @@ export function HomeSectionLabel({
 export function HomeFeaturedShow({
   event,
   hero,
-  isVerified,
-  verificationOpen,
+  fanExperience,
   slug,
-  isLive = true,
+  timingState,
   scoped = false,
+  postShowClosesAt = null,
+  artistSlug,
 }: {
   event: {
     artistName: string;
@@ -38,23 +40,34 @@ export function HomeFeaturedShow({
     tourName: string;
   };
   hero: string | null;
-  isVerified: boolean;
-  verificationOpen: boolean;
+  fanExperience: FanExperienceState;
   slug: string;
-  isLive?: boolean;
+  timingState: EventState;
   scoped?: boolean;
+  postShowClosesAt?: Date | null;
+  artistSlug?: string;
 }) {
+  const action = resolveNowNextAction({
+    access: fanExperience.access,
+    slug,
+    artistName: event.artistName,
+    city: event.venueCity,
+    startsAt: event.startsAt,
+    timezone: event.timezone,
+    teaserMessage: fanExperience.experience?.primaryMessage,
+    timingState,
+    postShowClosesAt,
+    artistSlug,
+  });
+
   return (
     <section className="relative">
-      <HomeSectionLabel scoped={scoped}>{isLive ? "Live now" : "Upcoming"}</HomeSectionLabel>
+      <HomeSectionLabel scoped={scoped}>{action.eyebrow}</HomeSectionLabel>
 
       {hero && (
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
           <Image src={hero} alt="" fill priority sizes="100vw" className="object-cover" />
-          <div
-            className="absolute inset-0 hero-gradient-overlay-home"
-            aria-hidden
-          />
+          <div className="absolute inset-0 hero-gradient-overlay-home" aria-hidden />
         </div>
       )}
 
@@ -82,49 +95,36 @@ export function HomeFeaturedShow({
             : "mt-4 space-y-3 rounded-2xl border border-border bg-card p-5"
         }
       >
-        {isVerified ? (
-          <>
-            <div className="flex items-start gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
-                <BadgeCheck className="size-5" aria-hidden />
-              </span>
-              <div>
-                <p className="font-display text-lg tracking-wide">You&rsquo;re in</p>
-                <p className="text-sm text-muted-foreground">Your attendance is verified.</p>
-              </div>
-            </div>
-            <Button asChild variant="moment" size="lg">
-              <Link href={`/event/${slug}`}>Enter the show</Link>
-            </Button>
-          </>
-        ) : verificationOpen ? (
-          <>
-            <div className="flex items-start gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <QrCode className="size-5" aria-hidden />
-              </span>
-              <div>
-                <p className="font-display text-lg tracking-wide">Verify you&rsquo;re here</p>
-                <p className="text-sm text-muted-foreground">
-                  Scan the code at the venue to unlock tonight&rsquo;s experience.
-                </p>
-              </div>
-            </div>
-            <Button asChild variant="moment" size="lg">
-              <Link href={`/event/${slug}/verify`}>Verify my attendance</Link>
-            </Button>
-          </>
-        ) : (
-          <>
-            <p className="font-display text-lg tracking-wide">Doors soon</p>
-            <p className="text-sm text-muted-foreground">
-              Verification opens when you&rsquo;re at the venue.
-            </p>
-            <Button asChild variant="outline" className="w-full border-foreground/20 bg-transparent uppercase tracking-wider">
-              <Link href={`/event/${slug}`}>Preview the show</Link>
-            </Button>
-          </>
-        )}
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 shrink-0 text-artist-accent">
+            {fanExperience.access === "live_unlocked" || fanExperience.access === "postshow_open" ? (
+              <BadgeCheck className="size-5" aria-hidden />
+            ) : (
+              <Lock className="size-5" aria-hidden />
+            )}
+          </span>
+          <div className="space-y-1">
+            <p className="font-display text-lg tracking-wide">{action.title}</p>
+            <p className="text-sm text-muted-foreground">{action.body}</p>
+          </div>
+        </div>
+        {action.showCta && action.cta ? (
+          <Button
+            asChild
+            variant={action.emphasis ? "moment" : "outline"}
+            size="lg"
+            className={
+              action.emphasis
+                ? "w-full"
+                : "w-full border-foreground/20 bg-transparent uppercase tracking-wider"
+            }
+          >
+            <Link href={action.href}>
+              {action.cta}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </Button>
+        ) : null}
       </div>
     </section>
   );
@@ -175,81 +175,6 @@ export function HomeUpcomingSection({
             </Link>
           </li>
         ))}
-      </ul>
-    </section>
-  );
-}
-
-export function HomeDropsSection({
-  drops,
-  eventSlug,
-  scoped = false,
-}: {
-  drops: Array<{
-    slug: string;
-    title: string;
-    artworkUrl: string | null;
-    endsAt: Date | null;
-    artistId: string;
-    artistName: string;
-    showCountdown?: boolean;
-  }>;
-  eventSlug?: string;
-  scoped?: boolean;
-}) {
-  if (drops.length === 0) return null;
-
-  const now = demoNow();
-
-  return (
-    <section>
-      <HomeSectionLabel scoped={scoped}>New drops</HomeSectionLabel>
-      <ul className="space-y-3">
-        {drops.slice(0, 4).map((drop) => {
-          const eventQuery = eventSlug ? `?e=${eventSlug}` : "";
-          const href = `/drop/${drop.slug}${eventQuery}`;
-          const showCountdown = drop.showCountdown ?? false;
-
-          return (
-            <li key={drop.slug}>
-              <Link
-                href={href}
-                className={
-                  scoped
-                    ? "flex items-center gap-4 overflow-hidden rounded-2xl border border-artist-border bg-artist-surface p-4 transition-colors hover:bg-artist-bg/40"
-                    : "flex items-center gap-4 overflow-hidden rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-accent/30"
-                }
-              >
-                {drop.artworkUrl ? (
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-muted">
-                    <Image src={drop.artworkUrl} alt="" fill className="object-cover" sizes="64px" />
-                  </div>
-                ) : (
-                  <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-muted text-2xl">
-                    🎁
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{drop.title}</p>
-                  {!scoped && <p className="text-sm text-muted-foreground">{drop.artistName}</p>}
-                  {showCountdown && drop.endsAt && drop.endsAt > now && (
-                    <p
-                      className={
-                        scoped
-                          ? "mt-1 flex items-center gap-1 text-xs font-semibold text-artist-accent"
-                          : "mt-1 flex items-center gap-1 text-xs font-semibold text-primary"
-                      }
-                    >
-                      <Timer className="size-3" aria-hidden />
-                      <FlashDropCountdown endsAt={drop.endsAt.toISOString()} />
-                    </p>
-                  )}
-                </div>
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-              </Link>
-            </li>
-          );
-        })}
       </ul>
     </section>
   );

@@ -10,23 +10,6 @@ export interface DemoScenarioPreset {
 
 export const DEMO_SCENARIO_PRESETS: DemoScenarioPreset[] = [
   {
-    id: "degens_show_night",
-    label: "The Degens — Show-Night Unlock",
-    buttonLabel: "Run Degens Show Night",
-    description:
-      "Detroit · Doors Open · At Venue · First Show — geofence unlock, Detroit exclusives, encore drop.",
-    scenario: {
-      artist: "the_degens",
-      showKey: "atlas-detroit",
-      timePhase: "doors_open",
-      fanState: "at_venue",
-      location: "inside_venue",
-      fanHistory: "first_show",
-      purchaseHistory: "none",
-      merchRule: "auto",
-    },
-  },
-  {
     id: "nova_pre_show",
     label: "Nova Kestrel — Pre-Show Acquisition",
     buttonLabel: "Run Nova Pre-Show",
@@ -38,6 +21,23 @@ export const DEMO_SCENARIO_PRESETS: DemoScenarioPreset[] = [
       timePhase: "t_minus_14",
       fanState: "unknown",
       location: "outside_venue",
+      fanHistory: "first_show",
+      purchaseHistory: "none",
+      merchRule: "auto",
+    },
+  },
+  {
+    id: "degens_show_night",
+    label: "The Degens — Show-Night Unlock",
+    buttonLabel: "Run Degens Show Night",
+    description:
+      "Detroit · Doors Open · At Venue · First Show — geofence unlock, Detroit exclusives, encore drop.",
+    scenario: {
+      artist: "the_degens",
+      showKey: "atlas-detroit",
+      timePhase: "doors_open",
+      fanState: "at_venue",
+      location: "inside_venue",
       fanHistory: "first_show",
       purchaseHistory: "none",
       merchRule: "auto",

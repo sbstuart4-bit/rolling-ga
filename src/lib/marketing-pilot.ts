@@ -1,21 +1,26 @@
 import { z } from "zod";
 
-export const PILOT_ROLES = [
-  "Artist manager",
-  "Head of merch / commerce",
-  "Tour manager",
-  "Independent artist",
-  "Management company",
-  "Promoter / venue",
-  "Label / other",
+export const PILOT_PARTNER_TYPES = [
+  "Artist / Manager",
+  "Venue",
+  "Promoter",
+  "Merch / Fulfillment Partner",
+  "Label / Artist Team",
+  "Other",
 ] as const;
+
+/** @deprecated Use PILOT_PARTNER_TYPES — kept for legacy imports. */
+export const PILOT_ROLES = PILOT_PARTNER_TYPES;
 
 export const pilotInquirySchema = z.object({
   name: z.string().trim().min(1, "Enter your name.").max(120),
-  email: z.string().trim().min(1, "Enter your email.").email("Enter a valid email."),
-  role: z.enum(PILOT_ROLES),
-  organization: z.string().trim().min(1, "Enter the artist or organization.").max(160),
-  notes: z.string().trim().max(2000).optional(),
+  email: z.string().trim().min(1, "Enter your work email.").email("Enter a valid email."),
+  organization: z.string().trim().max(160).optional(),
+  roleTitle: z.string().trim().max(120).optional(),
+  partnerType: z.enum(PILOT_PARTNER_TYPES, { message: "Choose who you represent." }),
+  hasShowInMind: z.enum(["yes", "not_yet"], { message: "Let us know if you have a show in mind." }),
+  opportunity: z.string().trim().max(500).optional(),
+  message: z.string().trim().max(2000).optional(),
 });
 
 export type PilotInquiry = z.infer<typeof pilotInquirySchema>;
@@ -36,18 +41,4 @@ export function validatePilotInquiry(input: unknown):
     }
   }
   return { success: false, fieldErrors };
-}
-
-export function composePilotMailto(inbox: string, inquiry: PilotInquiry): string {
-  const subject = `Rolling GA pilot — ${inquiry.organization}`;
-  const body = [
-    `Name: ${inquiry.name}`,
-    `Email: ${inquiry.email}`,
-    `Role: ${inquiry.role}`,
-    `Artist / organization: ${inquiry.organization}`,
-    "",
-    inquiry.notes ? `Notes:\n${inquiry.notes}` : "Notes: (none)",
-  ].join("\n");
-
-  return `mailto:${inbox}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

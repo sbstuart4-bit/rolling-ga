@@ -13,7 +13,9 @@ import {
   listBundleItems,
   listVariantsWithInventory,
 } from "@/server/catalog/queries";
+import { demoModeEnabled } from "@/lib/demo-mode";
 import { demoNow } from "@/server/demo/clock";
+import { getDemoAwareProductEligibility } from "@/server/demo/scenario-eligibility";
 import { resolveProductImage } from "@/lib/demo-product-images";
 import { assertEventAttendeeStoreOpen } from "@/server/events/commerce-window";
 import { getCartWithItems } from "./queries";
@@ -223,7 +225,15 @@ export async function resolveLine(input: ResolveLineInput): Promise<LineResult> 
     }
   }
 
-  const eligibility = await isEligibleForProduct(product, input.attendance, now);
+  const eligibility =
+    demoModeEnabled() && commerceEventId
+      ? await getDemoAwareProductEligibility(
+          product,
+          input.attendance,
+          commerceEventId,
+          now,
+        )
+      : await isEligibleForProduct(product, input.attendance, now);
   if (!eligibility.eligible) {
     return reject("not_eligible", eligibility.reason ?? "You are not eligible for this product.");
   }

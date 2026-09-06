@@ -1,19 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { composePilotMailto, validatePilotInquiry } from "@/lib/marketing-pilot";
+import { validatePilotInquiry } from "@/lib/marketing-pilot";
 
 describe("pilot inquiry validation", () => {
   it("accepts a complete inquiry", () => {
     const result = validatePilotInquiry({
       name: "Jordan Hale",
       email: "jordan@example.com",
-      role: "Artist manager",
       organization: "The Degens",
-      notes: "Five-show Midwest run",
+      roleTitle: "Tour manager",
+      partnerType: "Artist / Manager",
+      hasShowInMind: "yes",
+      opportunity: "Midwest club run — March",
+      message: "Five-show pilot opportunity",
     });
 
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.organization).toBe("The Degens");
+      expect(result.data.partnerType).toBe("Artist / Manager");
     }
   });
 
@@ -21,29 +25,16 @@ describe("pilot inquiry validation", () => {
     const result = validatePilotInquiry({
       name: "",
       email: "not-an-email",
-      role: "",
-      organization: "",
+      partnerType: "",
+      hasShowInMind: "",
     });
 
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.fieldErrors.name).toBeDefined();
       expect(result.fieldErrors.email).toBeDefined();
-      expect(result.fieldErrors.role).toBeDefined();
-      expect(result.fieldErrors.organization).toBeDefined();
+      expect(result.fieldErrors.partnerType).toBeDefined();
+      expect(result.fieldErrors.hasShowInMind).toBeDefined();
     }
-  });
-
-  it("composes a mailto without inventing a CRM payload", () => {
-    const href = composePilotMailto("pilots@example.com", {
-      name: "Jordan Hale",
-      email: "jordan@example.com",
-      role: "Artist manager",
-      organization: "The Degens",
-    });
-
-    expect(href.startsWith("mailto:pilots@example.com?")).toBe(true);
-    expect(href).toContain(encodeURIComponent("Rolling GA pilot — The Degens"));
-    expect(href).toContain(encodeURIComponent("jordan@example.com"));
   });
 });

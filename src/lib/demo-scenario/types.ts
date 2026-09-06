@@ -1,8 +1,8 @@
 /** Demo scenario control values — used on /demo and encoded in URL/cookie. */
 
 export const DEMO_ARTISTS = [
-  "the_degens",
   "nova_kestrel",
+  "the_degens",
   "the_low_country",
   "marisol_reyes",
 ] as const;
@@ -87,9 +87,9 @@ export interface DemoScenario {
 }
 
 export const DEFAULT_DEMO_SCENARIO: DemoScenario = {
-  artist: "the_degens",
-  showKey: "atlas-detroit",
-  timePhase: "t_minus_7",
+  artist: "nova_kestrel",
+  showKey: "nova-nashville",
+  timePhase: "t_minus_14",
   fanState: "unknown",
   location: "outside_venue",
   fanHistory: "first_show",

@@ -11,9 +11,9 @@ import {
   isDemoShowNight,
 } from "@/lib/demo-calendar";
 import {
-  jumpToDetroitDoorsOpenAction,
-  jumpToDetroitLiveAction,
-  jumpToDetroitPostShowAction,
+  jumpToNovaNashvilleDoorsOpenAction,
+  jumpToNovaNashvilleLiveAction,
+  jumpToNovaNashvillePostShowAction,
   resetDemoClockAction,
   resetDemoDataAction,
   setDemoClockAction,
@@ -62,7 +62,7 @@ export function DemoClockControls({
           <p className="eyebrow text-muted-foreground">Demo clock</p>
           <p className="text-2xl font-semibold tracking-normal tabular">{now}</p>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Resets to {anchor} · The Degens play Detroit {showDate}
+            Resets to {anchor} · Nova Kestrel plays Nashville {showDate}
           </p>
         </div>
         <p className="text-sm font-medium leading-snug text-primary">
@@ -108,19 +108,19 @@ export function DemoClockControls({
       </div>
 
       <div className="space-y-2">
-        <p className="text-xs text-muted-foreground">Detroit presets</p>
+        <p className="text-xs text-muted-foreground">Nashville presets</p>
         <div className="flex flex-wrap gap-2">
-          <form action={jumpToDetroitDoorsOpenAction}>
+          <form action={jumpToNovaNashvilleDoorsOpenAction}>
             <Button type="submit" variant="secondary" size="sm" disabled={pending}>
               Doors open
             </Button>
           </form>
-          <form action={jumpToDetroitLiveAction}>
+          <form action={jumpToNovaNashvilleLiveAction}>
             <Button type="submit" variant="secondary" size="sm" disabled={pending}>
               Live
             </Button>
           </form>
-          <form action={jumpToDetroitPostShowAction}>
+          <form action={jumpToNovaNashvillePostShowAction}>
             <Button type="submit" variant="secondary" size="sm" disabled={pending}>
               Post-show
             </Button>

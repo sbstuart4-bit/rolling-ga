@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, BadgeCheck, Lock, QrCode } from "lucide-react";
+import { ArrowRight, BadgeCheck, Lock } from "lucide-react";
 import { EventHero } from "@/components/fan/event-hero";
 import { EventContentList } from "@/components/fan/event-content-list";
 import { EventHubModules } from "@/components/fan/event-hub-modules";
@@ -16,13 +16,19 @@ import {
   buildEventHubModuleData,
   buildLockedPreviewProducts,
 } from "@/lib/event-hub-present";
+import type { FanExperienceState } from "@/lib/fan-experience/access-state";
+import {
+  canPreviewShop,
+  hasEarnedCredential,
+} from "@/lib/fan-experience/access-state";
+import { scenarioFanIsGoing } from "@/lib/fan-experience/now-next";
 import { isPostShowPhase, verifiedPostShowStateLabel } from "@/lib/post-show-commerce";
 import { requireAuth } from "@/server/auth/request";
+import { demoNow } from "@/server/demo/clock";
 import { loadEventPage } from "@/server/events/context";
 import { loadPostShowHub } from "@/server/events/post-show";
 import { countVerifiedAttendance, listEventContent } from "@/server/events/queries";
 import { loadEventShopCatalog } from "@/server/events/shop";
-import { getDemoScenarioForEvent } from "@/server/demo/scenario-eligibility";
 import { merchExperienceLockLabel } from "@/lib/merch-experience/resolver";
 
 export async function generateMetadata(props: PageProps<"/event/[slug]">): Promise<Metadata> {
@@ -37,14 +43,6 @@ export async function generateMetadata(props: PageProps<"/event/[slug]">): Promi
   };
 }
 
-/**
- * One URL carries a fan through the entire life of a show.
- *
- * The state is derived from timestamps and the fan's own verification record, so the
- * same link is a pre-show preview in the morning, a verification prompt at doors, the
- * live experience during the set, a closing window afterwards, and a permanent memory
- * from then on. Nothing has to be republished for the page to change.
- */
 export default async function EventPage(props: PageProps<"/event/[slug]">) {
   const { slug } = await props.params;
   const ctx = await requireAuth(`/event/${slug}`);
@@ -52,23 +50,28 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
 
   if (!page) notFound();
 
-  const { event, theme, timing, isVerifiedAttendee, verification } = page;
+  const { event, theme, timing, fanExperience } = page;
+  const hasCredential = hasEarnedCredential(fanExperience);
   const postShow = isPostShowPhase(timing.state);
-  const verifiedPostShow = isVerifiedAttendee && postShow;
-  const showHubModules = isVerifiedAttendee && timing.state === "live";
-  const showLockedPreview = !isVerifiedAttendee && timing.state === "upcoming";
-
+  const verifiedPostShow = hasCredential && postShow;
+  const showHubModules = hasCredential && timing.state === "live";
   const loadEventContent = !verifiedPostShow;
 
-  const [content, attendeeCount, postShowHub, shopCatalog, demoScenario] = await Promise.all([
-    loadEventContent ? listEventContent(event.id, isVerifiedAttendee) : Promise.resolve([]),
+  const mightNeedShopCatalog =
+    showHubModules ||
+    (!hasCredential &&
+      (timing.state === "upcoming" || fanExperience.access === "preview_locked"));
+
+  const [content, attendeeCount, postShowHub, shopCatalog] = await Promise.all([
+    loadEventContent ? listEventContent(event.id, hasCredential) : Promise.resolve([]),
     countVerifiedAttendance(event.id),
     verifiedPostShow ? loadPostShowHub(page, ctx.userId) : Promise.resolve(null),
-    showHubModules || showLockedPreview
-      ? loadEventShopCatalog(event, ctx.userId)
-      : Promise.resolve(null),
-    getDemoScenarioForEvent(event.id),
+    mightNeedShopCatalog ? loadEventShopCatalog(event, ctx.userId) : Promise.resolve(null),
   ]);
+
+  const previewShop = canPreviewShop(fanExperience.access);
+  const showLockedPreview =
+    fanExperience.access === "preview_locked" && timing.state === "upcoming";
 
   const hubModules =
     showHubModules && shopCatalog
@@ -81,7 +84,8 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
 
   const message = event.localMessage ?? theme.showMessaging;
   const heroStateLabel =
-    isVerifiedAttendee && postShow ? verifiedPostShowStateLabel(timing.state) : undefined;
+    hasCredential && postShow ? verifiedPostShowStateLabel(timing.state) : undefined;
+  const relationshipMessage = fanExperience.experience?.relationshipTreatment;
 
   return (
     <div>
@@ -90,9 +94,9 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
         theme={theme}
         state={timing.state}
         stateLabel={heroStateLabel}
-        eyebrow={relativeDayLabel(event.startsAt)}
+        eyebrow={relativeDayLabel(event.startsAt, demoNow())}
       >
-        {isVerifiedAttendee && !postShow && (
+        {hasCredential && !postShow && (
           <p className="flex items-center gap-1.5 text-sm font-medium text-artist-accent">
             <BadgeCheck className="size-4" aria-hidden />
             You were verified at this show
@@ -102,7 +106,7 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
 
       {verifiedPostShow && postShowHub ? (
         <PostShowVerifiedExperience slug={slug} page={page} hub={postShowHub} />
-      ) : !isVerifiedAttendee && postShow ? (
+      ) : !hasCredential && postShow ? (
         <PostShowVisitorExperience
           artistName={event.artistName}
           artistSlug={event.artistSlug}
@@ -110,13 +114,19 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
         />
       ) : (
         <div className="mx-auto max-w-lg space-y-6 px-4 pt-6">
-          {message && !showHubModules && (
-            <p className="display-xl font-artist text-2xl text-artist-fg md:text-3xl">
-              {demoScenario?.experience.relationshipTreatment ?? message}
+          {scenarioFanIsGoing(fanExperience) && (
+            <p className="inline-flex w-fit items-center gap-1.5 rounded-full border border-artist-accent/30 bg-artist-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-artist-accent">
+              You&apos;re going
             </p>
           )}
 
-          {demoScenario?.experience.merchOverrideActive && (
+          {message && !showHubModules && (
+            <p className="display-xl font-artist text-2xl text-artist-fg md:text-3xl">
+              {relationshipMessage ?? message}
+            </p>
+          )}
+
+          {fanExperience.experience?.merchOverrideActive && (
             <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
               Demo merch override active
             </p>
@@ -144,15 +154,14 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
               <PrimaryAction
                 slug={slug}
                 state={timing.state}
-                isVerifiedAttendee={isVerifiedAttendee}
-                verificationOpen={verification.open}
-                verificationOpensAt={verification.opensAt}
+                fanExperience={fanExperience}
                 postShowClosesAt={timing.postShowClosesAt}
                 timezone={event.timezone}
                 artistName={event.artistName}
                 artistSlug={event.artistSlug}
                 city={event.venueCity}
                 startsAt={event.startsAt}
+                canPreviewShop={previewShop}
               />
 
               {showLockedPreview && lockedPreviewProducts.length > 0 && (
@@ -161,11 +170,11 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
                   artistName={event.artistName}
                   products={lockedPreviewProducts}
                   lockLabel={
-                    demoScenario
-                      ? merchExperienceLockLabel(demoScenario.experience)
+                    fanExperience.experience
+                      ? merchExperienceLockLabel(fanExperience.experience)
                       : undefined
                   }
-                  previewMessage={demoScenario?.experience.primaryMessage}
+                  previewMessage={fanExperience.experience?.primaryMessage}
                 />
               )}
 
@@ -182,7 +191,7 @@ export default async function EventPage(props: PageProps<"/event/[slug]">) {
                 </div>
               )}
 
-              {!isVerifiedAttendee && timing.state !== "upcoming" && !postShow && (
+              {!hasCredential && timing.state !== "upcoming" && !postShow && (
                 <p className="text-sm text-artist-muted">
                   Some of what {event.artistName} put here is only for people who were in the room.
                 </p>
@@ -206,36 +215,33 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-/**
- * The single most important thing to do on this page right now. Exactly one call to
- * action is shown, chosen from the show's state and whether the fan holds a credential.
- */
 function PrimaryAction({
   slug,
   state,
-  isVerifiedAttendee,
-  verificationOpen,
-  verificationOpensAt,
+  fanExperience,
   postShowClosesAt,
   timezone,
   artistName,
   artistSlug,
   city,
   startsAt,
+  canPreviewShop: previewShop,
 }: {
   slug: string;
   state: string;
-  isVerifiedAttendee: boolean;
-  verificationOpen: boolean;
-  verificationOpensAt: Date;
+  fanExperience: FanExperienceState;
   postShowClosesAt: Date | null;
   timezone: string;
   artistName: string;
   artistSlug: string;
   city: string;
   startsAt: Date;
+  canPreviewShop: boolean;
 }) {
-  if (isVerifiedAttendee) {
+  const access = fanExperience.access;
+  const teaserMessage = fanExperience.experience?.primaryMessage;
+
+  if (access === "postshow_open" || (hasEarnedCredential(fanExperience) && access !== "history_only")) {
     return (
       <ActionCard
         icon={<BadgeCheck className="size-5" aria-hidden />}
@@ -247,25 +253,63 @@ function PrimaryAction({
     );
   }
 
-  if (verificationOpen) {
+  if (access === "live_unlocked") {
     return (
       <ActionCard
-        icon={<QrCode className="size-5" aria-hidden />}
-        title="Verify you're here"
-        body={`Scan the code at the venue or confirm your location to unlock tonight in ${city}.`}
-        href={`/event/${slug}/verify`}
-        cta="Verify my attendance"
+        icon={<BadgeCheck className="size-5" aria-hidden />}
+        title="You're in the room"
+        body="Tonight's show exclusives are unlocked. Shop without the merch line."
+        href={`/event/${slug}/shop`}
+        cta="Open tonight's shop"
         emphasis
       />
     );
   }
 
+  if (access === "history_only") {
+    return (
+      <ActionCard
+        icon={<BadgeCheck className="size-5" aria-hidden />}
+        title="You were there"
+        body={`Your ${city} credential and show history remain in My Shows.`}
+        href={`/event/${slug}/credential`}
+        cta="View your credential"
+      />
+    );
+  }
+
   if (state === "upcoming") {
+    if (access === "discover_only") {
+      return (
+        <DiscoverShowCard
+          startsAt={startsAt}
+          timezone={timezone}
+          city={city}
+          message={
+            teaserMessage ??
+            `${artistName} is coming to ${city}. Merch opens closer to show night.`
+          }
+        />
+      );
+    }
+
+    if (!previewShop) {
+      return (
+        <ActionCard
+          icon={<Lock className="size-5" aria-hidden />}
+          title="Show coming soon"
+          body={`${formatEventDate(startsAt, timezone)} in ${city}. Tour merch is open on Drops — show exclusives unlock closer to doors.`}
+          href={`/drops?e=${slug}`}
+          cta="Browse tour merch"
+        />
+      );
+    }
+
     return (
       <ActionCard
         icon={<Lock className="size-5" aria-hidden />}
-        title="Locked until doors"
-        body={`Verification opens ${formatDateTime(verificationOpensAt, timezone)}. Browse what's coming — the attendee-only pieces unlock when you're inside.`}
+        title="Locked until you're inside"
+        body={`${formatEventDate(startsAt, timezone)} in ${city}. Preview what's waiting — show exclusives unlock when you're inside the venue.`}
         href={`/event/${slug}/shop`}
         cta="Preview the merch"
       />
@@ -284,6 +328,32 @@ function PrimaryAction({
       href={`/artist/${artistSlug}`}
       cta={`See ${artistName}'s upcoming shows`}
     />
+  );
+}
+
+function DiscoverShowCard({
+  startsAt,
+  timezone,
+  city,
+  message,
+}: {
+  startsAt: Date;
+  timezone: string;
+  city: string;
+  message: string;
+}) {
+  return (
+    <section className="space-y-3 rounded-2xl border border-artist-border bg-artist-surface p-5">
+      <div className="flex items-start gap-3">
+        <Lock className="mt-0.5 size-5 shrink-0 text-artist-accent" aria-hidden />
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold text-artist-fg">Discover the show</h2>
+          <p className="text-sm text-artist-muted">
+            {formatEventDate(startsAt, timezone)} in {city}. {message}
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }
 

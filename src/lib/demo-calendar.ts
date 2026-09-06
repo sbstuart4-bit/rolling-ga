@@ -5,9 +5,9 @@ export const DEMO_YEAR = 2026;
 export const DEMO_ANCHOR_MONTH = 6;
 export const DEMO_ANCHOR_DAY = 1;
 
-/** The Degens' flagship demo show — slide the clock here to walk through live → post-show. */
+/** Flagship demo show on the seeded calendar — Nova Kestrel at Nashville. */
 export const DEMO_SHOW_MONTH = 6;
-export const DEMO_SHOW_DAY = 30;
+export const DEMO_SHOW_DAY = 12;
 
 export const HOUR_MS = 60 * 60 * 1000;
 export const DAY_MS = 24 * HOUR_MS;
@@ -16,6 +16,8 @@ export const DAY_MS = 24 * HOUR_MS;
 export const DEMO_CLOCK_MAX_DAYS = 90;
 export const DEMO_CLOCK_RANGE_MS = DEMO_CLOCK_MAX_DAYS * DAY_MS;
 export const DEMO_CLOCK_MAX_HOURS = 23;
+/** Room before the June 1 anchor for T-30 / early pre-show phases. */
+export const DEMO_CLOCK_MIN_OFFSET_MS = -31 * DAY_MS;
 
 export function demoAnchorDate(): Date {
   return new Date(DEMO_YEAR, DEMO_ANCHOR_MONTH - 1, DEMO_ANCHOR_DAY, 9, 0, 0, 0);
@@ -25,7 +27,12 @@ export function demoShowDate(): Date {
   return new Date(DEMO_YEAR, DEMO_SHOW_MONTH - 1, DEMO_SHOW_DAY, 20, 0, 0, 0);
 }
 
-/** Flagship demo show slug — The Degens at Detroit on the seeded calendar. */
+/** Flagship demo show slug — Nova Kestrel at Nashville on the seeded calendar. */
+export function demoNovaNashvilleEventSlug(): string {
+  return `nova-kestrel-gold-hour-nashville-${DEMO_YEAR}`;
+}
+
+/** @deprecated Use demoNovaNashvilleEventSlug — kept for Degens-specific walkthroughs. */
 export function demoDetroitEventSlug(): string {
   return `the-degens-signal-decay-detroit-${DEMO_YEAR}`;
 }
@@ -42,44 +49,63 @@ export function demoCalendarDate(
 }
 
 export function offsetToDaysAndHours(offsetMs: number): { days: number; hours: number } {
-  const clamped = Math.max(0, Math.min(offsetMs, DEMO_CLOCK_RANGE_MS));
-  const days = Math.floor(clamped / DAY_MS);
-  const hours = Math.floor((clamped % DAY_MS) / HOUR_MS);
+  const clamped = Math.max(
+    DEMO_CLOCK_MIN_OFFSET_MS,
+    Math.min(offsetMs, DEMO_CLOCK_RANGE_MS),
+  );
+  const sign = clamped < 0 ? -1 : 1;
+  const abs = Math.abs(clamped);
+  const days = sign * Math.floor(abs / DAY_MS);
+  const hours = Math.floor((abs % DAY_MS) / HOUR_MS);
   return { days, hours };
 }
 
 export function daysAndHoursToOffset(days: number, hours: number): number {
-  return Math.max(
-    0,
-    Math.min(DEMO_CLOCK_RANGE_MS, days * DAY_MS + hours * HOUR_MS),
-  );
+  const sign = days < 0 ? -1 : 1;
+  const absDays = Math.abs(days);
+  const raw = sign * (absDays * DAY_MS + hours * HOUR_MS);
+  return Math.max(DEMO_CLOCK_MIN_OFFSET_MS, Math.min(DEMO_CLOCK_RANGE_MS, raw));
 }
 
 /** Offset from the June 1 anchor to a timestamp on the demo calendar. */
 export function demoClockOffsetForDate(date: Date): number {
-  return Math.max(0, Math.min(DEMO_CLOCK_RANGE_MS, date.getTime() - demoAnchorDate().getTime()));
+  const offset = date.getTime() - demoAnchorDate().getTime();
+  return Math.max(DEMO_CLOCK_MIN_OFFSET_MS, Math.min(DEMO_CLOCK_RANGE_MS, offset));
 }
 
 export function demoClockDaysAndHoursForDate(date: Date): { days: number; hours: number } {
   return offsetToDaysAndHours(demoClockOffsetForDate(date));
 }
 
-/** The Degens Detroit — doors open, verification window, and live set (seeded show times). */
-export function demoDetroitDoorsOpen(): { days: number; hours: number } {
+/** Nova Nashville — doors open, verification window, and live set (seeded show times). */
+export function demoNovaNashvilleDoorsOpen(): { days: number; hours: number } {
   return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 17, 0));
 }
 
-export function demoDetroitLive(): { days: number; hours: number } {
+export function demoNovaNashvilleLive(): { days: number; hours: number } {
   return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 20, 0));
 }
 
-export function demoDetroitPostShow(): { days: number; hours: number } {
-  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 23, 30));
+export function demoNovaNashvillePostShow(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 22, 30));
 }
 
-/** Day index on the demo clock when The Degens play Detroit (June 30). */
+/** The Degens Detroit — doors open, verification window, and live set (seeded show times). */
+export function demoDetroitDoorsOpen(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(6, 30, 17, 0));
+}
+
+export function demoDetroitLive(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(6, 30, 20, 0));
+}
+
+export function demoDetroitPostShow(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(6, 30, 23, 30));
+}
+
+/** Day index on the demo clock when the flagship show plays (Nova · Nashville · June 12). */
 export function demoShowDayIndex(): number {
-  return demoDetroitLive().days;
+  return demoNovaNashvilleLive().days;
 }
 
 const DEMO_CLOCK_DATE_FMT = new Intl.DateTimeFormat("en-US", {
@@ -94,7 +120,11 @@ const DEMO_CLOCK_TIME_FMT = new Intl.DateTimeFormat("en-US", {
 
 /** Calendar date at a demo clock day/hour offset from the June 1 anchor. */
 export function demoClockDateAt(days: number, hours: number): Date {
-  return new Date(demoAnchorDate().getTime() + days * DAY_MS + hours * HOUR_MS);
+  const sign = days < 0 ? -1 : 1;
+  const absDays = Math.abs(days);
+  return new Date(
+    demoAnchorDate().getTime() + sign * (absDays * DAY_MS + hours * HOUR_MS),
+  );
 }
 
 export function formatDemoClockDate(days: number, hours: number): string {

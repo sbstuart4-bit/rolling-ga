@@ -6,8 +6,9 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { createSession, destroySession } from "@/server/auth/session";
-import { demoDetroitEventSlug, demoDetroitLive } from "@/lib/demo-calendar";
-import { setDemoClockDaysAndHours } from "./clock";
+import { demoNovaNashvilleEventSlug } from "@/lib/demo-calendar";
+import { getDemoShow } from "@/lib/demo-scenario/shows";
+import { applyDemoClockForPhase } from "./apply-demo-clock";
 import { setFanShowContextSlug } from "@/server/fans/show-context";
 import { demoModeEnabled } from "./accounts";
 
@@ -44,13 +45,35 @@ export async function startPersonaAction(formData: FormData): Promise<void> {
   redirect(destination);
 }
 
-/** One-click fan walkthrough: Detroit live on the demo clock, signed in as Scott. */
-export async function startScottDetroitLiveAction(): Promise<void> {
+/** One-click fan walkthrough: Nashville live on the demo clock, signed in as Scott. */
+export async function startScottNovaNashvilleLiveAction(): Promise<void> {
   if (!demoModeEnabled()) redirect("/welcome");
   if (!(await hasDemoBoardAccess())) redirect("/demo");
 
-  const { days, hours } = demoDetroitLive();
-  setDemoClockDaysAndHours(days, hours);
+  const show = getDemoShow("nova-nashville")!;
+  await applyDemoClockForPhase(show, "headliner");
+
+  const [user] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, SCOTT_EMAIL))
+    .limit(1);
+  if (!user) redirect("/demo");
+
+  await destroySession();
+  await createSession(user.id);
+  await setFanShowContextSlug(demoNovaNashvilleEventSlug());
+  redirect(`/event/${demoNovaNashvilleEventSlug()}`);
+}
+
+/** @deprecated Degens Detroit walkthrough — use startScottNovaNashvilleLiveAction. */
+export async function startScottDetroitLiveAction(): Promise<void> {
+  const { demoDetroitEventSlug } = await import("@/lib/demo-calendar");
+  if (!demoModeEnabled()) redirect("/welcome");
+  if (!(await hasDemoBoardAccess())) redirect("/demo");
+
+  const show = getDemoShow("atlas-detroit")!;
+  await applyDemoClockForPhase(show, "headliner");
 
   const [user] = await db
     .select({ id: users.id })

@@ -202,10 +202,69 @@ export const EXCLUSIVITY_TYPES = [
 /** @deprecated Use THE_DEGENS_THEME */
 export const ATLAS_VOID_THEME = THE_DEGENS_THEME;
 
+/** Approved mockup tagline under the logo. */
+export const MARKETING_TAGLINE = "Live music lives on.";
+
+/** Approved primary navigation — docs/website-reference. */
 export const MARKETING_NAV = [
-  { href: "/product", label: "Product" },
   { href: "/for-artists", label: "For Artists" },
+  { href: "/for-fans", label: "For Fans" },
   { href: "/how-it-works", label: "How It Works" },
+  { href: "/partners", label: "Partners" },
+  { href: "/about", label: "About" },
+] as const;
+
+export interface MarketingFooterColumn {
+  title: string;
+  links: readonly { href: string; label: string }[];
+}
+
+/** Approved footer columns — docs/website-reference. No fabricated proof content. */
+export const MARKETING_FOOTER_COLUMNS: readonly MarketingFooterColumn[] = [
+  {
+    title: "For Artists",
+    links: [
+      { href: "/for-artists", label: "Overview" },
+      { href: "/for-artists", label: "Benefits" },
+      { href: "/pilot#conversation", label: "Run a pilot" },
+      { href: "/pilot#conversation", label: "Get started" },
+    ],
+  },
+  {
+    title: "For Fans",
+    links: [
+      { href: "/how-it-works", label: "How it works" },
+      { href: "/for-fans", label: "FAQ" },
+      { href: "/demo", label: "Demo" },
+      { href: "/for-fans", label: "Upcoming shows" },
+    ],
+  },
+  {
+    title: "Partners",
+    links: [
+      { href: "/partners", label: "Venues" },
+      { href: "/partners", label: "Merch companies" },
+      { href: "/partners", label: "Labels & managers" },
+      { href: "/pilot#conversation", label: "Contact" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About" },
+      { href: "/about", label: "Press" },
+      { href: "/pilot#conversation", label: "Contact" },
+      { href: "/sign-in", label: "Log in" },
+    ],
+  },
+] as const;
+
+/** @deprecated Legacy single-row footer — retained for older pages until full migration. */
+export const MARKETING_FOOTER_NAV = [
+  { href: "/i-was-there", label: "I Was There" },
+  { href: "/for-artists", label: "For Artists" },
+  { href: "/product", label: "Product" },
+  { href: "/how-it-works", label: "How it works" },
   { href: "/demo", label: "Demo" },
   { href: "/pilot", label: "Pilot" },
 ] as const;

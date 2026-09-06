@@ -20,10 +20,9 @@ import {
 } from "@/lib/demo-scenario/types";
 import { getDemoScenarioPreset } from "@/lib/demo-scenario/presets";
 import { defaultDemoShowForArtist, getDemoShow } from "@/lib/demo-scenario/shows";
-import { demoClockForTimePhase } from "@/lib/demo-scenario/time-phases";
 import { demoScenarioWithArtist, serializeDemoScenarioToSearchParams } from "@/lib/demo-scenario/url";
 import { createSession, destroySession } from "@/server/auth/session";
-import { setDemoClockDaysAndHours } from "./clock";
+import { applyDemoClockForPhase } from "./apply-demo-clock";
 import { setFanShowContextSlug } from "@/server/fans/show-context";
 import {
   clearDemoScenarioCookie,
@@ -61,8 +60,7 @@ async function applyScenario(scenario: DemoScenario): Promise<void> {
   const show = getDemoShow(scenario.showKey);
   if (!show) return;
 
-  const { days, hours } = demoClockForTimePhase(show, scenario.timePhase);
-  setDemoClockDaysAndHours(days, hours);
+  await applyDemoClockForPhase(show, scenario.timePhase);
   await setDemoScenarioCookie(scenario);
 
   revalidatePath("/demo");

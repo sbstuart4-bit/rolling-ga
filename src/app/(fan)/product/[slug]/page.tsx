@@ -29,6 +29,8 @@ import {
   resolveCartEventId,
   resolveEventTakeoverContext,
 } from "@/server/events/takeover";
+import { getDemoAwareProductEligibility } from "@/server/demo/scenario-eligibility";
+import { productAccessLabelForExperience } from "@/lib/fan-experience/now-next";
 import { getSavedApparelSize } from "@/server/fans/preferences";
 
 export async function generateMetadata(props: PageProps<"/product/[slug]">): Promise<Metadata> {
@@ -80,11 +82,17 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
     getSavedApparelSize(ctx.userId),
   ]);
 
-  const eligibility = await isEligibleForProduct(product, {
-    attendedEventIds,
-    attendedTourIds,
-    attendedArtistIds,
-  });
+  const eligibility = eventPage
+    ? await getDemoAwareProductEligibility(
+        product,
+        { attendedEventIds, attendedTourIds, attendedArtistIds },
+        cartEventId ?? undefined,
+      )
+    : await isEligibleForProduct(product, {
+        attendedEventIds,
+        attendedTourIds,
+        attendedArtistIds,
+      });
 
   const images = product.images ?? [];
   const hasVariantsWithSize = variants.some((v) => v.size !== null);
@@ -151,9 +159,11 @@ export default async function ProductPage(props: PageProps<"/product/[slug]">) {
                 city={eventPage.event.venueCity}
                 dateLabel={formatEventDateStamp(eventPage.event.startsAt, eventPage.event.timezone)}
                 accessLabel={
-                  product.accessType === "verified_attendee" || product.accessType === "event_specific"
-                    ? "Verified attendees only"
-                    : "Tonight's drop"
+                  eventPage.fanExperience
+                    ? productAccessLabelForExperience(eventPage.fanExperience)
+                    : product.accessType === "verified_attendee" || product.accessType === "event_specific"
+                      ? "Verified attendees only"
+                      : "Tonight's drop"
                 }
               />
               {product.tagline && (
@@ -297,7 +307,7 @@ function LockedState({
           {reason ?? "Unlock at the show"}
         </h2>
         <p className={cn("text-sm", scoped ? "text-artist-muted" : "text-muted-foreground")}>
-          This piece is reserved for verified attendees. Scan the code at the venue to unlock it.
+          This piece unlocks when you&apos;re inside the venue tonight — no post-show credential required.
         </p>
       </div>
       {eventSlug && (

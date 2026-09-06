@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthSplashBackdrop } from "@/components/auth/auth-splash-backdrop";
@@ -8,6 +9,7 @@ import { COMING_SOON_GUIDED_JOURNEYS, listActiveGuidedJourneys } from "@/lib/gui
 import { demoModeEnabled } from "@/server/demo/accounts";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { startGuidedDemoAction } from "@/server/demo/guided-demo-actions";
+import { NOVA_KESTREL_DEMO_ASSETS } from "@/lib/demo-assets";
 
 export const metadata: Metadata = { title: "Guided demo — Rolling GA" };
 export const dynamic = "force-dynamic";
@@ -44,7 +46,7 @@ export default async function GuidedDemoChooserPage({
           <section className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center">
             <h2 className="text-lg font-semibold">Journey complete</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              You finished The Degens — Full Rolling GA Journey.
+              You finished Nova Kestrel — Full Rolling GA Journey.
             </p>
             <Button asChild className="mt-4 uppercase tracking-wider">
               <Link href="/demo?perspective=fan">Back to demo board</Link>
@@ -56,8 +58,22 @@ export default async function GuidedDemoChooserPage({
           {journeys.map((journey) => (
             <section
               key={journey.id}
-              className="rounded-2xl border border-primary/40 bg-primary/5 p-6 text-left"
+              className="overflow-hidden rounded-2xl border border-primary/40 bg-primary/5 text-left"
             >
+              {journey.id === "nova-nashville" ? (
+                <div className="relative aspect-[16/9] w-full border-b border-primary/20">
+                  <Image
+                    src={NOVA_KESTREL_DEMO_ASSETS.hero}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 768px, 100vw"
+                    className="object-cover object-[center_20%]"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/20 to-transparent" />
+                </div>
+              ) : null}
+              <div className="p-6">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
                 {journey.subtitle}
               </p>
@@ -87,6 +103,7 @@ export default async function GuidedDemoChooserPage({
                   .
                 </p>
               )}
+              </div>
             </section>
           ))}
 

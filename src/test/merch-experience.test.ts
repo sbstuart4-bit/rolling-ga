@@ -35,7 +35,8 @@ describe("resolveMerchExperience", () => {
     const state = experience(detroit, "t_minus_30", "unknown");
     expect(state.showExclusiveVisibility).toBe("teaser");
     expect(state.showExclusivePurchasable).toBe(false);
-    expect(state.coreMerchPurchasable).toBe(true);
+    expect(state.coreMerchVisible).toBe(false);
+    expect(state.coreMerchPurchasable).toBe(false);
   });
 
   it("T-14 + unknown shows visible locked exclusives", () => {
@@ -117,6 +118,17 @@ describe("resolveMerchExperience", () => {
   it("time alone does not unlock venue-exclusive merchandise", () => {
     const state = experience(detroit, "doors_open", "unknown", "outside_venue");
     expect(state.showExclusivePurchasable).toBe(false);
+  });
+
+  it("returning fan after the show gets history-only treatment without fabricated credential", () => {
+    const state = experience(detroit, "t_plus_7", "returning_fan", "outside_venue", "second_show");
+    expect(state.holdsShowCredential).toBe(false);
+    expect(state.showExclusiveTreatment).toBe("closed");
+  });
+
+  it("returning fan before the show does not hold show credential", () => {
+    const state = experience(detroit, "t_minus_1", "returning_fan", "outside_venue", "second_show");
+    expect(state.holdsShowCredential).toBe(false);
   });
 });
 

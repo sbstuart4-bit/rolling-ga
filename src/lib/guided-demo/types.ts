@@ -1,7 +1,7 @@
 import type { DemoScenario } from "@/lib/demo-scenario/types";
 import type { DemoShowDefinition } from "@/lib/demo-scenario/shows";
 
-export const GUIDED_JOURNEY_IDS = ["degens-detroit"] as const;
+export const GUIDED_JOURNEY_IDS = ["nova-nashville", "degens-detroit"] as const;
 
 export type GuidedJourneyId = (typeof GUIDED_JOURNEY_IDS)[number];
 

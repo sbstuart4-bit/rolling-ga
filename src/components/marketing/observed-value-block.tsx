@@ -1,70 +1,78 @@
 import { ClaimLabel } from "@/components/marketing/claim-label";
 import { COHORT_METRICS, OBSERVED_FAN_VALUE } from "@/components/marketing/marketing-fixtures";
-import { DeckStat } from "@/components/marketing/visual/deck-stat";
-import { RevenueWaterfall } from "@/components/marketing/visual/revenue-waterfall";
-import { ScrollReveal } from "@/components/marketing/visual/scroll-reveal";
-import { cn } from "@/lib/utils";
 
-const SPARK_HEIGHTS = [42, 68, 55, 72, 48, 80];
-
+/**
+ * One fan's observed value, then the cohort metrics behind it.
+ *
+ * Set as type on rules rather than as stat cards: the numbers are a worked demo
+ * example, and dressing them as a dashboard implies a track record we do not
+ * have. The arithmetic is shown in one line so the split between show-night and
+ * attributed post-show commerce is the point, not the styling.
+ */
 export function ObservedValueBlock() {
   return (
-    <div className="space-y-10">
-      <RevenueWaterfall />
+    <div className="max-w-5xl">
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-4 border-t border-world-rule pt-8">
+        <Figure amount={`$${OBSERVED_FAN_VALUE.showNight}`} label="Show night" />
+        <span aria-hidden className="mk-display text-3xl text-world-muted md:text-5xl">
+          +
+        </span>
+        <Figure amount={`$${OBSERVED_FAN_VALUE.postShow}`} label="Post-show" />
+        <span aria-hidden className="mk-display text-3xl text-world-muted md:text-5xl">
+          =
+        </span>
+        <Figure
+          amount={`$${OBSERVED_FAN_VALUE.total}`}
+          label="Observed fan value"
+          trailing={<ClaimLabel kind="demo" />}
+        />
+      </div>
 
-      <ScrollReveal>
-        <dl className="grid gap-4 sm:grid-cols-3">
-          <DeckStat value={`$${OBSERVED_FAN_VALUE.showNight}`} label="Show night" />
-          <DeckStat value={`+$${OBSERVED_FAN_VALUE.postShow}`} label="Post-show" featured />
-          <DeckStat
-            value={`$${OBSERVED_FAN_VALUE.total}`}
-            label="Observed fan value"
-            featured
-            trailing={<ClaimLabel kind="demo" />}
-          />
-        </dl>
-      </ScrollReveal>
-
-      <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-        Rolling GA separates show-night commerce from provably attributed post-show commerce so
-        artists can measure what their verified audience actually generates. This is historical
-        commerce tied to verified attendance — not a predictive LTV model.
+      <p className="mk-body mt-10 max-w-2xl text-base leading-relaxed text-world-muted">
+        Show-night commerce is separated from provably attributed post-show commerce, so the number
+        describes what a verified audience actually generated. It is historical commerce tied to
+        verified attendance &mdash; not a predictive lifetime-value model.
       </p>
 
-      <div>
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <p className="eyebrow text-muted-foreground">Cohort metrics</p>
+      <div className="mt-20">
+        <div className="mb-2 flex flex-wrap items-center gap-3">
+          <p className="mk-kicker text-world-muted">Cohort metrics</p>
           <ClaimLabel kind="illustrative" />
         </div>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {COHORT_METRICS.map((metric, index) => (
-            <ScrollReveal key={metric.label} delay={index * 40}>
-              <li className="deck-card rounded-xl border-white/8 bg-[#161618] px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{metric.label}</p>
-                <p className="mt-1 font-display text-2xl tabular">{metric.value}</p>
-                <SparkBar height={SPARK_HEIGHTS[index % SPARK_HEIGHTS.length] ?? 50} />
-              </li>
-            </ScrollReveal>
+        <dl className="grid gap-x-14 sm:grid-cols-2 lg:grid-cols-3">
+          {COHORT_METRICS.map((metric) => (
+            <div
+              key={metric.label}
+              className="flex items-baseline justify-between gap-6 border-t border-world-rule py-5"
+            >
+              <dt className="mk-kicker text-world-muted">{metric.label}</dt>
+              <dd className="mk-display text-2xl tabular-nums">{metric.value}</dd>
+            </div>
           ))}
-        </ul>
+        </dl>
       </div>
     </div>
   );
 }
 
-function SparkBar({ height }: { height: number }) {
+function Figure({
+  amount,
+  label,
+  trailing,
+}: {
+  amount: string;
+  label: string;
+  trailing?: React.ReactNode;
+}) {
   return (
-    <div className="mt-3 flex h-8 items-end gap-0.5" aria-hidden>
-      {Array.from({ length: 8 }).map((_, i) => (
-        <span
-          key={i}
-          className={cn(
-            "flex-1 rounded-sm bg-primary/30",
-            i === 5 ? "bg-primary/80" : "",
-          )}
-          style={{ height: `${Math.max(20, height - Math.abs(i - 5) * 8)}%` }}
-        />
-      ))}
+    <div>
+      <p className="mk-display mk-display-tight text-[clamp(2.5rem,6vw,5rem)] tabular-nums">
+        {amount}
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <p className="mk-kicker text-world-muted">{label}</p>
+        {trailing}
+      </div>
     </div>
   );
 }

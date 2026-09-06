@@ -191,6 +191,7 @@ export function resolveMerchExperience(input: MerchExperienceInput): MerchExperi
   } = input;
 
   const hasAttendanceCredential = fanStateHasAttendanceCredential(fanState);
+  const holdsShowCredential = hasAttendanceCredential;
   const venuePresenceActive = isVenuePresenceActive(timePhase, location);
   const phase = resolvePhaseFromTime(show, timePhase, now);
   const relationshipTreatment = relationshipMessage(
@@ -215,23 +216,28 @@ export function resolveMerchExperience(input: MerchExperienceInput): MerchExperi
     merchOverrideActive: false,
     hasAttendanceCredential,
     venuePresenceActive,
+    holdsShowCredential,
   };
 
   switch (phase) {
     case "pre_early":
+      state.coreMerchVisible = false;
+      state.coreMerchPurchasable = false;
       state.showExclusiveVisibility = "teaser";
       state.showExclusiveTreatment = "teaser";
       state.primaryMessage = `Something exclusive is coming to ${show.city}.`;
       state.reason =
-        "T-30 to T-15: core merch is open; show exclusives are teaser-only.";
+        "T-30: discover the show only — no merch yet; exclusives teased.";
       break;
 
     case "pre_mid":
+      state.coreMerchVisible = true;
+      state.coreMerchPurchasable = true;
       state.showExclusiveVisibility = "visible";
       state.showExclusiveTreatment = "visible_locked";
       state.primaryMessage = "Available at the show";
       state.reason =
-        "T-14 to T-8: selected show exclusives visible but locked.";
+        "T-14 to T-8: core tour merch opens; selected show exclusives visible but locked.";
       break;
 
     case "pre_late":
@@ -310,12 +316,13 @@ export function resolveMerchExperience(input: MerchExperienceInput): MerchExperi
 
     case "show_ended_attended":
       state.showExclusiveVisibility = "visible";
-      if (hasAttendanceCredential || venuePresenceActive) {
+      if (holdsShowCredential || venuePresenceActive) {
         state.showExclusiveTreatment = "unlocked";
         state.showExclusivePurchasable = true;
-        state.primaryMessage = "You were there";
-        state.reason =
-          "Show ended: qualified attendees can still purchase while transitioning to history.";
+        state.primaryMessage = holdsShowCredential ? "You were there" : "You're here · Tonight's drop is unlocked";
+        state.reason = holdsShowCredential
+          ? "Show ended: qualified attendees can still purchase while transitioning to history."
+          : "Show ended with venue presence before credential is issued.";
       } else {
         state.showExclusiveTreatment = "visible_locked";
         state.primaryMessage = "Unlocks at the show";
@@ -325,7 +332,7 @@ export function resolveMerchExperience(input: MerchExperienceInput): MerchExperi
 
     case "post_day_1":
       state.showExclusiveVisibility = "visible";
-      if (hasAttendanceCredential) {
+      if (holdsShowCredential) {
         state.showExclusiveTreatment = "last_chance";
         state.showExclusivePurchasable = true;
         state.primaryMessage = "Last chance · 24 hours left";
@@ -343,15 +350,17 @@ export function resolveMerchExperience(input: MerchExperienceInput): MerchExperi
     case "post_day_2":
     case "post_archived":
       state.showExclusiveVisibility = "visible";
-      state.showExclusiveTreatment = "closed";
       state.showExclusivePurchasable = false;
-      state.primaryMessage = "Show exclusive — closed";
-      state.reason =
-        "T+2 onward: show exclusives visible in history but not purchasable.";
-      if (hasAttendanceCredential) {
+      if (holdsShowCredential) {
         state.showExclusiveTreatment = "history_only";
+        state.primaryMessage = "Show exclusive — closed";
         state.reason =
           "Attendee history: product remains evidence of the show, not an active SKU.";
+      } else {
+        state.showExclusiveTreatment = "closed";
+        state.primaryMessage = "Show exclusive — closed";
+        state.reason =
+          "T+2 onward: show exclusives visible in history but not purchasable.";
       }
       break;
   }

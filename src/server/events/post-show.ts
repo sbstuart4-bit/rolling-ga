@@ -7,6 +7,7 @@ import { getCredential } from "@/server/attendance/queries";
 import { getStayConnectedState, type StayConnectedState } from "@/server/consent/service";
 import type { EventPageContext } from "./context";
 import { listEventContent } from "./queries";
+import { shouldSuppressGuidedDemoEventOrders } from "@/server/demo/guided-demo-purchase-filter";
 import { loadEventShopCatalog } from "./shop";
 
 export interface PostShowOrderLine {
@@ -74,20 +75,24 @@ export async function loadPostShowHub(
     ({ eligibility }) => eligibility.eligible,
   ).length;
 
+  const suppressOrders = await shouldSuppressGuidedDemoEventOrders(event.id);
+
   return {
     credential,
     storeOpen,
     purchasableDropCount,
     purchasableProductCount,
-    orders: orderRows.map((row) => ({
-      orderId: row.orderId,
-      orderNumber: row.orderNumber,
-      name: row.itemName,
-      size: row.itemSize,
-      quantity: row.quantity,
-      totalCents: row.totalCents,
-      placedAt: row.placedAt,
-    })),
+    orders: suppressOrders
+      ? []
+      : orderRows.map((row) => ({
+          orderId: row.orderId,
+          orderNumber: row.orderNumber,
+          name: row.itemName,
+          size: row.itemSize,
+          quantity: row.quantity,
+          totalCents: row.totalCents,
+          placedAt: row.placedAt,
+        })),
     content,
     stayConnectedState,
   };

@@ -65,12 +65,21 @@ export function EventShopClosedBanner() {
   );
 }
 
-export function EventShopEmptyState({ eventSlug, artistName }: { eventSlug: string; artistName: string }) {
+export function EventShopEmptyState({
+  eventSlug,
+  artistName,
+  message,
+}: {
+  eventSlug: string;
+  artistName: string;
+  message?: string;
+}) {
   return (
     <div className="rounded-2xl border border-artist-border bg-artist-surface px-6 py-16 text-center">
       <p className="font-artist text-lg text-artist-fg">Nothing live yet</p>
       <p className="mt-2 text-sm text-artist-muted">
-        {artistName} hasn&apos;t opened the shop for this show. Check back closer to doors.
+        {message ??
+          `${artistName} hasn\u2019t opened the shop for this show. Check back closer to doors.`}
       </p>
       <Button
         asChild
@@ -151,14 +160,14 @@ export function EventShopDropSection({
         {drop.artworkUrl && (
           <Link
             href={`/drop/${drop.slug}?artistId=${artistId}&e=${eventSlug}`}
-            className="relative block aspect-[4/5] overflow-hidden rounded-2xl border border-artist-border"
+            className="relative block aspect-[3/2] max-h-44 overflow-hidden rounded-2xl border border-artist-border bg-artist-bg sm:max-h-48"
           >
             <Image
               src={drop.artworkUrl}
               alt=""
               fill
-              sizes="(min-width: 768px) 672px, 100vw"
-              className="object-cover"
+              sizes="(min-width: 768px) 420px, 100vw"
+              className="object-contain p-1"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-artist-bg/80 via-transparent to-transparent" />
             <div className="absolute inset-x-0 bottom-0 space-y-1 p-4">

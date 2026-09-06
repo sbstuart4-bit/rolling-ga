@@ -118,3 +118,8 @@ export function resolveDropProductPresentation(
     locked: false,
   };
 }
+
+/** Whether the Drops tab should list purchasable or preview merch for the active demo phase. */
+export function shouldShowDropsMerch(experience: MerchExperienceState): boolean {
+  return experience.coreMerchVisible || experience.showExclusiveVisibility === "visible";
+}

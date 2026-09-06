@@ -30,7 +30,7 @@ export function EventShopProductCard({
   return (
     <article className="overflow-hidden rounded-2xl border border-artist-border bg-artist-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <Link href={href} className="group block" aria-label={locked ? `${name}, locked` : name}>
-        <div className="relative aspect-[4/5] bg-artist-bg">
+        <div className="relative aspect-[3/4] max-h-44 bg-artist-bg">
           {image ? (
             <Image
               src={image}

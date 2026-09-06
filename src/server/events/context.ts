@@ -5,19 +5,28 @@ import { enrichResolvedTheme } from "@/lib/demo-theme-assets";
 import { resolveEventTheme } from "@/server/theme/resolve";
 import { hasVerifiedAttendance } from "@/server/verification/service";
 import { demoNow } from "@/server/demo/clock";
+import { resolveDemoAwareEventTiming } from "@/server/demo/demo-event-timing";
+import { getPersistedDemoScenario } from "@/server/demo/scenario-state";
+import { resolveEventFanExperience } from "@/server/demo/scenario-access";
+import type { FanExperienceState } from "@/lib/fan-experience/access-state";
+import { hasEarnedCredential } from "@/lib/fan-experience/access-state";
 import {
   getEventBySlug,
   verificationWindowFor,
-  withTiming,
   type EventRow,
 } from "./queries";
 
 export interface EventPageContext {
   event: EventRow;
-  timing: ReturnType<typeof withTiming>["timing"];
+  timing: import("@/lib/event-state").EventStateResult;
   theme: ResolvedTheme;
-  isVerifiedAttendee: boolean;
+  fanExperience: FanExperienceState;
   verification: { opensAt: Date; closesAt: Date; open: boolean };
+}
+
+/** @deprecated Use fanExperience.credential === "earned". */
+export function isVerifiedAttendeeFromContext(page: EventPageContext): boolean {
+  return hasEarnedCredential(page.fanExperience);
 }
 
 /**
@@ -31,10 +40,20 @@ export const loadEventPage = cache(
     const event = await getEventBySlug(slug);
     if (!event) return null;
 
-    const [rawTheme, isVerifiedAttendee] = await Promise.all([
+    const [rawTheme, realVerified, demoScenario] = await Promise.all([
       resolveEventTheme(event.id),
       hasVerifiedAttendance(userId, event.id),
+      getPersistedDemoScenario(),
     ]);
+
+    const now = demoNow();
+    const timing = resolveDemoAwareEventTiming(event, demoScenario, event.id, now);
+    const fanExperience = resolveEventFanExperience(
+      event.id,
+      demoScenario,
+      realVerified,
+      timing.state,
+    );
 
     const theme = enrichResolvedTheme(rawTheme, {
       artistId: event.artistId,
@@ -42,14 +61,13 @@ export const loadEventPage = cache(
       tourId: event.tourId,
     });
 
-    const now = demoNow();
     const window = verificationWindowFor(event);
 
     return {
       event,
-      timing: withTiming(event, now).timing,
+      timing,
       theme,
-      isVerifiedAttendee,
+      fanExperience,
       verification: {
         ...window,
         open: !event.cancelled && now >= window.opensAt && now <= window.closesAt,

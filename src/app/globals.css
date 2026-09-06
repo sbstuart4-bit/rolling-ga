@@ -66,6 +66,31 @@
   --color-artist-border: var(--artist-border);
   --font-artist: var(--artist-font);
 
+  /*
+   * Marketing "world" tokens. The homepage is one night: Rolling GA restraint
+   * frames it, and The Degens take the site over while their story is told.
+   * `[data-world]` swaps the underlying values, so `text-world-fg` or
+   * `bg-world-accent` mean different things inside a takeover — the same idea
+   * as the artist takeover, applied to marketing.
+   */
+  --color-world-bg: var(--world-bg);
+  --color-world-fg: var(--world-fg);
+  --color-world-muted: var(--world-muted);
+  --color-world-rule: var(--world-rule);
+  --color-world-accent: var(--world-accent);
+  --color-world-accent-fg: var(--world-accent-fg);
+  --color-world-red: var(--world-red);
+
+  /* Approved marketing site tokens (mockup reference system). */
+  --color-mkt-bg: var(--mkt-bg);
+  --color-mkt-fg: var(--mkt-fg);
+  --color-mkt-muted: var(--mkt-muted);
+  --color-mkt-purple: var(--mkt-purple);
+  --color-mkt-purple-fg: var(--mkt-purple-fg);
+  --color-mkt-border: var(--mkt-border);
+  --color-mkt-surface: var(--mkt-surface);
+  --color-mkt-surface-light: var(--mkt-surface-light);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -133,6 +158,89 @@
   --artist-accent-2: var(--brand-pink);
   --artist-border: var(--border);
   --artist-font: var(--font-inter);
+
+  /* World fallbacks so marketing utilities stay legible outside a takeover. */
+  --world-bg: #08080a;
+  --world-fg: #edebe4;
+  --world-muted: #85857d;
+  --world-rule: rgba(237, 235, 228, 0.12);
+  --world-accent: #edebe4;
+  --world-accent-fg: #08080a;
+  --world-red: #ff4a28;
+
+  /*
+   * Approved marketing site palette — black / white / Rolling GA purple.
+   * Matches docs/website-reference mockups. Used by `[data-mkt="site"]`.
+   */
+  --mkt-bg: #0a0a0a;
+  --mkt-fg: #ffffff;
+  --mkt-muted: #a1a1aa;
+  --mkt-purple: #7b3cff;
+  --mkt-purple-fg: #ffffff;
+  --mkt-border: rgba(255, 255, 255, 0.12);
+  --mkt-surface: #141414;
+  --mkt-surface-light: #f5f5f7;
+}
+
+/*
+ * Rolling GA's marketing identity: near-black, bone, hairlines, no colour of
+ * its own. It is deliberately the quietest thing on the page so the artist can
+ * be the loudest.
+ */
+[data-world="rga"] {
+  --world-bg: #08080a;
+  --world-fg: #edebe4;
+  --world-muted: #85857d;
+  --world-rule: rgba(237, 235, 228, 0.12);
+  --world-accent: #edebe4;
+  --world-accent-fg: #08080a;
+  --world-red: #ff4a28;
+}
+
+/* The Degens. Same values the product serves to the fan in the venue. */
+[data-world="degens"] {
+  --world-bg: #0b0b0c;
+  --world-fg: #f3f3f0;
+  --world-muted: #8b8b85;
+  --world-rule: #28282c;
+  --world-accent: #d8ff3e;
+  --world-accent-fg: #0b0b0c;
+  --world-red: #ff4a28;
+}
+
+/*
+ * Inside a marketing world, the shadcn primitives borrow the world's accent
+ * instead of Rolling GA's product purple. This is what keeps the older
+ * marketing pages — which are still reachable, just de-emphasised — from
+ * looking like a different site.
+ */
+[data-world] {
+  background-color: var(--world-bg);
+  color: var(--world-fg);
+  --background: var(--world-bg);
+  --foreground: var(--world-fg);
+  --muted-foreground: var(--world-muted);
+  --border: var(--world-rule);
+  --primary: var(--world-accent);
+  --primary-foreground: var(--world-accent-fg);
+  --ring: var(--world-accent);
+  --brand-pink: var(--world-red);
+}
+
+/*
+ * Approved marketing site shell — nav, footer, and forthcoming mockup pages.
+ * Purple-forward; distinct from the legacy editorial `[data-world]` beats.
+ */
+[data-mkt="site"] {
+  background-color: var(--mkt-bg);
+  color: var(--mkt-fg);
+  --background: var(--mkt-bg);
+  --foreground: var(--mkt-fg);
+  --muted-foreground: var(--mkt-muted);
+  --border: var(--mkt-border);
+  --primary: var(--mkt-purple);
+  --primary-foreground: var(--mkt-purple-fg);
+  --ring: var(--mkt-purple);
 }
 
 .dark {
@@ -303,6 +411,260 @@
   .marketing-scroll-reveal-visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /*
+   * Marketing display type. Bebas Neue set far tighter than the product uses
+   * it, because these lines are meant to be read as posters rather than as
+   * headings. `text-wrap: balance` keeps three-word lines from orphaning.
+   */
+  .mk-display {
+    font-family: var(--font-display), var(--font-sans);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.84;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+  .mk-display-tight {
+    line-height: 0.78;
+  }
+  .mk-kicker {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+  .mk-body {
+    font-family: var(--font-editorial), var(--font-sans);
+    line-height: 1.5;
+  }
+  /* Screenprint halftone. Sits over artwork to unify photography and type. */
+  .mk-print::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: radial-gradient(#fff 0.5px, transparent 0.5px);
+    background-size: 3px 3px;
+  }
+  /* Hard flash: light falls off fast, the way a venue photo does. */
+  .mk-flash {
+    background:
+      radial-gradient(ellipse 60% 45% at 50% 18%, rgba(255, 255, 255, 0.1), transparent 70%),
+      linear-gradient(to bottom, transparent 30%, var(--world-bg) 100%);
+  }
+  /* Masking tape holding a flyposted sheet to a wall. */
+  .mk-tape {
+    background:
+      linear-gradient(180deg, rgba(232, 226, 205, 0.82), rgba(198, 190, 168, 0.72));
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  }
+
+  /*
+   * Approved mockup utilities — docs/website-reference.
+   * Condensed display headlines, purple eyebrows, pill CTAs.
+   */
+  .mkt-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--mkt-purple);
+  }
+  .mkt-display {
+    font-family: var(--font-display), var(--font-sans);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+  .mkt-body {
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    color: var(--mkt-muted);
+  }
+  .mkt-section-dark {
+    background-color: var(--mkt-bg);
+    color: var(--mkt-fg);
+  }
+  .mkt-section-light {
+    background-color: var(--mkt-surface-light);
+    color: #0a0a0a;
+  }
+  .mkt-section-muted {
+    background-color: var(--mkt-surface);
+    color: var(--mkt-fg);
+  }
+  .mkt-how-it-works-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  @media (min-width: 768px) {
+    .mkt-how-it-works-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 2.5rem;
+      row-gap: 5rem;
+    }
+  }
+  @media (min-width: 1440px) {
+    .mkt-how-it-works-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      column-gap: 2rem;
+      row-gap: 0;
+    }
+  }
+  .mkt-how-it-works-unit {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1.75rem;
+  }
+  .mkt-how-it-works-unit:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  @media (min-width: 768px) {
+    .mkt-how-it-works-unit {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+  .mkt-how-it-works-copy {
+    height: auto;
+    overflow: visible;
+  }
+  @media (min-width: 768px) {
+    .mkt-how-it-works-copy {
+      height: 10rem;
+      overflow: hidden;
+    }
+  }
+  .mkt-how-it-works-phone {
+    width: 85%;
+    max-width: 85%;
+    margin-top: 1rem;
+  }
+  @media (min-width: 768px) {
+    .mkt-how-it-works-phone {
+      width: 100%;
+      max-width: min(100%, 300px);
+      margin-top: 2rem;
+    }
+  }
+  @media (min-width: 1440px) {
+    .mkt-how-it-works-phone {
+      margin-top: 2.5rem;
+      max-width: 300px;
+    }
+  }
+  .mkt-how-it-works-separator {
+    display: block;
+    margin-top: 1rem;
+    line-height: 1;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.2);
+  }
+  @media (min-width: 768px) {
+    .mkt-how-it-works-separator {
+      display: none;
+    }
+  }
+  .mkt-partners-stakeholder-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.625rem;
+  }
+  @media (min-width: 768px) {
+    .mkt-partners-stakeholder-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .mkt-partners-stakeholder-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+    .mkt-partners-stakeholder-grid > li:nth-child(-n + 3) {
+      grid-column: span 2;
+    }
+    .mkt-partners-stakeholder-grid > li:nth-child(4) {
+      grid-column: 2 / span 2;
+    }
+    .mkt-partners-stakeholder-grid > li:nth-child(5) {
+      grid-column: 4 / span 2;
+    }
+  }
+  .mkt-partners-stakeholder-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(18, 8, 24, 0.9), rgba(12, 12, 12, 0.95));
+    padding: 1rem;
+  }
+  @media (min-width: 768px) {
+    .mkt-partners-stakeholder-card {
+      padding: 1.25rem 1.375rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .mkt-partners-stakeholder-card {
+      padding: 1.375rem 1.5rem;
+    }
+  }
+  .mkt-partners-stakeholder-card--accent-left {
+    border-left: 2px solid rgba(123, 60, 255, 0.65);
+  }
+  .mkt-partners-stakeholder-card--accent-top {
+    border-top: 2px solid rgba(123, 60, 255, 0.45);
+  }
+  .mkt-about-thesis-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  @media (min-width: 1024px) {
+    .mkt-about-thesis-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      column-gap: 1.5rem;
+    }
+  }
+  .mkt-about-thesis-step {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .mkt-about-thesis-step {
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0;
+      padding-right: 1.5rem;
+    }
+    .mkt-about-thesis-step:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+  }
+  .mkt-about-thesis-separator {
+    display: block;
+    margin-top: 1.25rem;
+    line-height: 1;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.25);
+  }
+  @media (min-width: 1024px) {
+    .mkt-about-thesis-separator {
+      display: none;
+    }
   }
 }
 

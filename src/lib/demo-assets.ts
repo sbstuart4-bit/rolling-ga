@@ -93,6 +93,11 @@ export const THE_DEGENS_DEMO_ASSETS = {
   products: THE_DEGENS_PRODUCT_IMAGES,
 } as const;
 
+/** Nova Kestrel — brand hero and Nashville show photography. */
+export const NOVA_KESTREL_DEMO_ASSETS = {
+  hero: "/demo/hero-nova-kestrel.png",
+} as const;
+
 export type TheDegensDropArtworkKey = keyof typeof THE_DEGENS_DEMO_ASSETS.dropPosters;
 
 /** Artist brand imagery (logo + hero) where static png art exists. */
@@ -103,11 +108,15 @@ export const DEMO_ARTIST_BRAND_IMAGES: Partial<
     logoUrl: THE_DEGENS_DEMO_ASSETS.logo,
     heroImageUrl: THE_DEGENS_DEMO_ASSETS.tourHero,
   },
+  art_nova_kestrel: {
+    heroImageUrl: NOVA_KESTREL_DEMO_ASSETS.hero,
+  },
 };
 
 /** City hero art for seeded event themes. */
 export const DEMO_EVENT_CITY_IMAGES: Partial<Record<string, string>> = {
   evt_atlas_detroit: THE_DEGENS_DEMO_ASSETS.cityDetroit,
+  evt_nova_nashville: NOVA_KESTREL_DEMO_ASSETS.hero,
 };
 
 export function demoProductImage(productId: string): string | undefined {

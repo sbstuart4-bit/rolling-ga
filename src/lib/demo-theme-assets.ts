@@ -7,6 +7,7 @@
 import {
   demoArtistBrandImages,
   demoEventCityImage,
+  NOVA_KESTREL_DEMO_ASSETS,
   THE_DEGENS_DEMO_ASSETS,
 } from "@/lib/demo-assets";
 import type { ResolvedTheme } from "@/lib/theme";
@@ -38,6 +39,7 @@ export function resolveDemoThemeUrl(
 
 const TOUR_ARTWORK_BY_ID: Partial<Record<string, string>> = {
   tor_signal_decay: THE_DEGENS_DEMO_ASSETS.tourHero,
+  tor_gold_hour: NOVA_KESTREL_DEMO_ASSETS.hero,
 };
 
 export function enrichResolvedTheme(

@@ -22,7 +22,7 @@ export const DEGENS_DETROIT_STEPS: GuidedDemoStep[] = [
     step: 1,
     title: "Discover the show",
     whatFanSees:
-      "The Degens are coming to Detroit. Core merch is available now and something exclusive is being teased for the show.",
+      "The Degens are coming to Detroit. The fan can learn about the show, but no merch is visible yet.",
     whatChanged: "Nothing has been claimed yet. The fan is still anonymous to this show.",
     whyItMatters: "Rolling GA can begin the relationship before the fan enters the venue.",
     scenario: {
@@ -34,9 +34,9 @@ export const DEGENS_DETROIT_STEPS: GuidedDemoStep[] = [
     },
     route: "/event/{slug}",
     presenter: {
-      say: "The fan can browse core tour merch, but Detroit exclusives are only teased.",
-      pointOut: "Locked or teaser treatment on show-exclusive products.",
-      next: "Move closer to show night — more of the assortment becomes visible.",
+      say: "The fan discovers the show a month out — no merch, no credential, just the relationship starting.",
+      pointOut: "Show date, city, and teaser copy only. Drops and event shop stay empty.",
+      next: "Move to T-14 — tour merch opens on Drops and Detroit exclusives become visible but locked.",
     },
   }),
   step({
@@ -171,8 +171,9 @@ export const DEGENS_DETROIT_STEPS: GuidedDemoStep[] = [
   step({
     step: 8,
     title: "The fan buys",
-    whatFanSees: "A normal checkout experience.",
-    whatChanged: "The fan is now both a verified attendee and a purchasing fan.",
+    whatFanSees:
+      "A normal checkout experience at the venue — show exclusives unlocked by geofence, not credential yet.",
+    whatChanged: "The fan is purchasing inside the venue before post-show credential issuance.",
     whyItMatters:
       "Rolling GA connects attendance and commerce into one relationship history.",
     scenario: {

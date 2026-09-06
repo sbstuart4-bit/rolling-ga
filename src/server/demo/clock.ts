@@ -1,12 +1,16 @@
 import "server-only";
 
+import { cookies } from "next/headers";
+import { DEMO_CLOCK_COOKIE } from "@/lib/auth-cookies";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import {
   DAY_MS,
   DEMO_CLOCK_MAX_DAYS,
   DEMO_CLOCK_MAX_HOURS,
+  DEMO_CLOCK_MIN_OFFSET_MS,
   DEMO_CLOCK_RANGE_MS,
   demoAnchorDate,
+  demoClockOffsetForDate,
   demoShowDate,
   daysAndHoursToOffset,
   HOUR_MS,
@@ -28,7 +32,10 @@ function readOffsetMs(): number {
 /** Ignored outside demo mode, so no caller can shift business time in production. */
 function writeOffsetMs(ms: number): void {
   if (!demoModeEnabled()) return;
-  globalForClock.__rollingGaDemoClockOffsetMs = Math.max(0, Math.min(ms, DEMO_CLOCK_RANGE_MS));
+  globalForClock.__rollingGaDemoClockOffsetMs = Math.max(
+    DEMO_CLOCK_MIN_OFFSET_MS,
+    Math.min(ms, DEMO_CLOCK_RANGE_MS),
+  );
 }
 
 /**
@@ -85,6 +92,48 @@ export function setDemoClockDaysAndHours(days: number, hours: number): void {
   writeOffsetMs(daysAndHoursToOffset(days, hours));
 }
 
+export function setDemoClockToDate(date: Date): void {
+  writeOffsetMs(demoClockOffsetForDate(date));
+}
+
 export function resetDemoClock(): void {
   writeOffsetMs(0);
+}
+
+export async function persistDemoClockOffset(): Promise<void> {
+  if (!demoModeEnabled()) return;
+  try {
+    const jar = await cookies();
+    jar.set(DEMO_CLOCK_COOKIE, String(readOffsetMs()), {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 8,
+    });
+  } catch {
+    // cookies() unavailable outside a request
+  }
+}
+
+export async function hydrateDemoClockFromCookie(): Promise<void> {
+  if (!demoModeEnabled()) return;
+  try {
+    const jar = await cookies();
+    const raw = jar.get(DEMO_CLOCK_COOKIE)?.value;
+    if (!raw) return;
+    const offset = Number.parseInt(raw, 10);
+    if (Number.isFinite(offset)) writeOffsetMs(offset);
+  } catch {
+    // cookies() unavailable outside a request
+  }
+}
+
+export async function clearDemoClockCookie(): Promise<void> {
+  if (!demoModeEnabled()) return;
+  try {
+    const jar = await cookies();
+    jar.delete(DEMO_CLOCK_COOKIE);
+  } catch {
+    // ignore
+  }
 }

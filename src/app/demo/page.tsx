@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Disc3, Mic2, ShieldCheck, Truck } from "lucide-react";
 import { AuthSplashBackdrop } from "@/components/auth/auth-splash-backdrop";
 import { RollingGaLogo } from "@/components/brand/rolling-ga-mark";
 import { DemoPerspectiveSelector } from "@/components/demo/demo-perspective-selector";
+import { DemoPerspectiveScroll } from "@/components/demo/demo-perspective-scroll";
 import { GuidedDemoModeSelector } from "@/components/demo/guided-demo-mode-selector";
 import { DemoOpsControls } from "@/components/demo/demo-ops-controls";
 import { DemoClockControls } from "@/components/demo/demo-clock-controls";
 import { DemoScenarioControls } from "@/components/demo/demo-scenario-controls";
 import { DemoSessionReset } from "@/components/demo/demo-session-reset";
 import { Button } from "@/components/ui/button";
-import { parseDemoPerspective } from "@/lib/demo-perspective";
+import { DEMO_PERSPECTIVE_LABELS, parseDemoPerspective } from "@/lib/demo-perspective";
 import { ROLE_LABELS, type PlatformRole } from "@/lib/types";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { hostedDemoBoardGateRequired } from "@/lib/production-env";
 import { demoModeEnabled, listDemoAccounts, type DemoAccount } from "@/server/demo/accounts";
 import { getDemoClockState } from "@/server/demo/clock";
 import { getDemoScenario } from "@/server/demo/scenario-state";
-import { startPersonaAction, startScottDetroitLiveAction } from "@/server/demo/persona-actions";
+import { startPersonaAction, startScottNovaNashvilleLiveAction } from "@/server/demo/persona-actions";
 
 export const metadata: Metadata = { title: "Demo board — Rolling GA" };
 export const dynamic = "force-dynamic";
@@ -68,10 +70,12 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#121212]">
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <AuthSplashBackdrop />
+      </div>
       <DemoSessionReset />
-      <AuthSplashBackdrop />
 
-      <div className="relative flex flex-col items-center px-6 pt-14 pb-10 text-center">
+      <div className="relative z-10 flex flex-col items-center px-6 pt-14 pb-10 text-center">
         <Link href="/demo" className="inline-block" aria-label="Rolling GA demo board">
           <RollingGaLogo size="default" />
         </Link>
@@ -79,8 +83,19 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
         <p className="mt-2 max-w-sm text-sm text-muted-foreground text-balance">{SUBTITLE[perspective]}</p>
       </div>
 
-      <div className="relative mx-auto w-full max-w-3xl flex-1 space-y-10 px-6 pb-16">
+      <div className="relative z-10 mx-auto w-full max-w-3xl flex-1 space-y-10 px-6 pb-16">
         <DemoPerspectiveSelector active={perspective} />
+
+        <div id="demo-perspective-content" className="scroll-mt-6 space-y-10">
+        <Suspense fallback={null}>
+          <DemoPerspectiveScroll />
+        </Suspense>
+        <p className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+          Viewing:{" "}
+          <span className="font-semibold text-foreground">
+            {DEMO_PERSPECTIVE_LABELS[perspective]}
+          </span>
+        </p>
 
         {perspective === "ops" && <DemoOpsControls />}
 
@@ -104,15 +119,15 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
               <section className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
                 <h2 className="text-lg font-semibold tracking-tight">Featured fan walkthrough</h2>
                 <p className="mt-2 text-sm text-muted-foreground text-balance">
-                  Sets the clock to Detroit live (June 30, 8:00 PM), signs in as Scott Weller, and
-                  opens The Degens at The Ironworks — ready to verify.
+                  Sets the clock to Nashville live (June 12, 8:00 PM), signs in as Scott Weller, and
+                  opens Nova Kestrel at Cedar & Vine — ready to verify.
                 </p>
-                <form action={startScottDetroitLiveAction} className="mt-4">
+                <form action={startScottNovaNashvilleLiveAction} className="mt-4">
                   <Button
                     type="submit"
                     className="h-11 w-full bg-primary uppercase tracking-wider hover:bg-primary/90 sm:w-auto"
                   >
-                    Start Detroit live as Scott
+                    Start Nashville live as Scott
                   </Button>
                 </form>
               </section>
@@ -144,6 +159,7 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
             </Link>
           </p>
         )}
+        </div>
       </div>
     </div>
   );

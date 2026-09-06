@@ -7,6 +7,7 @@ import type { GuidedDemoJourney, GuidedDemoStep, GuidedDemoSession } from "@/lib
 import { cn } from "@/lib/utils";
 import {
   exitGuidedDemoAction,
+  guidedDemoGoToStepAction,
   guidedDemoNextAction,
   guidedDemoPrevAction,
   toggleGuidedDemoAutoplayAction,
@@ -21,7 +22,12 @@ interface GuidedDemoPanelProps {
   step: GuidedDemoStep;
   session: GuidedDemoSession;
   totalSteps: number;
-  merchLabel: string;
+  accessLabel: string;
+  timeLabel: string;
+  fanLabel: string;
+  locationLabel: string;
+  credentialLabel: string;
+  purchaseLabel: string;
 }
 
 export function GuidedDemoPanel({
@@ -29,7 +35,12 @@ export function GuidedDemoPanel({
   step,
   session,
   totalSteps,
-  merchLabel,
+  accessLabel,
+  timeLabel,
+  fanLabel,
+  locationLabel,
+  credentialLabel,
+  purchaseLabel,
 }: GuidedDemoPanelProps) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [paused, setPaused] = React.useState(false);
@@ -81,7 +92,7 @@ export function GuidedDemoPanel({
     <aside
       className={cn(
         "guided-demo-panel flex flex-col border-border bg-[#0f0f10] text-foreground",
-        "w-full shrink-0 border-b md:h-[min(44rem,calc(100dvh-3rem))] md:w-[min(24rem,calc(100vw-26rem))] md:border-b-0 md:border-r",
+        "w-full shrink-0 border-t md:max-h-[min(52rem,calc(100dvh-2rem))] md:w-full md:overflow-hidden md:rounded-2xl md:border md:border-border/80",
       )}
       aria-label="Guided demo narration"
     >
@@ -117,8 +128,21 @@ export function GuidedDemoPanel({
                 Step {step.step} of {totalSteps}
               </p>
               <h2 className="mt-1 font-display text-xl tracking-wide">{step.title}</h2>
-              <p className="mt-1 text-xs text-muted-foreground">Merch: {merchLabel}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Access: {accessLabel}</p>
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                <span className="rounded-full border border-border/70 px-2 py-0.5">{timeLabel}</span>
+                <span className="rounded-full border border-border/70 px-2 py-0.5">{fanLabel}</span>
+                <span className="rounded-full border border-border/70 px-2 py-0.5">{locationLabel}</span>
+                <span className="rounded-full border border-border/70 px-2 py-0.5">{credentialLabel}</span>
+                <span className="rounded-full border border-border/70 px-2 py-0.5">{purchaseLabel}</span>
+              </div>
             </div>
+
+            <GuidedDemoStepRail
+              journeyId={session.journeyId}
+              steps={journey.steps}
+              currentStep={step.step}
+            />
 
             <NarrationBlock label="What the fan sees" body={step.whatFanSees} />
             <NarrationBlock label="What changed" body={step.whatChanged} />
@@ -236,6 +260,57 @@ function PresenterHint({ label, body }: { label: string; body: string }) {
         {label}
       </p>
       <p className="mt-0.5 text-sm">{body}</p>
+    </div>
+  );
+}
+
+function GuidedDemoStepRail({
+  journeyId,
+  steps,
+  currentStep,
+}: {
+  journeyId: GuidedDemoSession["journeyId"];
+  steps: GuidedDemoStep[];
+  currentStep: number;
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        Jump to step
+      </p>
+      <ol className="mt-2 grid gap-1">
+        {steps.map((journeyStep) => {
+          const active = journeyStep.step === currentStep;
+          return (
+            <li key={journeyStep.step}>
+              <form action={guidedDemoGoToStepAction}>
+                <input type="hidden" name="journeyId" value={journeyId} />
+                <input type="hidden" name="step" value={String(journeyStep.step)} />
+                <button
+                  type="submit"
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-colors",
+                    active
+                      ? "border-primary/50 bg-primary/10 text-foreground"
+                      : "border-border/60 bg-card/30 text-muted-foreground hover:border-border hover:bg-card/60 hover:text-foreground",
+                  )}
+                  aria-current={active ? "step" : undefined}
+                >
+                  <span
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold",
+                      active ? "bg-primary text-primary-foreground" : "bg-secondary",
+                    )}
+                  >
+                    {journeyStep.step}
+                  </span>
+                  <span className="min-w-0 truncate font-medium">{journeyStep.title}</span>
+                </button>
+              </form>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

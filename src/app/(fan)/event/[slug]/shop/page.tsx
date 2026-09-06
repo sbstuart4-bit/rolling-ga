@@ -14,7 +14,14 @@ import {
   EventShopUnlockBanner,
 } from "@/components/fan/event-shop/event-shop-sections";
 import { isAttendeeStoreOpen } from "@/lib/post-show-commerce";
+import {
+  canPreviewShop,
+  canPurchaseShowExclusives,
+  eventShopSubtitle,
+  eventShopTitle,
+} from "@/lib/event-shop-access";
 import { requireAuth } from "@/server/auth/request";
+import { demoNow } from "@/server/demo/clock";
 import { countCartItems } from "@/server/commerce/cart";
 import { loadEventPage } from "@/server/events/context";
 import { loadEventShopCatalog } from "@/server/events/shop";
@@ -33,10 +40,6 @@ export async function generateMetadata(
   };
 }
 
-/**
- * Event-scoped commerce hub. Lives inside the artist takeover so the fan never leaves
- * the show's visual world between verification and purchase.
- */
 export default async function EventShopPage(props: PageProps<"/event/[slug]/shop">) {
   const { slug } = await props.params;
   const ctx = await requireAuth(`/event/${slug}/shop`);
@@ -44,37 +47,36 @@ export default async function EventShopPage(props: PageProps<"/event/[slug]/shop
 
   if (!page) notFound();
 
-  const { event, timing, isVerifiedAttendee, theme } = page;
+  const { event, timing, theme, fanExperience } = page;
+  const now = demoNow();
+  const previewShop = canPreviewShop(fanExperience.access);
+  const purchaseOpen = canPurchaseShowExclusives(fanExperience.access);
+
   const [{ dropSections, standaloneProducts }, cartCount, bundleSections] = await Promise.all([
     loadEventShopCatalog(event, ctx.userId),
     countCartItems(ctx.userId),
     listActiveBundlesForEvent(event.id, event.artistId),
   ]);
 
+  const visibleDropSections = dropSections.filter(
+    (section) => timing.state !== "upcoming" || !section.notStarted,
+  );
+  const visibleStandaloneProducts = previewShop ? standaloneProducts : [];
+
   const hasCatalog =
-    dropSections.length > 0 || standaloneProducts.length > 0 || bundleSections.length > 0;
-  const activeFlash = dropSections.find(
+    visibleDropSections.length > 0 ||
+    visibleStandaloneProducts.length > 0 ||
+    bundleSections.length > 0;
+  const activeFlash = visibleDropSections.find(
     (section) => section.isFlash && !section.expired && !section.notStarted && section.drop.endsAt,
   );
 
   const storeOpen = isAttendeeStoreOpen(timing.state);
 
-  const shopTitle =
-    timing.state === "upcoming"
-      ? "What's coming tonight"
-      : timing.state === "recently_ended"
-        ? "Complete your collection"
-        : timing.state === "archived"
-          ? "From this show"
-          : "Tonight's Drop";
-
-  const shopSubtitle = !isVerifiedAttendee
-    ? timing.state === "upcoming"
-      ? "Preview what's waiting. Attendee-only pieces unlock when you're verified inside."
-      : "Verify at the venue to unlock pieces made for this room."
-    : storeOpen
-      ? "Attendee-exclusive pieces and post-show drops are unlocked for you."
-      : "The attendee store has closed. Your credential and past purchases remain in My Shows.";
+  const shopTitle = eventShopTitle(timing.state, event.startsAt, now);
+  const shopSubtitle = eventShopSubtitle(timing.state, fanExperience, storeOpen);
+  const shopUnlocked = purchaseOpen && storeOpen;
+  const shopLockedEarly = fanExperience.access === "discover_only" && timing.state === "upcoming";
 
   return (
     <div className="pb-safe-tabs">
@@ -88,24 +90,34 @@ export default async function EventShopPage(props: PageProps<"/event/[slug]/shop
       />
 
       <EventCommerceBody className="space-y-8 pt-6">
-        {isVerifiedAttendee && storeOpen && hasCatalog && <EventShopUnlockBanner />}
+        {shopUnlocked && hasCatalog && <EventShopUnlockBanner />}
 
         {timing.state === "recently_ended" &&
-          isVerifiedAttendee &&
+          purchaseOpen &&
           timing.postShowClosesAt &&
           storeOpen && <EventShopPostShowBanner closesAt={timing.postShowClosesAt.toISOString()} />}
 
-        {!storeOpen && isVerifiedAttendee && timing.state === "archived" && <EventShopClosedBanner />}
+        {!storeOpen && purchaseOpen && timing.state === "archived" && (
+          <EventShopClosedBanner />
+        )}
 
         {activeFlash?.drop.endsAt && (
           <EventShopFlashBanner endsAt={activeFlash.drop.endsAt.toISOString()} />
         )}
 
-        {!hasCatalog ? (
-          <EventShopEmptyState eventSlug={slug} artistName={event.artistName} />
+        {!hasCatalog || shopLockedEarly ? (
+          <EventShopEmptyState
+            eventSlug={slug}
+            artistName={event.artistName}
+            message={
+              shopLockedEarly
+                ? "Show-exclusive preview opens closer to show day. Browse Gold Hour tour merch on Drops."
+                : undefined
+            }
+          />
         ) : (
           <>
-            {dropSections.map(({ drop, products, expired, isFlash, notStarted }) => (
+            {visibleDropSections.map(({ drop, products, expired, isFlash, notStarted }) => (
               <EventShopDropSection
                 key={drop.id}
                 eventSlug={slug}
@@ -132,15 +144,15 @@ export default async function EventShopPage(props: PageProps<"/event/[slug]/shop
                 bundle={bundle}
                 items={items}
                 savingsCents={savingsCents}
-                canPurchase={isVerifiedAttendee && storeOpen}
+                canPurchase={shopUnlocked}
               />
             ))}
 
-            {standaloneProducts.length > 0 && (
+            {visibleStandaloneProducts.length > 0 && (
               <EventShopStandaloneSection
                 eventSlug={slug}
                 storeOpen={storeOpen}
-                products={standaloneProducts.map(({ product, eligibility }) => ({
+                products={visibleStandaloneProducts.map(({ product, eligibility }) => ({
                   product: {
                     id: product.id,
                     slug: product.slug,

@@ -10,19 +10,19 @@ import {
   type GuidedJourneyId,
 } from "@/lib/guided-demo";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
-import { demoClockForTimePhase } from "@/lib/demo-scenario/time-phases";
 import { createSession, destroySession } from "@/server/auth/session";
 import { getActiveEventToken } from "@/server/events/queries";
 import { setFanShowContextSlug } from "@/server/fans/show-context";
 import { verifyAttendance } from "@/server/verification/service";
 import { staffCodeForToken } from "@/server/verification/verifiers";
-import { setDemoClockDaysAndHours } from "./clock";
+import { applyDemoClockForPhase, applyDemoClockForPhaseInMemory } from "./apply-demo-clock";
 import { setDemoScenarioCookie } from "./scenario-state";
 import {
   getGuidedDemoSession,
   setGuidedDemoSession,
   type ActiveGuidedDemoContext,
 } from "./guided-demo-state";
+import { syncGuidedDemoFanRecords } from "./guided-demo-fan-reset";
 
 const SCOTT_EMAIL = "scott@example.com";
 
@@ -66,13 +66,14 @@ export async function loadGuidedStepContext(
 export async function applyGuidedStepState(ctx: ActiveGuidedDemoContext): Promise<void> {
   const { step, show, session } = ctx;
 
-  const { days, hours } = demoClockForTimePhase(show, step.scenario.timePhase);
-  setDemoClockDaysAndHours(days, hours);
+  await applyDemoClockForPhase(show, step.scenario.timePhase);
   await setDemoScenarioCookie(step.scenario);
   await setFanShowContextSlug(show.slug);
 
+  const userId = await ensureScottSession();
+  await syncGuidedDemoFanRecords(show, step, userId);
+
   if (step.verifyAttendance) {
-    const userId = await ensureScottSession();
     const token = await getActiveEventToken(show.eventId);
     if (token) {
       await verifyAttendance("staff_override", {
@@ -81,8 +82,6 @@ export async function applyGuidedStepState(ctx: ActiveGuidedDemoContext): Promis
         staffCode: staffCodeForToken(token.token),
       });
     }
-  } else {
-    await ensureScottSession();
   }
 
   await setGuidedDemoSession(session);
@@ -106,4 +105,12 @@ export async function ensureGuidedDemoFromSearchParams(
 
   await applyGuidedStepState(ctx);
   return ctx;
+}
+
+/**
+ * Re-applies the guided step clock in-memory on fan requests.
+ * Cookie writes stay in Server Actions only; scenario is read from the guided session via getEffectiveDemoScenario().
+ */
+export function syncGuidedDemoClock(ctx: ActiveGuidedDemoContext): void {
+  applyDemoClockForPhaseInMemory(ctx.show, ctx.step.scenario.timePhase);
 }

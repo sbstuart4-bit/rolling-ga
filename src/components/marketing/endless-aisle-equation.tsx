@@ -1,116 +1,83 @@
 import Image from "next/image";
 import { ClaimLabel } from "@/components/marketing/claim-label";
-import { ENDLESS_AISLE_EQUATION, MARKETING_PRODUCTS } from "@/components/marketing/marketing-fixtures";
-import { SplitCompare } from "@/components/marketing/visual/split-compare";
+import {
+  ENDLESS_AISLE_EQUATION,
+  MARKETING_PRODUCTS,
+} from "@/components/marketing/marketing-fixtures";
 
-const BOOTH_PRODUCTS = MARKETING_PRODUCTS.filter((p) => p.tag === "Booth" || p.tag === "City" || p.tag === "Show").slice(0, 8);
-const DIGITAL_PRODUCTS = MARKETING_PRODUCTS;
+/** The whole assortment, since the point of the section is that it is wider than a booth. */
+const ASSORTMENT = MARKETING_PRODUCTS;
 
+/**
+ * What the truck carries against what the catalogue can carry.
+ *
+ * The arithmetic is set as type on a rule rather than as three bordered stat
+ * cards, and the assortment is shown as the actual product photography instead
+ * of a side-by-side comparison panel.
+ */
 export function EndlessAisleEquation() {
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center gap-3">
-        <ClaimLabel kind="illustrative" />
-        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Numbers are illustrative</p>
-      </div>
-
-      <SplitCompare
-        leftLabel="At the booth tonight"
-        rightLabel="Rolling GA Endless Aisle"
-        left={<ProductFan products={BOOTH_PRODUCTS} compact />}
-        right={<ProductFan products={DIGITAL_PRODUCTS} scrollable accent />}
-      />
-
-      <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr_auto_1fr] sm:items-center">
-        <EquationCard value={ENDLESS_AISLE_EQUATION.booth} label="Products at the booth" />
-        <span className="hidden text-center font-display text-4xl text-muted-foreground sm:block" aria-hidden>
+    <div>
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-4 border-t border-world-rule pt-8">
+        <Figure value={ENDLESS_AISLE_EQUATION.booth} label="At the booth tonight" />
+        <span aria-hidden className="mk-display text-3xl text-world-muted md:text-5xl">
           +
         </span>
-        <EquationCard value={ENDLESS_AISLE_EQUATION.rollingGa} label="Rolling GA products" accent />
-        <span className="hidden text-center font-display text-4xl text-muted-foreground sm:block" aria-hidden>
+        <Figure value={ENDLESS_AISLE_EQUATION.rollingGa} label="On Rolling GA" />
+        <span aria-hidden className="mk-display text-3xl text-world-muted md:text-5xl">
           =
         </span>
-        <EquationCard value={ENDLESS_AISLE_EQUATION.total} label="Products available tonight" total />
+        <Figure
+          value={ENDLESS_AISLE_EQUATION.total}
+          label="Available tonight"
+          trailing={<ClaimLabel kind="illustrative" />}
+        />
       </div>
-      <p className="font-display text-2xl leading-tight sm:text-3xl">
+
+      <p className="mk-display mt-12 max-w-3xl text-[clamp(1.5rem,3.5vw,2.5rem)] leading-tight">
         Carry the greatest hits.
-        <br />
-        <span className="text-primary">Rolling GA carries the Endless Aisle.</span>
+        <span className="block text-world-muted">Rolling GA carries the rest.</span>
       </p>
+
+      {/* The assortment itself, at the size the fan browses it. */}
+      <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {ASSORTMENT.map((product) => (
+          <li key={product.name}>
+            <div className="relative aspect-square overflow-hidden">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                sizes="(min-width: 1024px) 200px, 45vw"
+                className="object-cover"
+              />
+            </div>
+            <p className="mk-kicker mt-3 text-world-muted">{product.name}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-function ProductFan({
-  products,
-  compact = false,
-  scrollable = false,
-  accent = false,
-}: {
-  products: readonly { name: string; image: string; tag: string }[];
-  compact?: boolean;
-  scrollable?: boolean;
-  accent?: boolean;
-}) {
-  return (
-    <div
-      className={
-        scrollable
-          ? "flex max-h-48 gap-2 overflow-x-auto pb-1"
-          : compact
-            ? "grid grid-cols-4 gap-2"
-            : "grid grid-cols-3 gap-2"
-      }
-    >
-      {products.map((product) => (
-        <div
-          key={product.name}
-          className={
-            scrollable
-              ? "relative size-16 shrink-0 overflow-hidden rounded-lg border border-white/10"
-              : "relative aspect-square overflow-hidden rounded-lg border border-white/10"
-          }
-        >
-          <Image src={product.image} alt={product.name} fill sizes="64px" className="object-cover" />
-          {accent && product.tag === "Endless Aisle" ? (
-            <span className="absolute inset-x-0 bottom-0 bg-primary/80 py-0.5 text-center text-[7px] font-bold uppercase text-primary-foreground">
-              EA
-            </span>
-          ) : null}
-        </div>
-      ))}
-      {scrollable ? (
-        <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-dashed border-primary/30 bg-primary/5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-          +18 more
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function EquationCard({
+function Figure({
   value,
   label,
-  accent = false,
-  total = false,
+  trailing,
 }: {
   value: number;
   label: string;
-  accent?: boolean;
-  total?: boolean;
+  trailing?: React.ReactNode;
 }) {
   return (
-    <div
-      className={
-        total
-          ? "deck-card rounded-2xl border-primary/40 bg-primary/10 p-6"
-          : accent
-            ? "deck-card rounded-2xl border-white/10 bg-[#161618] p-6"
-            : "deck-card rounded-2xl border-white/8 bg-[#101012] p-6"
-      }
-    >
-      <p className="font-display text-6xl leading-none tabular">{value}</p>
-      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+    <div>
+      <p className="mk-display mk-display-tight text-[clamp(2.5rem,6vw,5rem)] tabular-nums">
+        {value}
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <p className="mk-kicker text-world-muted">{label}</p>
+        {trailing}
+      </div>
     </div>
   );
 }

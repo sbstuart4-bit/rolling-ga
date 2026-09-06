@@ -1,13 +1,8 @@
 "use server";
 
-import { composePilotMailto, validatePilotInquiry, type PilotFieldErrors } from "@/lib/marketing-pilot";
-
-export interface PilotFormState {
-  success?: boolean;
-  mailto?: string;
-  error?: string;
-  fieldErrors?: PilotFieldErrors;
-}
+import { PILOT_SEND_ERROR_MESSAGE, type PilotFormState } from "@/lib/marketing-pilot-form";
+import { validatePilotInquiry } from "@/lib/marketing-pilot";
+import { getPilotDeliveryConfig, sendPilotInquiryEmail } from "@/server/marketing/pilot-delivery";
 
 export async function submitPilotInquiry(
   _prev: PilotFormState,
@@ -16,18 +11,27 @@ export async function submitPilotInquiry(
   const parsed = validatePilotInquiry({
     name: formData.get("name"),
     email: formData.get("email"),
-    role: formData.get("role"),
-    organization: formData.get("organization"),
-    notes: formData.get("notes") || undefined,
+    organization: formData.get("organization") || undefined,
+    roleTitle: formData.get("roleTitle") || undefined,
+    partnerType: formData.get("partnerType"),
+    hasShowInMind: formData.get("hasShowInMind"),
+    opportunity: formData.get("opportunity") || undefined,
+    message: formData.get("message") || undefined,
   });
 
   if (!parsed.success) {
     return { error: "Check the highlighted fields.", fieldErrors: parsed.fieldErrors };
   }
 
-  const inbox = process.env.PILOT_INBOX?.trim();
-  return {
-    success: true,
-    mailto: inbox ? composePilotMailto(inbox, parsed.data) : undefined,
-  };
+  const config = getPilotDeliveryConfig();
+  if (!config) {
+    return { notConfigured: true };
+  }
+
+  const sent = await sendPilotInquiryEmail(parsed.data, config);
+  if (!sent.ok) {
+    return { error: PILOT_SEND_ERROR_MESSAGE };
+  }
+
+  return { success: true };
 }

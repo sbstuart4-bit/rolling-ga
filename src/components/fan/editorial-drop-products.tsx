@@ -96,7 +96,7 @@ function EditorialHeroProduct({
         scoped ? "border-artist-border" : "border-border",
       )}
     >
-      <div className="relative aspect-[4/3] w-full bg-artist-bg">
+      <div className="relative aspect-[3/2] max-h-48 w-full bg-artist-bg sm:max-h-52">
         {product.images?.[0] ? (
           <Image
             src={product.images[0]}
@@ -152,7 +152,7 @@ function EditorialSecondaryProduct({
         scoped ? "border-artist-border bg-artist-surface" : "border-border bg-card",
       )}
     >
-      <div className="relative aspect-[4/5] bg-artist-bg">
+      <div className="relative aspect-[3/4] max-h-40 bg-artist-bg">
         {product.images?.[0] ? (
           <Image
             src={product.images[0]}

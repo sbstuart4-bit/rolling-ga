@@ -4,6 +4,12 @@ import { cookies } from "next/headers";
 import { GUIDED_DEMO_COOKIE } from "@/lib/auth-cookies";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import {
+  experienceAccessLabel,
+  resolveFanExperienceState,
+  timingStateForDemoPhase,
+  type FanExperienceState,
+} from "@/lib/fan-experience/access-state";
+import {
   getGuidedJourney,
   getGuidedStep,
   type GuidedDemoSession,
@@ -11,8 +17,8 @@ import {
   type GuidedJourneyId,
 } from "@/lib/guided-demo";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
-import { buildDemoScenarioContext } from "./scenario-state";
-import { resolveMerchExperience } from "@/lib/merch-experience/resolver";
+import { DEMO_TIME_PHASE_LABELS } from "@/lib/demo-scenario/time-phases";
+import { DEMO_FAN_STATE_LABELS, DEMO_LOCATION_LABELS } from "@/lib/demo-scenario/url";
 import { demoNow } from "./clock";
 
 export interface ActiveGuidedDemoContext {
@@ -96,30 +102,39 @@ export async function getActiveGuidedDemoContext(): Promise<ActiveGuidedDemoCont
   return { session, journey, step, show };
 }
 
-/** Expected merch diagnostic for a guided step — used by tests and presenter panel. */
-export function guidedStepMerchLabel(step: GuidedDemoStep): string {
+export function resolveGuidedStepFanExperience(step: GuidedDemoStep): FanExperienceState | null {
   const show = getDemoShow(step.scenario.showKey);
-  if (!show) return "unknown";
-  const ctx = buildDemoScenarioContext(step.scenario);
-  if (!ctx) return "unknown";
-  const experience = resolveMerchExperience({
+  if (!show) return null;
+  const timingState = timingStateForDemoPhase(step.scenario.timePhase);
+  return resolveFanExperienceState({
+    eventId: show.eventId,
+    scenario: step.scenario,
+    realVerified: false,
+    timingState,
+    storeOpen: timingState !== "archived",
     now: demoNow(),
-    show: ctx.show,
-    timePhase: step.scenario.timePhase,
-    fanState: step.scenario.fanState,
-    location: step.scenario.location,
-    fanHistory: step.scenario.fanHistory,
-    purchaseHistory: step.scenario.purchaseHistory,
-    merchRule: step.scenario.merchRule,
   });
-  if (experience.showExclusiveVisibility === "teaser") return "TEASER ONLY";
-  if (!experience.showExclusivePurchasable && experience.showExclusiveVisibility !== "hidden") {
-    return "VISIBLE + LOCKED";
-  }
-  if (experience.showExclusivePurchasable) return "UNLOCKED";
-  if (experience.liveDropVisible) return "LIVE DROP";
-  if (experience.phase.startsWith("post")) return "POST-SHOW";
-  return experience.primaryMessage;
+}
+
+/** Canonical access label for a guided step — used by tests and presenter panel. */
+export function guidedStepMerchLabel(step: GuidedDemoStep): string {
+  const fanExperience = resolveGuidedStepFanExperience(step);
+  if (!fanExperience) return "unknown";
+  return experienceAccessLabel(fanExperience.access);
+}
+
+export function guidedStepContextSummary(step: GuidedDemoStep) {
+  const fanExperience = resolveGuidedStepFanExperience(step);
+  return {
+    timeLabel: DEMO_TIME_PHASE_LABELS[step.scenario.timePhase],
+    fanLabel: DEMO_FAN_STATE_LABELS[step.scenario.fanState],
+    locationLabel: DEMO_LOCATION_LABELS[step.scenario.location],
+    accessLabel: fanExperience ? experienceAccessLabel(fanExperience.access) : "unknown",
+    credentialLabel: fanExperience?.credential === "earned" ? "Credential earned" : "No credential yet",
+    purchaseLabel:
+      fanExperience?.purchase === "completed" ? "Purchase completed" : "No purchase yet",
+    fanExperience,
+  };
 }
 
 export function guidedDemoQuery(session: GuidedDemoSession): string {

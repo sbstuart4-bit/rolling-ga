@@ -5,9 +5,15 @@ import { isEligibleForProduct } from "@/server/catalog/queries";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import type { DemoScenario } from "@/lib/demo-scenario/types";
 import { getDemoShowByEventId } from "@/lib/demo-scenario/shows";
+import {
+  canPurchaseShowExclusives,
+  canPreviewShop,
+  resolveFanExperienceState,
+  timingStateForDemoPhase,
+} from "@/lib/fan-experience/access-state";
+import { isAttendeeStoreOpen } from "@/lib/post-show-commerce";
 import { getActiveDemoScenarioContext } from "./scenario-state";
 import { applyScenarioToAttendance, type AttendanceContext } from "./scenario-attendance";
-import { resolveMerchExperience } from "@/lib/merch-experience/resolver";
 import { demoNow } from "./clock";
 
 function isShowExclusiveProduct(
@@ -22,7 +28,7 @@ function isShowExclusiveProduct(
 }
 
 /**
- * Demo-aware product eligibility — layers scenario merch rules on top of real access checks.
+ * Demo-aware product eligibility — layers canonical fan experience on real access checks.
  * Production behavior is unchanged when demo mode is off or no scenario is active.
  */
 export async function getDemoAwareProductEligibility(
@@ -46,39 +52,39 @@ export async function getDemoAwareProductEligibility(
     return scenarioEligible;
   }
 
-  const experience = resolveMerchExperience({
+  const timingState = timingStateForDemoPhase(ctx.scenario.timePhase);
+  const fanExperience = resolveFanExperienceState({
+    eventId: show.eventId,
+    scenario: ctx.scenario,
+    realVerified: attendance.attendedEventIds.includes(show.eventId),
+    timingState,
+    storeOpen: isAttendeeStoreOpen(timingState),
     now,
-    show: ctx.show,
-    timePhase: ctx.scenario.timePhase,
-    fanState: ctx.scenario.fanState,
-    location: ctx.scenario.location,
-    fanHistory: ctx.scenario.fanHistory,
-    purchaseHistory: ctx.scenario.purchaseHistory,
-    merchRule: ctx.scenario.merchRule,
   });
 
   const exclusive = isShowExclusiveProduct(product, show.eventId);
+  const experience = fanExperience.experience;
 
   if (exclusive) {
-    if (experience.showExclusiveVisibility === "hidden" || experience.showExclusiveVisibility === "teaser") {
+    if (fanExperience.access === "discover_only") {
       return {
         eligible: false,
-        reason: experience.primaryMessage,
+        reason: experience?.primaryMessage ?? "Coming soon",
         demoScenarioActive: true,
       };
     }
-    if (!experience.showExclusivePurchasable) {
+    if (!canPurchaseShowExclusives(fanExperience.access)) {
       return {
         eligible: false,
-        reason: experience.primaryMessage || "Unlocks at the show",
+        reason: experience?.primaryMessage || "Unlocks at the show",
         demoScenarioActive: true,
       };
     }
-    return { ...scenarioEligible, demoScenarioActive: true };
+    return { eligible: true, demoScenarioActive: true };
   }
 
-  if (!experience.coreMerchPurchasable) {
-    return { eligible: false, reason: experience.primaryMessage, demoScenarioActive: true };
+  if (!canPreviewShop(fanExperience.access) || !experience?.coreMerchPurchasable) {
+    return { eligible: false, reason: experience?.primaryMessage, demoScenarioActive: true };
   }
 
   return { ...scenarioEligible, demoScenarioActive: true };

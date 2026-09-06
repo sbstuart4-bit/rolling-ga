@@ -43,7 +43,7 @@ export function EventLockedMerchPreview({
         <p className="eyebrow text-artist-accent">Tonight&apos;s merchandise</p>
         <p className="mt-1 text-sm text-artist-muted">
           {previewMessage ??
-            `Exclusive to verified attendees at ${artistName}'s show.`}
+            `Exclusive to fans inside the venue at ${artistName}'s show tonight.`}
         </p>
       </div>
 

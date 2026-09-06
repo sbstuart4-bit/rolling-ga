@@ -11,24 +11,44 @@ function StarMark({ className }: { className?: string }) {
   );
 }
 
-/** Compact wordmark for headers and credits. */
+/**
+ * Compact wordmark for headers and credits.
+ *
+ * `tone="mono"` drops the purple so the mark can sit inside surfaces that own
+ * their own colour — the marketing site, or an artist takeover.
+ */
 export function RollingGaMark({
   className,
   size = "default",
+  tone = "brand",
 }: {
   className?: string;
-  size?: "sm" | "default" | "lg";
+  size?: "sm" | "default" | "lg" | "xl";
+  tone?: "brand" | "mono";
 }) {
   const sizes = {
     sm: "text-[10px]",
     default: "text-xs",
     lg: "text-sm",
+    xl: "text-base sm:text-lg lg:text-[1.375rem]",
   } as const;
+  const accent = tone === "mono" ? "text-current" : "text-primary";
 
   return (
-    <span className={cn("inline-flex items-center gap-1.5 font-display font-normal tracking-[0.18em] text-foreground", sizes[size], className)}>
-      <StarMark className={size === "lg" ? "size-3" : size === "sm" ? "size-2" : "size-2.5"} />
-      Rolling<span className="text-primary">&nbsp;GA</span>
+    <span className={cn("inline-flex items-center gap-2 font-display font-normal tracking-[0.18em] text-foreground lg:gap-2.5 lg:tracking-[0.2em]", sizes[size], className)}>
+      <StarMark
+        className={cn(
+          size === "xl"
+            ? "size-4 lg:size-5"
+            : size === "lg"
+              ? "size-3"
+              : size === "sm"
+                ? "size-2"
+                : "size-2.5",
+          accent,
+        )}
+      />
+      Rolling<span className={accent}>&nbsp;GA</span>
     </span>
   );
 }

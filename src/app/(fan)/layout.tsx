@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 import { FanAppShell } from "@/components/fan/fan-app-shell";
+import { GuidedDemoMobileChrome } from "@/components/demo/guided-demo-mobile-chrome";
 import { GuidedDemoShell } from "@/components/demo/guided-demo-shell";
-import { getActiveGuidedDemoContext } from "@/server/demo/guided-demo-state";
+import {
+  getActiveGuidedDemoContext,
+  guidedStepContextSummary,
+} from "@/server/demo/guided-demo-state";
 import { syncGuidedDemoClock } from "@/server/demo/guided-demo-apply";
 import { hydrateDemoClockFromCookie } from "@/server/demo/clock";
 import { requireAuth } from "@/server/auth/request";
@@ -32,6 +36,8 @@ export default async function FanLayout({ children }: LayoutProps<"/">) {
     syncGuidedDemoClock(guidedDemo);
   }
 
+  const guidedContext = guidedDemo ? guidedStepContextSummary(guidedDemo.step) : null;
+
   return (
     <GuidedDemoShell>
       <FanAppShell
@@ -39,6 +45,22 @@ export default async function FanLayout({ children }: LayoutProps<"/">) {
         cartCount={cartCount}
         liveVerifiedShow={liveVerifiedShow}
         presentation={guidedDemo ? "guided" : "default"}
+        guidedMobileChrome={
+          guidedDemo && guidedContext ? (
+            <GuidedDemoMobileChrome
+              journey={guidedDemo.journey}
+              step={guidedDemo.step}
+              session={guidedDemo.session}
+              totalSteps={guidedDemo.journey.steps.length}
+              accessLabel={guidedContext.accessLabel}
+              timeLabel={guidedContext.timeLabel}
+              fanLabel={guidedContext.fanLabel}
+              locationLabel={guidedContext.locationLabel}
+              credentialLabel={guidedContext.credentialLabel}
+              purchaseLabel={guidedContext.purchaseLabel}
+            />
+          ) : undefined
+        }
       >
         <main className="min-h-full">{children}</main>
       </FanAppShell>

@@ -13,6 +13,7 @@ export function FanAppShell({
   cartCount,
   liveVerifiedShow = false,
   presentation = "default",
+  guidedMobileChrome,
   children,
 }: {
   displayName: string;
@@ -20,6 +21,8 @@ export function FanAppShell({
   liveVerifiedShow?: boolean;
   /** Guided demo uses a larger frame and skips the outer desktop chrome wrapper. */
   presentation?: "default" | "guided";
+  /** Compact guided controls — mobile only, above the tab bar. */
+  guidedMobileChrome?: ReactNode;
   children: ReactNode;
 }) {
   const isGuided = presentation === "guided";
@@ -27,7 +30,7 @@ export function FanAppShell({
   const device = (
     <div
       className={cn(
-        "relative mx-auto flex h-dvh w-full flex-col overflow-hidden bg-background",
+        "relative mx-auto flex h-dvh w-full max-w-none flex-col overflow-hidden bg-background",
         isGuided
           ? "md:h-[min(52rem,calc(100dvh-2rem))] md:w-[428px] md:max-w-[428px] md:rounded-[2.15rem] md:border md:border-zinc-600/80 md:p-2 md:shadow-soft-lg"
           : "max-w-lg md:h-[min(44rem,calc(100dvh-3rem))] md:w-[390px] md:max-w-[390px] md:rounded-[2.15rem] md:border md:border-zinc-600/80 md:p-2 md:shadow-soft-lg",
@@ -43,8 +46,16 @@ export function FanAppShell({
           <span>5G</span>
         </div>
         <FanHeader displayName={displayName} cartCount={cartCount} />
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
+        <div
+          className={cn(
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+            guidedMobileChrome && "pb-safe-guided md:pb-0",
+          )}
+        >
+          {children}
+        </div>
         <div id="fan-app-dock" className="shrink-0 empty:hidden" />
+        {guidedMobileChrome}
         <FanTabBar liveVerifiedShow={liveVerifiedShow} />
         <div className="hidden shrink-0 justify-center pb-1.5 pt-0.5 md:flex" aria-hidden>
           <span className="h-1 w-28 rounded-full bg-white/20" />

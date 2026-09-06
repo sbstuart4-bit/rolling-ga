@@ -30,8 +30,10 @@ function redirectToStep(ctx: ActiveGuidedDemoContext): never {
 }
 
 export async function startGuidedDemoAction(formData: FormData): Promise<void> {
-  if (!demoModeEnabled()) redirect("/welcome");
-  if (!(await hasDemoBoardAccess())) redirect("/demo");
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
+
+  const publicMarketingEntry = formData.get("publicMarketingEntry") === "1";
+  if (!publicMarketingEntry && !(await hasDemoBoardAccess())) redirect("/demo");
 
   const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
   const presenter = formData.get("presenter") === "1";

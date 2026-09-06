@@ -12,11 +12,8 @@ export async function GuidedDemoShell({ children }: { children: ReactNode }) {
   const context = guidedStepContextSummary(ctx.step);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[#070708] md:flex-row md:items-center md:justify-center md:gap-5 md:p-4">
-      <div className="order-1 flex min-h-0 flex-1 items-start justify-center md:order-2 md:min-w-[440px] md:flex-[1.35] md:items-center">
-        {children}
-      </div>
-      <div className="order-2 shrink-0 md:order-1 md:w-[min(22rem,calc(100vw-28rem))]">
+    <div className="min-h-dvh md:flex md:items-center md:justify-center md:gap-5 md:bg-[#070708] md:p-4">
+      <div className="hidden md:order-1 md:block md:w-[min(22rem,calc(100vw-28rem))] md:shrink-0">
         <GuidedDemoPanel
           journey={ctx.journey}
           step={ctx.step}
@@ -29,6 +26,9 @@ export async function GuidedDemoShell({ children }: { children: ReactNode }) {
           credentialLabel={context.credentialLabel}
           purchaseLabel={context.purchaseLabel}
         />
+      </div>
+      <div className="md:order-2 md:min-w-[440px] md:flex-[1.35] md:items-center md:justify-center">
+        {children}
       </div>
     </div>
   );

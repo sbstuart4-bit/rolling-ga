@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { AuthSplashBackdrop } from "@/components/auth/auth-splash-backdrop";
 import { RollingGaLogo } from "@/components/brand/rolling-ga-mark";
 import { Button } from "@/components/ui/button";
@@ -19,9 +18,32 @@ export default async function GuidedDemoChooserPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  if (!demoModeEnabled()) redirect("/welcome");
-
   const params = await searchParams;
+  const demoEnabled = demoModeEnabled();
+  const unavailable = params.unavailable === "1" || !demoEnabled;
+
+  if (unavailable) {
+    return (
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#121212]">
+        <AuthSplashBackdrop />
+        <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
+          <Link href="/home" className="inline-block" aria-label="Rolling GA home">
+            <RollingGaLogo size="default" />
+          </Link>
+          <h1 className="mt-8 font-display text-2xl tracking-wide">Demo not available</h1>
+          <p className="mt-3 max-w-sm text-sm text-muted-foreground text-balance">
+            The Nova Kestrel guided demo is not enabled on this deployment yet. No account is
+            required — once demo mode is turned on, the homepage button drops you straight into the
+            journey as demo fan Scott Weller.
+          </p>
+          <Button asChild className="mt-8 uppercase tracking-wider">
+            <Link href="/home">Back to homepage</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const boardAccess = await hasDemoBoardAccess();
   const journeys = listActiveGuidedJourneys();
   const complete = params.complete === "1";

@@ -390,6 +390,10 @@
   .pb-safe-tabs {
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
   }
+  /* Tab bar + guided mobile chrome (~4.75rem) on narrow viewports. */
+  .pb-safe-guided {
+    padding-bottom: calc(9.25rem + env(safe-area-inset-bottom, 0px));
+  }
   .pt-safe {
     padding-top: env(safe-area-inset-top, 0px);
   }

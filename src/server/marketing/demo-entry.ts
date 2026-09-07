@@ -10,6 +10,18 @@ function redirectIfDemoSeedMissing(error: unknown): never | void {
   }
 }
 
+function rethrowUnlessRedirect(error: unknown): void {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: string }).digest === "string" &&
+    (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  ) {
+    throw error;
+  }
+}
+
 /**
  * Marketing's primary conversion path: drop the visitor into the Nova Kestrel
  * guided demo instead of asking them to pick a persona first.
@@ -27,6 +39,7 @@ export async function experienceNovaKestrelAction(): Promise<void> {
   try {
     await startGuidedDemoAction(formData);
   } catch (error) {
+    rethrowUnlessRedirect(error);
     redirectIfDemoSeedMissing(error);
     throw error;
   }
@@ -46,6 +59,7 @@ export async function experienceDegensDetroitAction(): Promise<void> {
   try {
     await startGuidedDemoAction(formData);
   } catch (error) {
+    rethrowUnlessRedirect(error);
     redirectIfDemoSeedMissing(error);
     throw error;
   }

@@ -9,10 +9,7 @@ import {
   unauthenticatedEntryPath,
 } from "@/lib/demo-mode";
 import { isPublicPath, isStaticAssetPath, shouldRewriteRootToMarketing } from "@/lib/public-paths";
-import {
-  GUIDED_DEMO_ENTRY_HEADER,
-  shouldAllowGuidedDemoFanRequest,
-} from "@/lib/guided-demo-entry";
+import { shouldAllowGuidedDemoFanRequest } from "@/lib/guided-demo-entry";
 import {
   hostedDemoBoardGateRequired,
   resolveDemoBoardSecret,
@@ -100,6 +97,10 @@ export async function proxy(request: NextRequest) {
     if (granted) return granted;
   }
 
+  if (pathname === "/api/demo/enter-guided") {
+    return NextResponse.next();
+  }
+
   if (isPublicPath(pathname)) {
     return NextResponse.next();
   }
@@ -131,12 +132,9 @@ export async function proxy(request: NextRequest) {
   if (sessionId) return NextResponse.next();
 
   if (shouldAllowGuidedDemoFanRequest(request)) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set(
-      GUIDED_DEMO_ENTRY_HEADER,
-      `${pathname}${search}`,
-    );
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    const enterUrl = new URL("/api/demo/enter-guided", request.url);
+    enterUrl.searchParams.set("returnTo", `${pathname}${search}`);
+    return NextResponse.redirect(enterUrl);
   }
 
   if (shouldRewriteRootToMarketing({ pathname, hasSession: false, demoMode: fullDemoBoard })) {

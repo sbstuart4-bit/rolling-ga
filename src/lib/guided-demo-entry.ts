@@ -2,9 +2,6 @@ import type { NextRequest } from "next/server";
 import { GUIDED_DEMO_COOKIE } from "@/lib/auth-cookies";
 import type { GuidedJourneyId } from "@/lib/guided-demo";
 
-/** Request header set by edge proxy when a guided demo fan route is allowed through. */
-export const GUIDED_DEMO_ENTRY_HEADER = "x-rga-guided-entry";
-
 const GUIDED_JOURNEY_IDS = new Set<GuidedJourneyId>(["nova-nashville", "degens-detroit"]);
 
 export function isGuidedDemoQuery(searchParams: URLSearchParams): boolean {

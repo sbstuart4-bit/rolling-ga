@@ -2,6 +2,9 @@ import type { NextRequest } from "next/server";
 import { GUIDED_DEMO_COOKIE } from "@/lib/auth-cookies";
 import type { GuidedJourneyId } from "@/lib/guided-demo";
 
+/** Set by edge proxy so fan layouts can bootstrap Scott without cookie writes in RSC. */
+export const GUIDED_DEMO_ENTRY_HEADER = "x-rga-guided-entry";
+
 const GUIDED_JOURNEY_IDS = new Set<GuidedJourneyId>(["nova-nashville", "degens-detroit"]);
 
 export function isGuidedDemoQuery(searchParams: URLSearchParams): boolean {

@@ -1,0 +1,199 @@
+[
+  {
+    "step": 1,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=1&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-01\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | UPCOMING | JUN 12, 2026 | NOVA KESTREL | NASHVILLE | Gold Hour · Fri, Jun 12, 2026 | Cedar & Vine, TN · 7:00 PM CDT | FIRST TIME SEEING NOVA KESTREL | Discover the show | Fri, Jun 12, 2026 in Nashville. Something exclusive is coming to Nashville. | VERIFIED | 52 | VENUE | Cedar & Vine | DATE | Fri, Jun 12, 2026 | TOUR | Gold Hour | FROM THE NIGHT | THANK YOU | Thank you, Nashville",
+    "fanFull": "ROLLING\n GA\nSW\nUPCOMING\nJUN 12, 2026\n\nNOVA KESTREL\n\nNASHVILLE\n\nGold Hour · Fri, Jun 12, 2026\n\nCedar & Vine, TN · 7:00 PM CDT\n\nFIRST TIME SEEING NOVA KESTREL\n\nDiscover the show\n\nFri, Jun 12, 2026 in Nashville. Something exclusive is coming to Nashville.\n\nVERIFIED\n52\nVENUE\nCedar & Vine\nDATE\nFri, Jun 12, 2026\nTOUR\nGold Hour\nFROM THE NIGHT\nTHANK YOU\nThank you, Nashville\n\nYou sang the bridge louder than we did. The attendee store is open for a few more hours.\n\nPOWERED BY\nROLLING\n GA\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "DISCOVER ONLY",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 1"
+    ],
+    "live": "GA | SW | UPCOMING | NOVA KESTREL | NASHVILLE · CEDAR & VINE | Fri, Jun 12, 2026 · 7:00 PM CDT | DISCOVER THE SHOW | Something exclusive is coming to Nashville. | POWERED BY",
+    "drops": "GA | SW | NOVA KESTREL · COMING SOON | Back to show | 📦 | MERCH OPENS SOON | Something exclusive is coming to Nashville. | Back to the show | POWERED BY",
+    "myShows": "GA | SW | MY SHOWS | My access — credentials and ongoing unlocks | 13 | SHOWS | 7 | ARTISTS | 6 | CITIES | UPCOMING | The Ossuary | Jul 6, 2025 | The Low Country | Jun 1, 2025 | 2 unlocks",
+    "pass": false
+  },
+  {
+    "step": 2,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=2&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-02\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | UPCOMING | JUN 12, 2026 | NOVA KESTREL | NASHVILLE | Gold Hour · Fri, Jun 12, 2026 | Cedar & Vine, TN · 7:00 PM CDT | FIRST TIME SEEING NOVA KESTREL | Locked until you're inside | Fri, Jun 12, 2026 in Nashville. Preview what's waiting — show exclusives unlock when you're inside the venue. | TONIGHT'S MERCHANDISE | Available at the show | POST-SHOW | LOCKED",
+    "fanFull": "ROLLING\n GA\nSW\nUPCOMING\nJUN 12, 2026\n\nNOVA KESTREL\n\nNASHVILLE\n\nGold Hour · Fri, Jun 12, 2026\n\nCedar & Vine, TN · 7:00 PM CDT\n\nFIRST TIME SEEING NOVA KESTREL\n\nLocked until you're inside\n\nFri, Jun 12, 2026 in Nashville. Preview what's waiting — show exclusives unlock when you're inside the venue.\n\nPreview the merch\n\nTONIGHT'S MERCHANDISE\n\nAvailable at the show\n\nPOST-SHOW\nLOCKED\n\nNashville Night Tee\n\nYou stayed for the last song.\n\n$52\n\nAvailable at the show\n\nUNLOCK\nPOST-SHOW\nLOCKED\n\nGold Hour Scarf\n\nWoven, not printed.\n\n$48\n\nAvailable at the show\n\nUNLOCK\nPOST-SHOW\nLOCKED\n\nNashville Night Print\n\nThe setlist, in order.\n\n$32\n\nAvailable at the show\n\nUNLOCK\nAPPAREL\nLOCKED\n\nGold Hour Tee\n\nBrass section included.\n\n$42\n\nAvailable at the show\n\nUNLOCK\nPreview the full shop\nVERIFIED\n52\nVENUE\nCedar & Vine\nDATE\nFri, Jun 12, 2026\nTOUR\nGold Hour\nFROM THE NIGHT\nTHANK YOU\nThank you, Nashville\n\nYou sang the bridge louder than we did. The attendee store is open for a few more hours.\n\nPOWERED BY\nROLLING\n GA\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "PREVIEW LOCKED",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 2"
+    ],
+    "live": "GA | SW | UPCOMING | NOVA KESTREL | NASHVILLE · CEDAR & VINE | Fri, Jun 12, 2026 · 7:00 PM CDT | LOCKED UNTIL YOU'RE INSIDE | Fri, Jun 12, 2026 in Nashville. Preview what's waiting — show exclusives unlock when you're inside the venue. | POWERED BY",
+    "drops": "GA | SW | NOVA KESTREL · DROPS | Back to show | GOLD HOUR | Gold Hour Tee | $42 | BUY NOW | Gold Hour Tour Book | $35 | Gold Hour 7″ | $24 | Gold Hour Corduroy Cap",
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 3,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=3&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-03\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | UPCOMING | JUN 12, 2026 | NOVA KESTREL | NASHVILLE | Gold Hour · Fri, Jun 12, 2026 | Cedar & Vine, TN · 7:00 PM CDT | YOU'RE GOING | COMING TO NASHVILLE | Locked until you're inside | Fri, Jun 12, 2026 in Nashville. Preview what's waiting — show exclusives unlock when you're inside the venue. | TONIGHT'S MERCHANDISE | Unlocks at the show | POST-SHOW",
+    "fanFull": "ROLLING\n GA\nSW\nUPCOMING\nJUN 12, 2026\n\nNOVA KESTREL\n\nNASHVILLE\n\nGold Hour · Fri, Jun 12, 2026\n\nCedar & Vine, TN · 7:00 PM CDT\n\nYOU'RE GOING\n\nCOMING TO NASHVILLE\n\nLocked until you're inside\n\nFri, Jun 12, 2026 in Nashville. Preview what's waiting — show exclusives unlock when you're inside the venue.\n\nPreview the merch\n\nTONIGHT'S MERCHANDISE\n\nUnlocks at the show\n\nPOST-SHOW\nLOCKED\n\nNashville Night Tee\n\nYou stayed for the last song.\n\n$52\n\nUnlocks at the show\n\nUNLOCK\nPOST-SHOW\nLOCKED\n\nGold Hour Scarf\n\nWoven, not printed.\n\n$48\n\nUnlocks at the show\n\nUNLOCK\nPOST-SHOW\nLOCKED\n\nNashville Night Print\n\nThe setlist, in order.\n\n$32\n\nUnlocks at the show\n\nUNLOCK\nAPPAREL\nLOCKED\n\nGold Hour Tee\n\nBrass section included.\n\n$42\n\nUnlocks at the show\n\nUNLOCK\nPreview the full shop\nVERIFIED\n52\nVENUE\nCedar & Vine\nDATE\nFri, Jun 12, 2026\nTOUR\nGold Hour\nFROM THE NIGHT\nTHANK YOU\nThank you, Nashville\n\nYou sang the bridge louder than we did. The attendee store is open for a few more hours.\n\nPOWERED BY\nROLLING\n GA\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "PREVIEW LOCKED",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 3"
+    ],
+    "live": null,
+    "drops": null,
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 4,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=4&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-04\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | UPCOMING | TODAY | NOVA KESTREL | NASHVILLE | Gold Hour · Fri, Jun 12, 2026 | Cedar & Vine, TN · 7:00 PM CDT | YOU'RE GOING | COMING TO NASHVILLE | Locked until you're inside | Fri, Jun 12, 2026 in Nashville. Preview what's waiting — show exclusives unlock when you're inside the venue. | TONIGHT'S MERCHANDISE | Unlocks at the show | POST-SHOW",
+    "fanFull": "ROLLING\n GA\nSW\nUPCOMING\nTODAY\n\nNOVA KESTREL\n\nNASHVILLE\n\nGold Hour · Fri, Jun 12, 2026\n\nCedar & Vine, TN · 7:00 PM CDT\n\nYOU'RE GOING\n\nCOMING TO NASHVILLE\n\nLocked until you're inside\n\nFri, Jun 12, 2026 in Nashville. Preview what's waiting — show exclusives unlock when you're inside the venue.\n\nPreview the merch\n\nTONIGHT'S MERCHANDISE\n\nUnlocks at the show\n\nPOST-SHOW\nLOCKED\n\nNashville Night Tee\n\nYou stayed for the last song.\n\n$52\n\nUnlocks at the show\n\nUNLOCK\nPOST-SHOW\nLOCKED\n\nGold Hour Scarf\n\nWoven, not printed.\n\n$48\n\nUnlocks at the show\n\nUNLOCK\nPOST-SHOW\nLOCKED\n\nNashville Night Print\n\nThe setlist, in order.\n\n$32\n\nUnlocks at the show\n\nUNLOCK\nAPPAREL\nLOCKED\n\nGold Hour Tee\n\nBrass section included.\n\n$42\n\nUnlocks at the show\n\nUNLOCK\nPreview the full shop\nVERIFIED\n52\nVENUE\nCedar & Vine\nDATE\nFri, Jun 12, 2026\nTOUR\nGold Hour\nFROM THE NIGHT\nTHANK YOU\nThank you, Nashville\n\nYou sang the bridge louder than we did. The attendee store is open for a few more hours.\n\nPOWERED BY\nROLLING\n GA\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "PREVIEW LOCKED",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 4"
+    ],
+    "live": null,
+    "drops": null,
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 5,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026/shop?guided=nova-nashville&step=5&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-05\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | ← Back to the show | NOVA KESTREL · NASHVILLE | What's coming tonight | Preview what's waiting. Show exclusives unlock when you're inside the venue. | Gold Hour | The tour collection. | APPAREL | NASHVILLE / 06.12.26 | Gold Hour Tee | $42 | COLLECTIBLE | MUSIC",
+    "fanFull": "ROLLING\n GA\nSW\n← Back to the show\n\nNOVA KESTREL · NASHVILLE\n\nWhat's coming tonight\nPreview what's waiting. Show exclusives unlock when you're inside the venue.\nGold Hour\n\nThe tour collection.\n\nAPPAREL\n\nNASHVILLE / 06.12.26\n\nGold Hour Tee\n\n$42\n\nCOLLECTIBLE\n\nGold Hour Tour Book\n\n$35\n\nMUSIC\n\nGold Hour 7″\n\n$24\n\nGold Hour Corduroy Cap\n\nSoft brim, brass pin.\n\n$38\n\nNova Kestrel Sun Tote\n\nCarries the whole setlist.\n\n$30\n\nGold Hour Tour Print\n\nThe whole route, letterpress.\n\n$35\n\nGold Hour Sun Pendant\n\nBrass on a fine chain.\n\n$46\n\nView full drop\nPOWERED BY\nROLLING\n GA\nCart\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "LIVE UNLOCKED",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 5"
+    ],
+    "live": "GA | SW | LIVE NOW | NOVA KESTREL | NASHVILLE · CEDAR & VINE | Fri, Jun 12, 2026 · 7:00 PM CDT | YOU'RE IN THE ROOM | Tonight's show exclusives are unlocked. Shop without the merch line. | POWERED BY",
+    "drops": null,
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 6,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026/shop?guided=nova-nashville&step=6&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-06\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | ← Back to the show | NOVA KESTREL · NASHVILLE | What's coming tonight | Preview what's waiting. Show exclusives unlock when you're inside the venue. | Gold Hour | The tour collection. | APPAREL | NASHVILLE / 06.12.26 | Gold Hour Tee | $42 | COLLECTIBLE | MUSIC",
+    "fanFull": "ROLLING\n GA\nSW\n← Back to the show\n\nNOVA KESTREL · NASHVILLE\n\nWhat's coming tonight\nPreview what's waiting. Show exclusives unlock when you're inside the venue.\nGold Hour\n\nThe tour collection.\n\nAPPAREL\n\nNASHVILLE / 06.12.26\n\nGold Hour Tee\n\n$42\n\nCOLLECTIBLE\n\nGold Hour Tour Book\n\n$35\n\nMUSIC\n\nGold Hour 7″\n\n$24\n\nGold Hour Corduroy Cap\n\nSoft brim, brass pin.\n\n$38\n\nNova Kestrel Sun Tote\n\nCarries the whole setlist.\n\n$30\n\nGold Hour Tour Print\n\nThe whole route, letterpress.\n\n$35\n\nGold Hour Sun Pendant\n\nBrass on a fine chain.\n\n$46\n\nView full drop\nPOWERED BY\nROLLING\n GA\nCart\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "LIVE UNLOCKED",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 6",
+      "Step 6: no add-to-cart in shop"
+    ],
+    "live": null,
+    "drops": null,
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 7,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026/shop?guided=nova-nashville&step=7&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-07\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | ← Back to the show | NOVA KESTREL · NASHVILLE | Tonight's Drop | You're inside the venue — tonight's show exclusives are unlocked. | UNLOCKED TONIGHT | Attendee exclusives are live | Everything in this shop was made for people in the room. | Nashville, After | The attendee store stays open for a few hours after the room empties. Then it closes for good. | POST-SHOW | NASHVILLE / 06.12.26 | Nashville Night Tee | $52",
+    "fanFull": "ROLLING\n GA\nSW\n← Back to the show\n\nNOVA KESTREL · NASHVILLE\n\nTonight's Drop\nYou're inside the venue — tonight's show exclusives are unlocked.\n\nUNLOCKED TONIGHT\n\nAttendee exclusives are live\n\nEverything in this shop was made for people in the room.\n\nNashville, After\n\nThe attendee store stays open for a few hours after the room empties. Then it closes for good.\n\nPOST-SHOW\n\nNASHVILLE / 06.12.26\n\nNashville Night Tee\n\n$52\n\nPOST-SHOW\n\nGold Hour Scarf\n\n$48\n\nPOST-SHOW\n\nNashville Night Print\n\n$32\n\nView full drop\nGold Hour\n\nThe tour collection.\n\nAPPAREL\n\nNASHVILLE / 06.12.26\n\nGold Hour Tee\n\n$42\n\nCOLLECTIBLE\n\nGold Hour Tour Book\n\n$35\n\nMUSIC\n\nGold Hour 7″\n\n$24\n\nGold Hour Corduroy Cap\n\nSoft brim, brass pin.\n\n$38\n\nNova Kestrel Sun Tote\n\nCarries the whole setlist.\n\n$30\n\nGold Hour Tour Print\n\nThe whole route, letterpress.\n\n$35\n\nGold Hour Sun Pendant\n\nBrass on a fine chain.\n\n$46\n\nView full drop\nPOWERED BY\nROLLING\n GA\nCart\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "LIVE UNLOCKED",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 7"
+    ],
+    "live": null,
+    "drops": null,
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 8,
+    "url": "http://localhost:3002/product/nashville-night-tee?e=nova-kestrel-gold-hour-nashville-2026&guided=nova-nashville&step=8&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-08\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | ← Back to show shop | NOVA KESTREL · NASHVILLE | NASHVILLE NIGHT TEE | You stayed for the last song. | $52 | NASHVILLE / 06.12.26 · INSIDE THE VENUE TONIGHT | 400 PRODUCED | Your saved size (L) is selected",
+    "fanFull": "ROLLING\n GA\nSW\n← Back to show shop\n\nNOVA KESTREL · NASHVILLE\n\nNASHVILLE NIGHT TEE\nYou stayed for the last song.\n$52\n\nNASHVILLE / 06.12.26 · INSIDE THE VENUE TONIGHT\n\nYou stayed for the last song.\n\n400 PRODUCED\n\nYour saved size (L) is selected\n\nSize\nL\nS\nM\nL\nXL\nXXL\nADD TO MY DROP\nABOUT THIS PIECE\n\nPrinted for the Cedar & Vine night only. The artwork is the actual setlist, in the order it was played.\n\nPOWERED BY\nROLLING\n GA\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "LIVE UNLOCKED",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 8",
+      "Step 8: Add to cart button not visible on PDP"
+    ],
+    "live": null,
+    "drops": null,
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 9,
+    "url": "http://localhost:3002/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=9&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-09\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | YOU WERE THERE | TODAY | NOVA KESTREL | NASHVILLE | Gold Hour · Fri, Jun 12, 2026 | Cedar & Vine, TN · 7:00 PM CDT | THANK YOU, NASHVILLE. | Your credential is permanent. Everything here stays in your passport even after tonight's store closes. | Your digital credential | Verified at Cedar & Vine · Nashville | 11:29:59 | Complete your collection | Attendee-exclusive pieces and post-show drops are still available while the window is open.",
+    "fanFull": "ROLLING\n GA\nSW\nYOU WERE THERE\nTODAY\n\nNOVA KESTREL\n\nNASHVILLE\n\nGold Hour · Fri, Jun 12, 2026\n\nCedar & Vine, TN · 7:00 PM CDT\n\nTHANK YOU, NASHVILLE.\n\nYOU WERE THERE\n\nYour credential is permanent. Everything here stays in your passport even after tonight's store closes.\n\nYour digital credential\n\nVerified at Cedar & Vine · Nashville\n\nView credential\n\nYour attendee-exclusive store remains open for 11:29:59\n\nComplete your collection\n\nAttendee-exclusive pieces and post-show drops are still available while the window is open.\n\nShop the attendee store\nFROM THE NIGHT\nTHANK YOU\nThank you, Nashville\n\nYou sang the bridge louder than we did. The attendee store is open for a few more hours.\n\nPHOTO\nATTENDEES\nFrom the pit\n\nThree frames from the second song, before anybody's phone was up.\n\nConnected\n\nMy Shows\nPOWERED BY\nROLLING\n GA\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "POSTSHOW OPEN",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 9"
+    ],
+    "live": "GA | SW | JUST ENDED | NOVA KESTREL | NASHVILLE · CEDAR & VINE | Fri, Jun 12, 2026 · 7:00 PM CDT | THANK YOU FOR BEING THERE | Your Nashville credential is live. Complete your collection while the post-show store is open. | POWERED BY",
+    "drops": null,
+    "myShows": null,
+    "pass": false
+  },
+  {
+    "step": 10,
+    "url": "http://localhost:3002/shows?guided=nova-nashville&step=10&presenter=1",
+    "screenshot": "c:\\Users\\hunte\\Documents\\RollingGA\\acceptance-walkthrough-output\\step-10\\routed-fan-390.png",
+    "fanAboveFold": "GA | SW | MY SHOWS | Welcome back — your show history and credentials live here | 14 | SHOWS | 8 | ARTISTS | 6 | CITIES | UPCOMING | Nova Kestrel | Jun 12, 2026 | 2 unlocks | The Ossuary | Jul 6, 2025",
+    "fanFull": "ROLLING\n GA\nSW\nMY SHOWS\n\nWelcome back — your show history and credentials live here\n\n14\n\nSHOWS\n\n8\n\nARTISTS\n\n6\n\nCITIES\n\nPAST\nUPCOMING\n\nNova Kestrel\n\nNashville · Cedar & Vine\n\nJun 12, 2026\n\nI WAS THERE\n2 unlocks\n\nThe Ossuary\n\nChicago · The Foundry\n\nJul 6, 2025\n\nI WAS THERE\n\nThe Low Country\n\nAustin · Riverbend Yard\n\nJun 1, 2025\n\nI WAS THERE\n2 unlocks\n\nMarisol Reyes\n\nDenver · Alpine Theatre\n\nApr 7, 2025\n\nI WAS THERE\n\nMarisol Reyes\n\nBrooklyn · Warehouse Nine\n\nMar 8, 2025\n\nI WAS THERE\n1 unlock\n\nThe Degens\n\nChicago · The Foundry\n\nDec 8, 2024\n\nI WAS THERE\n\nThe Degens\n\nToronto · Harbourline Hall\n\nOct 9, 2024\n\nI WAS THERE\n\nThe Ossuary\n\nBrooklyn · Warehouse Nine\n\nAug 10, 2024\n\nI WAS THERE\n\nPale Horses\n\nToronto · Harbourline Hall\n\nJun 11, 2024\n\nI WAS THERE\n\nPale Horses\n\nChicago · The Foundry\n\nApr 12, 2024\n\nI WAS THERE\n\nKite & Anchor\n\nBrooklyn · Warehouse Nine\n\nJan 13, 2024\n\nI WAS THERE\n\nKite & Anchor\n\nNashville · Cedar & Vine\n\nNov 14, 2023\n\nI WAS THERE\n\nDJ Vantablack\n\nAustin · Riverbend Yard\n\nSep 15, 2023\n\nI WAS THERE\n\nDJ Vantablack\n\nDenver · Alpine Theatre\n\nAug 16, 2023\n\nI WAS THERE\n\n5 anniversary unlocks waiting\n\nDrops tied to shows you were at may have opened since your last visit.\n\nBROWSE DROPS\nLIVE\nDROPS\nMY SHOWS\nPROFILE",
+    "panelAccess": "HISTORY ONLY",
+    "panelTitle": "",
+    "overflow": false,
+    "visual": [],
+    "functional": [
+      "Panel shows step null, expected 10"
+    ],
+    "live": "GA | SW | YOUR SHOW | NOVA KESTREL | NASHVILLE · CEDAR & VINE | Fri, Jun 12, 2026 · 7:00 PM CDT | YOU WERE THERE | Your Nashville credential and show history live in My Shows. | POWERED BY",
+    "drops": null,
+    "myShows": "GA | SW | MY SHOWS | Welcome back — your show history and credentials live here | 14 | SHOWS | 8 | ARTISTS | 6 | CITIES | UPCOMING | Nova Kestrel | Jun 12, 2026 | 2 unlocks | The Ossuary | Jul 6, 2025",
+    "pass": false
+  },
+  {
+    "step": "refresh-step10",
+    "pass": false,
+    "functional": [
+      "Refresh lost step: got null"
+    ],
+    "url": "http://localhost:3002/demo"
+  },
+  {
+    "step": "rewind-to-4",
+    "pass": false,
+    "functional": [
+      "Could not jump to step 4 via presenter rail"
+    ]
+  }
+]

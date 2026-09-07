@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { RelationshipFunnel } from "@/components/studio/relationship-funnel";
 import { formatEventDate, formatMoney, formatPercent } from "@/lib/format";
 import type { ShowCohortMetrics } from "@/server/studio/fan-relationship-queries";
 
@@ -26,8 +27,8 @@ export function FanCohortDashboard({
     <div className="space-y-8">
       {cohort.isDemoData && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-900 dark:text-amber-100">
-          Demo data — cohort metrics reflect seeded Detroit demonstration orders and anniversary
-          drop purchases.
+          Demo data — cohort metrics reflect seeded Brooklyn demonstration orders and post-show
+          purchases.
         </div>
       )}
 
@@ -56,6 +57,15 @@ export function FanCohortDashboard({
         </div>
       </header>
 
+      <RelationshipFunnel
+        metrics={{
+          attendees: cohort.originalVerifiedAttendees,
+          connectedFans: cohort.connectedFans,
+          purchasingFans: cohort.purchasingFans,
+          repeatPurchasers: cohort.repeatPurchasers,
+        }}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <CohortMetric
           label="Original verified attendees"
@@ -65,6 +75,21 @@ export function FanCohortDashboard({
           label="Connected after show"
           value={cohort.connectedAfterShow.toLocaleString("en-US")}
           detail="Stay Connected granted after show end"
+        />
+        <CohortMetric
+          label="Connected fans"
+          value={cohort.connectedFans.toLocaleString("en-US")}
+          detail="Opted in to artist connection"
+        />
+        <CohortMetric
+          label="Purchasing fans"
+          value={cohort.purchasingFans.toLocaleString("en-US")}
+          detail="At least one show-attributed order"
+        />
+        <CohortMetric
+          label="Repeat purchasers"
+          value={cohort.repeatPurchasers.toLocaleString("en-US")}
+          detail="Two or more show-attributed orders"
         />
         <CohortMetric
           label="Show-night GMV"

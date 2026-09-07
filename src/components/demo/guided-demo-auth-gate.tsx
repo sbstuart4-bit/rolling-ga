@@ -60,7 +60,7 @@ export function GuidedDemoAuthGate({
         </>
       ) : (
         <>
-          <h1 className="mt-8 font-display text-2xl tracking-wide">Starting Nova demo</h1>
+          <h1 className="mt-8 font-display text-2xl tracking-wide">Starting fan demo</h1>
           <p className="mt-3 max-w-sm text-sm text-muted-foreground text-balance">
             Signing you in as demo fan Scott Weller&hellip;
           </p>

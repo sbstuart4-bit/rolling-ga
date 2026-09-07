@@ -6,7 +6,7 @@ describe("enter guided demo route handler", () => {
     vi.resetModules();
   });
 
-  it("redirects to Nova step 1 after establishing demo state", async () => {
+  it("redirects to Marisol step 1 after establishing demo state", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("ROLLING_GA_PUBLIC_GUIDED_DEMO", "1");
 
@@ -14,8 +14,8 @@ describe("enter guided demo route handler", () => {
     const loadGuidedStepContext = vi.fn(async () => ({
       journey: { steps: [{ step: 1 }] },
       step: { step: 1, route: "/event/{slug}" },
-      show: { slug: "nova-kestrel-gold-hour-nashville-2026" },
-      session: { journeyId: "nova-nashville", step: 1, autoplay: false, presenter: false },
+      show: { slug: "marisol-reyes-a-tender-night-brooklyn-2026" },
+      session: { journeyId: "marisol-tender-night", step: 1, autoplay: false, presenter: false },
     }));
 
     vi.doMock("@/server/demo/guided-demo-apply", () => ({
@@ -26,7 +26,7 @@ describe("enter guided demo route handler", () => {
     const { handleEnterGuidedDemoRequest } = await import("@/server/demo/enter-guided-demo");
 
     const returnTo =
-      "/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=1";
+      "/event/marisol-reyes-a-tender-night-brooklyn-2026?guided=marisol-tender-night&step=1";
     const response = await handleEnterGuidedDemoRequest(
       new Request(`https://rollingga.com/api/demo/enter-guided?returnTo=${encodeURIComponent(returnTo)}`),
     );
@@ -57,7 +57,7 @@ describe("enter guided demo route handler", () => {
     const { handleEnterGuidedDemoRequest } = await import("@/server/demo/enter-guided-demo");
 
     const returnTo =
-      "/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=1";
+      "/event/marisol-reyes-a-tender-night-brooklyn-2026?guided=marisol-tender-night&step=1";
     const response = await handleEnterGuidedDemoRequest(
       new Request(`https://rollingga.com/api/demo/enter-guided?returnTo=${encodeURIComponent(returnTo)}`),
     );

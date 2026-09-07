@@ -10,6 +10,23 @@ export interface DemoScenarioPreset {
 
 export const DEMO_SCENARIO_PRESETS: DemoScenarioPreset[] = [
   {
+    id: "marisol_pre_show",
+    label: "Marisol Reyes — Pre-Show Acquisition",
+    buttonLabel: "Run Marisol Pre-Show",
+    description:
+      "Brooklyn · T-14 · Unknown · Outside — social/ad landing, merch preview, I'm Going, countdown.",
+    scenario: {
+      artist: "marisol_reyes",
+      showKey: "marisol-brooklyn",
+      timePhase: "t_minus_14",
+      fanState: "unknown",
+      location: "outside_venue",
+      fanHistory: "first_show",
+      purchaseHistory: "none",
+      merchRule: "auto",
+    },
+  },
+  {
     id: "nova_pre_show",
     label: "Nova Kestrel — Pre-Show Acquisition",
     buttonLabel: "Run Nova Pre-Show",
@@ -61,11 +78,11 @@ export const DEMO_SCENARIO_PRESETS: DemoScenarioPreset[] = [
     },
   },
   {
-    id: "marisol_violeta",
+    id: "marisol_tender_night",
     label: "Marisol Reyes — Premium Show Exclusive",
-    buttonLabel: "Run Marisol Violeta Night",
+    buttonLabel: "Run Marisol Tender Night",
     description:
-      "Brooklyn · Show Day T-3 Hours · I'm Going · Outside — Violeta preview, locked merch, arrival unlock.",
+      "Brooklyn · Show Day T-3 Hours · I'm Going · Outside — A Tender Night preview, locked merch, arrival unlock.",
     scenario: {
       artist: "marisol_reyes",
       showKey: "marisol-brooklyn",

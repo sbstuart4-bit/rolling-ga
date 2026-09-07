@@ -4,7 +4,7 @@ import { useFormStatus } from "react-dom";
 import { cn } from "@/lib/utils";
 
 /**
- * Primary marketing CTA — launches the Nova Kestrel guided demo when the gate
+ * Primary marketing CTA — launches the Marisol Reyes guided demo when the gate
  * allows, otherwise falls back to /demo.
  */
 export function ExperienceNovaButton({
@@ -20,7 +20,7 @@ export function ExperienceNovaButton({
 }) {
   const { pending } = useFormStatus();
   const resolvedLabel =
-    label ?? (compact ? "Experience the Demo" : "Experience the Demo");
+    label ?? (compact ? "See the Artist Demo" : "See the Artist Demo");
 
   return (
     <button

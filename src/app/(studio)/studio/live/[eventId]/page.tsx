@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { ArtistGuidedDemoHighlight } from "@/components/demo/artist-guided-demo-highlight";
 import { LiveCommandCenter } from "@/components/studio/live-command-center";
 import { Button } from "@/components/ui/button";
 import { requireAuthWithRole } from "@/server/auth/request";
@@ -33,6 +34,7 @@ export default async function StudioLiveEventPage({
 
   return (
     <div className="space-y-4">
+      <ArtistGuidedDemoHighlight />
       <Button asChild variant="ghost" size="sm" className="-ml-2 text-muted-foreground">
         <Link href="/studio">
           <ArrowLeft className="size-4" aria-hidden />

@@ -13,38 +13,38 @@ import {
 } from "@/server/demo/guided-demo-state";
 import { timingStateForDemoPhase } from "@/lib/fan-experience/access-state";
 
-const nashville = getDemoShow("nova-nashville")!;
-const timezone = "America/Chicago";
+const brooklyn = getDemoShow("marisol-brooklyn")!;
+const timezone = "America/New_York";
 
 describe("resolveNowNextAction", () => {
   it("step 1 discover_only has no buy CTA and anticipation copy", () => {
-    const step = getGuidedStep("nova-nashville", 1)!;
+    const step = getGuidedStep("marisol-tender-night", 1)!;
     const fanExperience = resolveGuidedStepFanExperience(step)!;
     const action = resolveNowNextAction({
       access: fanExperience.access,
-      slug: nashville.slug,
-      artistName: nashville.artistName,
-      city: nashville.city,
-      startsAt: nashville.startsAt,
+      slug: brooklyn.slug,
+      artistName: brooklyn.artistName,
+      city: brooklyn.city,
+      startsAt: brooklyn.startsAt,
       timezone,
       teaserMessage: fanExperience.experience?.primaryMessage,
       timingState: timingStateForDemoPhase(step.scenario.timePhase),
     });
     expect(action.showCta).toBe(false);
     expect(action.title).toMatch(/discover/i);
-    expect(action.body).not.toMatch(/doors soon|verify|gold hour/i);
+    expect(action.body).not.toMatch(/doors soon|verify|tender night/i);
   });
 
   it("step 4 preview_locked stays locked without verify CTA", () => {
-    const step = getGuidedStep("nova-nashville", 4)!;
+    const step = getGuidedStep("marisol-tender-night", 4)!;
     const fanExperience = resolveGuidedStepFanExperience(step)!;
     expect(guidedStepMerchLabel(step)).toBe("PREVIEW LOCKED");
     const action = resolveNowNextAction({
       access: fanExperience.access,
-      slug: nashville.slug,
-      artistName: nashville.artistName,
-      city: nashville.city,
-      startsAt: nashville.startsAt,
+      slug: brooklyn.slug,
+      artistName: brooklyn.artistName,
+      city: brooklyn.city,
+      startsAt: brooklyn.startsAt,
       timezone,
       timingState: timingStateForDemoPhase(step.scenario.timePhase),
     });
@@ -54,14 +54,14 @@ describe("resolveNowNextAction", () => {
   });
 
   it("step 5 live_unlocked routes to shop without credential language", () => {
-    const step = getGuidedStep("nova-nashville", 5)!;
+    const step = getGuidedStep("marisol-tender-night", 5)!;
     const fanExperience = resolveGuidedStepFanExperience(step)!;
     const action = resolveNowNextAction({
       access: fanExperience.access,
-      slug: nashville.slug,
-      artistName: nashville.artistName,
-      city: nashville.city,
-      startsAt: nashville.startsAt,
+      slug: brooklyn.slug,
+      artistName: brooklyn.artistName,
+      city: brooklyn.city,
+      startsAt: brooklyn.startsAt,
       timezone,
       timingState: timingStateForDemoPhase(step.scenario.timePhase),
     });
@@ -70,14 +70,14 @@ describe("resolveNowNextAction", () => {
   });
 
   it("step 10 history_only points to credential not live entry", () => {
-    const step = getGuidedStep("nova-nashville", 10)!;
+    const step = getGuidedStep("marisol-tender-night", 10)!;
     const fanExperience = resolveGuidedStepFanExperience(step)!;
     const action = resolveNowNextAction({
       access: fanExperience.access,
-      slug: nashville.slug,
-      artistName: nashville.artistName,
-      city: nashville.city,
-      startsAt: nashville.startsAt,
+      slug: brooklyn.slug,
+      artistName: brooklyn.artistName,
+      city: brooklyn.city,
+      startsAt: brooklyn.startsAt,
       timezone,
       timingState: timingStateForDemoPhase(step.scenario.timePhase),
     });
@@ -86,13 +86,13 @@ describe("resolveNowNextAction", () => {
   });
 
   it("step 3 shows going relationship treatment", () => {
-    const step = getGuidedStep("nova-nashville", 3)!;
+    const step = getGuidedStep("marisol-tender-night", 3)!;
     const fanExperience = resolveGuidedStepFanExperience(step)!;
     expect(scenarioFanIsGoing(fanExperience)).toBe(true);
   });
 
   it("step 8 PDP access label reflects venue presence not credential", () => {
-    const step = getGuidedStep("nova-nashville", 8)!;
+    const step = getGuidedStep("marisol-tender-night", 8)!;
     const fanExperience = resolveGuidedStepFanExperience(step)!;
     expect(productAccessLabelForExperience(fanExperience)).toBe("Inside the venue tonight");
     expect(fanExperience.purchase).toBe("none");

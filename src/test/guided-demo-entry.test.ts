@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { GUIDED_DEMO_COOKIE } from "@/lib/auth-cookies";
 import {
+  isFanGuidedDemoQuery,
   isGuidedDemoQuery,
   parseGuidedDemoQuery,
   shouldAllowGuidedDemoFanRequest,
+  shouldAllowGuidedDemoRequest,
 } from "@/lib/guided-demo-entry";
 
 function mockRequest(pathWithSearch: string, cookies: Record<string, string> = {}) {
@@ -16,15 +18,16 @@ function mockRequest(pathWithSearch: string, cookies: Record<string, string> = {
         return value ? { value } : undefined;
       },
     },
-  } as Parameters<typeof shouldAllowGuidedDemoFanRequest>[0];
+  } as Parameters<typeof shouldAllowGuidedDemoRequest>[0];
 }
 
 describe("guided demo fan entry detection", () => {
-  it("recognises Nova Nashville guided query params", () => {
+  it("recognises Marisol guided query params and normalises legacy Nova alias", () => {
     const params = new URLSearchParams("guided=nova-nashville&step=1");
     expect(isGuidedDemoQuery(params)).toBe(true);
     expect(parseGuidedDemoQuery(params)).toEqual({
-      journeyId: "nova-nashville",
+      perspective: "fan",
+      journeyId: "marisol-tender-night",
       step: 1,
       presenter: false,
       autoplay: false,
@@ -38,7 +41,7 @@ describe("guided demo fan entry detection", () => {
 
   it("allows anonymous fan routes with guided query through proxy", () => {
     expect(
-      shouldAllowGuidedDemoFanRequest(
+      shouldAllowGuidedDemoRequest(
         mockRequest("/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=1"),
       ),
     ).toBe(true);
@@ -46,7 +49,7 @@ describe("guided demo fan entry detection", () => {
 
   it("allows anonymous fan routes when the guided session cookie is present", () => {
     expect(
-      shouldAllowGuidedDemoFanRequest(
+      shouldAllowGuidedDemoRequest(
         mockRequest("/event/nova-kestrel-gold-hour-nashville-2026", {
           [GUIDED_DEMO_COOKIE]: '{"journeyId":"nova-nashville","step":1}',
         }),
@@ -55,6 +58,29 @@ describe("guided demo fan entry detection", () => {
   });
 
   it("does not allow unrelated protected routes", () => {
-    expect(shouldAllowGuidedDemoFanRequest(mockRequest("/profile"))).toBe(false);
+    expect(shouldAllowGuidedDemoRequest(mockRequest("/profile"))).toBe(false);
+  });
+
+  it("allows studio routes for artist guided demo queries only", () => {
+    expect(
+      shouldAllowGuidedDemoRequest(
+        mockRequest("/studio/live/evt_marisol_brooklyn?guided=marisol-artist-studio&step=1"),
+      ),
+    ).toBe(true);
+    expect(
+      shouldAllowGuidedDemoRequest(
+        mockRequest("/studio/live/evt_marisol_brooklyn?guided=marisol-tender-night&step=1"),
+      ),
+    ).toBe(false);
+  });
+
+  it("keeps fan alias for shouldAllowGuidedDemoFanRequest", () => {
+    expect(isFanGuidedDemoQuery(new URLSearchParams("guided=marisol-tender-night&step=1"))).toBe(
+      true,
+    );
+    const request = mockRequest("/event/marisol-reyes-a-tender-night-brooklyn-2026?guided=marisol-tender-night&step=1");
+    expect(shouldAllowGuidedDemoFanRequest(request)).toBe(
+      shouldAllowGuidedDemoRequest(request),
+    );
   });
 });

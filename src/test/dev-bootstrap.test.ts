@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { isPgliteAbortError } from "@/db/dev-bootstrap";
+import { isPgliteAbortError, isPgliteCorruptionError } from "@/db/dev-bootstrap";
 
 describe("dev-bootstrap", () => {
   it("detects PGlite Aborted errors", () => {
@@ -12,6 +12,21 @@ describe("dev-bootstrap", () => {
       ),
     ).toBe(true);
     expect(isPgliteAbortError(new Error("relation users does not exist"))).toBe(false);
+  });
+
+  it("detects corrupt PGlite cluster errors", () => {
+    expect(
+      isPgliteCorruptionError(
+        new Error("Failed query", {
+          cause: new Error('could not open file "base/5/25624": No such file or directory'),
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      isPgliteCorruptionError(
+        new Error("duplicate key value violates unique constraint \"artists_pkey\""),
+      ),
+    ).toBe(true);
   });
 });
 
@@ -29,8 +44,9 @@ describe("listDemoAccounts fallback", () => {
 
     const { listDemoAccounts } = await import("@/server/demo/accounts");
     const accounts = await listDemoAccounts();
-    expect(accounts.length).toBe(6);
+    expect(accounts.length).toBe(7);
     expect(accounts.some((a) => a.email === "scott@example.com")).toBe(true);
+    expect(accounts.some((a) => a.email === "elena@marisolreyes.example")).toBe(true);
 
     vi.unmock("@/lib/demo-mode");
     vi.unmock("@/db/dev-bootstrap");

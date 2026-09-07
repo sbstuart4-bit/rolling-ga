@@ -33,10 +33,18 @@ export function CreateFlashDropForm({
   artistId,
   events,
   products,
+  defaults,
 }: {
   artistId: string;
   events: { id: string; slug: string; startsAt: Date; timezone: string; venueCity: string; artistName: string }[];
   products: { id: string; name: string; basePriceCents: number }[];
+  defaults?: {
+    title?: string;
+    description?: string;
+    eventId?: string;
+    durationMinutes?: string;
+    productIds?: string[];
+  };
 }) {
   const [state, action, pending] = useActionState<FlashDropState, FormData>(
     createFlashDropAction,
@@ -77,17 +85,30 @@ export function CreateFlashDropForm({
         <>
           <div className="space-y-1.5">
             <Label htmlFor="title">Drop title</Label>
-            <Input id="title" name="title" required placeholder="e.g. Detroit Midnight Merch" className="h-11" />
+            <Input
+              id="title"
+              name="title"
+              required
+              defaultValue={defaults?.title}
+              placeholder="e.g. 48-Hour Brooklyn Encore Drop"
+              className="h-11"
+            />
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="description">Description (optional)</Label>
-            <Input id="description" name="description" placeholder="A quick line about this drop" className="h-11" />
+            <Input
+              id="description"
+              name="description"
+              defaultValue={defaults?.description}
+              placeholder="A quick line about this drop"
+              className="h-11"
+            />
           </div>
 
           <div className="space-y-1.5">
             <Label htmlFor="eventId">Show</Label>
-            <Select name="eventId" required>
+            <Select name="eventId" required defaultValue={defaults?.eventId}>
               <SelectTrigger id="eventId" className="h-11">
                 <SelectValue placeholder="Select a show" />
               </SelectTrigger>
@@ -103,7 +124,7 @@ export function CreateFlashDropForm({
 
           <div className="space-y-1.5">
             <Label htmlFor="durationMinutes">How long does it run?</Label>
-            <Select name="durationMinutes" defaultValue="60">
+            <Select name="durationMinutes" defaultValue={defaults?.durationMinutes ?? "60"}>
               <SelectTrigger id="durationMinutes" className="h-11">
                 <SelectValue />
               </SelectTrigger>
@@ -114,6 +135,7 @@ export function CreateFlashDropForm({
                 <SelectItem value="120">2 hours</SelectItem>
                 <SelectItem value="180">3 hours</SelectItem>
                 <SelectItem value="480">8 hours</SelectItem>
+                <SelectItem value="2880">48 hours</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -124,7 +146,11 @@ export function CreateFlashDropForm({
               {products.map((p) => (
                 <li key={p.id}>
                   <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-card p-3.5 transition-colors hover:bg-accent has-[:checked]:border-primary">
-                    <Checkbox name="productIds" value={p.id} />
+                    <Checkbox
+                      name="productIds"
+                      value={p.id}
+                      defaultChecked={defaults?.productIds?.includes(p.id)}
+                    />
                     <span className="flex-1 text-sm font-medium">{p.name}</span>
                     <span className="tabular text-sm text-muted-foreground">
                       ${(p.basePriceCents / 100).toFixed(0)}

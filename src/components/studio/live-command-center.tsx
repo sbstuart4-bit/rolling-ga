@@ -63,10 +63,21 @@ export function LiveCommandCenter({
       </header>
 
       <dl className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
-        <Metric label="Expected" value={snapshot.expectedAttendance?.toLocaleString("en-US") ?? "—"} />
-        <Metric label="Verified" value={snapshot.verifiedAttendees.toLocaleString("en-US")} accent />
+        <Metric
+          label="Attendance"
+          value={snapshot.verifiedAttendees.toLocaleString("en-US")}
+          accent
+        />
+        <Metric
+          label="Connected fans"
+          value={snapshot.connectedFans.toLocaleString("en-US")}
+        />
+        <Metric
+          label="Purchasing fans"
+          value={snapshot.purchasingFans.toLocaleString("en-US")}
+        />
+        <Metric label="Merch GMV" value={formatMoney(snapshot.gmvCents)} accent />
         <Metric label="Orders" value={snapshot.orderCount.toLocaleString("en-US")} />
-        <Metric label="GMV" value={formatMoney(snapshot.gmvCents)} />
         <Metric label="AOV" value={formatMoney(snapshot.aovCents)} />
         <Metric
           label="Active drop"

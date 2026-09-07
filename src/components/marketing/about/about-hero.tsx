@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ABOUT_HERO_CHAIN } from "@/components/marketing/about/marketing-about-fixtures";
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 import { MktDisplayHeading, MktEyebrow } from "@/components/marketing/site";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,7 @@ export function AboutHero() {
             </p>
 
             <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5">
-              <form action={experienceNovaKestrelAction} className="w-full sm:w-auto">
+              <form action={experienceArtistStudioAction} className="w-full sm:w-auto">
                 <ExperienceNovaButton
                   size="large"
                   label="Experience the Demo"

@@ -1,10 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import { Heart, MapPin, Package, Repeat, Shield, Smartphone, Sparkles, UserCheck, Users } from "lucide-react";
 import {
-  NOVA_KESTREL_CREDENTIAL_SCREENSHOT,
-  NOVA_KESTREL_MY_SHOWS_SCREENSHOT,
-  NOVA_KESTREL_SHOP_SCREENSHOT,
-  NOVA_KESTREL_UNLOCK_SCREENSHOT,
+  MARISOL_REYES_CREDENTIAL_SCREENSHOT,
+  MARISOL_REYES_MY_SHOWS_SCREENSHOT,
+  MARISOL_REYES_SHOP_SCREENSHOT,
+  MARISOL_REYES_UNLOCK_SCREENSHOT,
 } from "@/components/marketing/home/marketing-home-fixtures";
 
 export const FOR_FANS_NIGHT_BENEFITS = [
@@ -28,20 +28,20 @@ export const FOR_FANS_NIGHT_BENEFITS = [
 export const FOR_FANS_SHOW_SCREENS = [
   {
     label: "You were there",
-    screenshot: NOVA_KESTREL_CREDENTIAL_SCREENSHOT,
-    alt: "Nova Kestrel I Was There digital credential in Rolling GA",
+    screenshot: MARISOL_REYES_CREDENTIAL_SCREENSHOT,
+    alt: "Marisol Reyes I Was There digital credential in Rolling GA",
   },
   {
     label: "My shows",
-    screenshot: NOVA_KESTREL_MY_SHOWS_SCREENSHOT,
-    alt: "My Shows in Rolling GA — Nova Kestrel Nashville credential and show history",
+    screenshot: MARISOL_REYES_MY_SHOWS_SCREENSHOT,
+    alt: "My Shows in Rolling GA — Marisol Reyes Brooklyn credential and show history",
   },
 ] as const;
 
-export const FOR_FANS_HERO_UNLOCK = NOVA_KESTREL_UNLOCK_SCREENSHOT;
-export const FOR_FANS_HERO_CREDENTIAL = NOVA_KESTREL_CREDENTIAL_SCREENSHOT;
-export const FOR_FANS_NIGHT_UNLOCK = NOVA_KESTREL_UNLOCK_SCREENSHOT;
-export const FOR_FANS_NIGHT_SHOP = NOVA_KESTREL_SHOP_SCREENSHOT;
+export const FOR_FANS_HERO_UNLOCK = MARISOL_REYES_UNLOCK_SCREENSHOT;
+export const FOR_FANS_HERO_CREDENTIAL = MARISOL_REYES_CREDENTIAL_SCREENSHOT;
+export const FOR_FANS_NIGHT_UNLOCK = MARISOL_REYES_UNLOCK_SCREENSHOT;
+export const FOR_FANS_NIGHT_SHOP = MARISOL_REYES_SHOP_SCREENSHOT;
 
 export const FOR_FANS_NEXT_SHOW_POSSIBILITIES = [
   {

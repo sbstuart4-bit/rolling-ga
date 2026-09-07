@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PARTNERS_ECOSYSTEM_LABELS } from "@/components/marketing/partners/marketing-partners-fixtures";
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 import { MktDisplayHeading, MktEyebrow } from "@/components/marketing/site";
 import { cn } from "@/lib/utils";
 
@@ -42,7 +42,7 @@ export function PartnersHero() {
               >
                 Pilot With Us <span aria-hidden>&rarr;</span>
               </Link>
-              <form action={experienceNovaKestrelAction} className="w-full sm:w-auto">
+              <form action={experienceArtistStudioAction} className="w-full sm:w-auto">
                 <ExperienceNovaButton
                   size="large"
                   label="Experience the Demo"

@@ -73,8 +73,8 @@ describe("public marketing guided demo entry", () => {
     const loadGuidedStepContext = vi.fn(async () => ({
       journey: { steps: [{ step: 1 }] },
       step: { step: 1, route: "/event/{slug}" },
-      show: { slug: "nova-nashville-cedar-vine" },
-      session: { journeyId: "nova-nashville", step: 1, autoplay: false, presenter: false },
+      show: { slug: "marisol-reyes-a-tender-night-brooklyn-2026" },
+      session: { journeyId: "marisol-tender-night", step: 1, autoplay: false, presenter: false },
     }));
     const redirect = vi.fn((url: string) => {
       throw new Error(`redirect:${url}`);
@@ -89,10 +89,12 @@ describe("public marketing guided demo entry", () => {
       ensureScottSession: vi.fn(),
     }));
     vi.doMock("@/lib/guided-demo", () => ({
-      resolveGuidedRoute: () => "/event/nova-kestrel-gold-hour-nashville-2026",
+      normalizeGuidedJourneyId: (id: string) =>
+        id === "nova-nashville" ? "marisol-tender-night" : id,
+      resolveGuidedRoute: () => "/event/marisol-reyes-a-tender-night-brooklyn-2026",
     }));
     vi.doMock("@/server/demo/guided-demo-state", () => ({
-      guidedDemoQuery: () => "guided=nova-nashville&step=1",
+      guidedDemoQuery: () => "guided=marisol-tender-night&step=1",
     }));
     vi.doMock("next/navigation", () => ({ redirect }));
 
@@ -103,7 +105,7 @@ describe("public marketing guided demo entry", () => {
     formData.set("publicMarketingEntry", "1");
 
     await expect(startGuidedDemoAction(formData)).rejects.toThrow(
-      "redirect:/event/nova-kestrel-gold-hour-nashville-2026?guided=nova-nashville&step=1",
+      "redirect:/event/marisol-reyes-a-tender-night-brooklyn-2026?guided=marisol-tender-night&step=1",
     );
 
     expect(boardAccess).not.toHaveBeenCalled();

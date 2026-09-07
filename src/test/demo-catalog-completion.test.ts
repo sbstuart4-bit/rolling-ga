@@ -37,8 +37,8 @@ export const P1_1_NEW_PRODUCTS = [
   { id: "prd_mr_vinyl", artistId: "art_marisol_reyes", accessType: "public" as const },
   { id: "prd_mr_scarf", artistId: "art_marisol_reyes", accessType: "public" as const },
   { id: "prd_mr_tote", artistId: "art_marisol_reyes", accessType: "public" as const },
-  { id: "prd_mr_longsleeve", artistId: "art_marisol_reyes", accessType: "public" as const },
-  { id: "prd_mr_fan", artistId: "art_marisol_reyes", accessType: "public" as const },
+  { id: "prd_mr_hoodie", artistId: "art_marisol_reyes", accessType: "public" as const },
+  { id: "prd_mr_hat", artistId: "art_marisol_reyes", accessType: "public" as const },
   { id: "prd_mr_7inch", artistId: "art_marisol_reyes", accessType: "public" as const },
   { id: "prd_mr_city_tee", artistId: "art_marisol_reyes", accessType: "event_specific" as const },
   { id: "prd_mr_necklace", artistId: "art_marisol_reyes", accessType: "public" as const },
@@ -102,7 +102,7 @@ describe("P1.1 demo catalog completion", () => {
 
   it("seeds apparel sizes on new apparel products", () => {
     const apparel = ALL_PRODUCTS.filter((p) =>
-      ["prd_lc_austin_tee", "prd_mr_city_tee", "prd_mr_longsleeve"].includes(p.id),
+      ["prd_lc_austin_tee", "prd_mr_city_tee", "prd_mr_hoodie"].includes(p.id),
     );
     for (const product of apparel) {
       expect(product.sizes?.length).toBeGreaterThan(0);

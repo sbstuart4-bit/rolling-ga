@@ -9,7 +9,7 @@ import {
   unauthenticatedEntryPath,
 } from "@/lib/demo-mode";
 import { isPublicPath, isStaticAssetPath, shouldRewriteRootToMarketing } from "@/lib/public-paths";
-import { shouldAllowGuidedDemoFanRequest, GUIDED_DEMO_ENTRY_HEADER } from "@/lib/guided-demo-entry";
+import { shouldAllowGuidedDemoRequest, GUIDED_DEMO_ENTRY_HEADER } from "@/lib/guided-demo-entry";
 import {
   hostedDemoBoardGateRequired,
   resolveDemoBoardSecret,
@@ -129,13 +129,13 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (sessionId) return NextResponse.next();
-
-  if (shouldAllowGuidedDemoFanRequest(request)) {
+  if (shouldAllowGuidedDemoRequest(request)) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(GUIDED_DEMO_ENTRY_HEADER, `${pathname}${search}`);
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
+
+  if (sessionId) return NextResponse.next();
 
   if (shouldRewriteRootToMarketing({ pathname, hasSession: false, demoMode: fullDemoBoard })) {
     return NextResponse.rewrite(new URL("/home", request.url));

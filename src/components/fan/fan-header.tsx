@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
-import { RollingGaMark } from "@/components/brand/rolling-ga-mark";
+import { RollingGaHomeLink, RollingGaMark } from "@/components/brand/rolling-ga-mark";
 import { DemoBoardReturn } from "@/components/demo/demo-board-return";
 import { initialsOf } from "@/lib/format";
 import { demoModeEnabled } from "@/lib/demo-mode";
@@ -8,16 +8,28 @@ import { demoModeEnabled } from "@/lib/demo-mode";
 export function FanHeader({
   displayName,
   cartCount,
+  homeHref = "/",
 }: {
   displayName: string;
   cartCount: number;
+  /** Marketing homepage when presenting the public guided demo. */
+  homeHref?: "/" | "/home";
 }) {
   return (
     <header className="z-30 shrink-0 border-b border-border bg-[#121212]/95 pt-safe backdrop-blur-lg">
       <div className="flex h-12 items-center gap-2 px-4">
-        <Link href="/" className="min-w-0 flex-1" aria-label="Rolling GA home">
-          <RollingGaMark />
-        </Link>
+        {homeHref === "/home" ? (
+          <RollingGaHomeLink
+            className="min-w-0 flex-1 focus-visible:ring-primary focus-visible:ring-offset-[#121212]"
+            markClassName="uppercase font-semibold"
+            size="default"
+            tone="brand"
+          />
+        ) : (
+          <Link href="/" className="min-w-0 flex-1" aria-label="Rolling GA home">
+            <RollingGaMark className="uppercase font-semibold" />
+          </Link>
+        )}
 
         <Link
           href="/cart"

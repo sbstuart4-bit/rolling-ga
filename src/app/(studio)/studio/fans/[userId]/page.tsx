@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ArtistGuidedDemoHighlight } from "@/components/demo/artist-guided-demo-highlight";
 import { FanRelationshipProfileView } from "@/components/studio/fan-relationship-profile";
 import { requireAuthWithRole } from "@/server/auth/request";
 import { defaultArtistId } from "@/server/auth/guards";
@@ -23,6 +24,7 @@ export default async function StudioFanProfilePage({
 
   return (
     <div className="p-6">
+      <ArtistGuidedDemoHighlight />
       <FanRelationshipProfileView profile={profile} />
     </div>
   );

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PILOT_HERO_CONDITIONS } from "@/components/marketing/pilot/marketing-pilot-page-fixtures";
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
 import { MktDisplayHeading, MktEyebrow } from "@/components/marketing/site";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 import { cn } from "@/lib/utils";
 
 export function PilotHero() {
@@ -42,7 +42,7 @@ export function PilotHero() {
               >
                 Start a pilot conversation <span aria-hidden>&rarr;</span>
               </Link>
-              <form action={experienceNovaKestrelAction} className="w-full sm:w-auto">
+              <form action={experienceArtistStudioAction} className="w-full sm:w-auto">
                 <ExperienceNovaButton
                   size="large"
                   label="Experience the Demo"

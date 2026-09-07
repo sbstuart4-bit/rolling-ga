@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Brooklyn">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#120E1B"/>
+      <stop offset="100%" stop-color="#1C1628"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <rect x="0" y="120" width="1057" height="8" fill="#7B3CFF" opacity="0.50"/>
+  <rect x="0" y="154" width="1115" height="14" fill="#B892FF" opacity="0.47"/>
+  <rect x="0" y="188" width="1028" height="7" fill="#B892FF" opacity="0.44"/>
+  <rect x="0" y="222" width="1225" height="12" fill="#B892FF" opacity="0.42"/>
+  <rect x="0" y="256" width="1404" height="13" fill="#7B3CFF" opacity="0.39"/>
+  <rect x="0" y="290" width="935" height="9" fill="#B892FF" opacity="0.36"/>
+  <rect x="0" y="324" width="1157" height="7" fill="#B892FF" opacity="0.33"/>
+  <rect x="0" y="358" width="1339" height="13" fill="#B892FF" opacity="0.30"/>
+  <rect x="0" y="392" width="932" height="9" fill="#7B3CFF" opacity="0.28"/>
+  <rect x="0" y="426" width="1119" height="14" fill="#B892FF" opacity="0.25"/>
+  <rect x="0" y="460" width="1444" height="14" fill="#B892FF" opacity="0.22"/>
+  <rect x="0" y="494" width="1310" height="8" fill="#B892FF" opacity="0.19"/>
+  <rect x="0" y="528" width="1358" height="6" fill="#7B3CFF" opacity="0.16"/>
+  <rect x="0" y="562" width="1148" height="9" fill="#B892FF" opacity="0.14"/>
+  <rect width="1600" height="1000" filter="url(#grain)" opacity="0.05"/>
+  <text x="96" y="800" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="132"
+        font-weight="800" letter-spacing="-5" fill="#F1ECFA">BROOKLYN</text>
+  <text x="100" y="856" font-family="Archivo, Helvetica, Arial, sans-serif" font-size="30"
+        font-weight="600" letter-spacing="10" fill="#B892FF">BROOKLYN, AFTER</text>
+</svg>

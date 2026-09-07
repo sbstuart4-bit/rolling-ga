@@ -1,12 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import { CalendarDays, MapPin, Smartphone, Truck, Users } from "lucide-react";
 import {
-  NOVA_KESTREL_CREDENTIAL_SCREENSHOT,
-  NOVA_KESTREL_DISCOVER_SCREENSHOT,
-  NOVA_KESTREL_MY_SHOWS_SCREENSHOT,
-  NOVA_KESTREL_RECEIVE_SCREENSHOT,
-  NOVA_KESTREL_SHOP_SCREENSHOT,
-  NOVA_KESTREL_UNLOCK_SCREENSHOT,
+  MARISOL_REYES_CREDENTIAL_SCREENSHOT,
+  MARISOL_REYES_DISCOVER_SCREENSHOT,
+  MARISOL_REYES_MY_SHOWS_SCREENSHOT,
+  MARISOL_REYES_RECEIVE_SCREENSHOT,
+  MARISOL_REYES_SHOP_SCREENSHOT,
+  MARISOL_REYES_UNLOCK_SCREENSHOT,
 } from "@/components/marketing/home/marketing-home-fixtures";
 
 export interface HowItWorksJourneyStage {
@@ -18,38 +18,38 @@ export interface HowItWorksJourneyStage {
   alt: string;
 }
 
-/** Commerce journey — same real Nova assets as the approved homepage section. */
+/** Commerce journey — real Marisol Reyes guided-demo screenshots. */
 export const HOW_IT_WORKS_COMMERCE_STAGES: readonly HowItWorksJourneyStage[] = [
   {
     step: "01",
     icon: CalendarDays,
     title: "Discover",
     body: "See what's coming before the show.",
-    screenshot: NOVA_KESTREL_DISCOVER_SCREENSHOT,
-    alt: "Nova Kestrel show page in Rolling GA — discover the Nashville show before doors",
+    screenshot: MARISOL_REYES_DISCOVER_SCREENSHOT,
+    alt: "Marisol Reyes show page in Rolling GA — discover the Brooklyn show before doors",
   },
   {
     step: "02",
     icon: MapPin,
     title: "Unlock",
     body: "Being at the show unlocks what others can't get.",
-    screenshot: NOVA_KESTREL_UNLOCK_SCREENSHOT,
-    alt: "Nova Kestrel event page in Rolling GA — venue arrival unlocks show-night exclusives",
+    screenshot: MARISOL_REYES_UNLOCK_SCREENSHOT,
+    alt: "Marisol Reyes event page in Rolling GA — venue arrival unlocks show-night exclusives",
   },
   {
     step: "03",
     icon: Smartphone,
     title: "Shop",
     body: "Buy from your phone. Skip the merch line.",
-    screenshot: NOVA_KESTREL_SHOP_SCREENSHOT,
-    alt: "Nova Kestrel attendee shop in Rolling GA — buy from your phone at the show",
+    screenshot: MARISOL_REYES_SHOP_SCREENSHOT,
+    alt: "Marisol Reyes attendee shop in Rolling GA — A Tender Night tour merchandise",
   },
   {
     step: "04",
     icon: Truck,
     title: "Receive",
     body: "Leave the merch behind. We'll send it to you.",
-    screenshot: NOVA_KESTREL_RECEIVE_SCREENSHOT,
+    screenshot: MARISOL_REYES_RECEIVE_SCREENSHOT,
     alt: "Rolling GA order confirmation — your piece of tonight is on its way",
   },
 ];
@@ -58,14 +58,14 @@ export const HOW_IT_WORKS_RELATIONSHIP_STAGES = [
   {
     label: "Remember",
     title: "The fan keeps a record of the show they attended.",
-    screenshot: NOVA_KESTREL_CREDENTIAL_SCREENSHOT,
-    alt: "Nova Kestrel I Was There digital credential in Rolling GA",
+    screenshot: MARISOL_REYES_CREDENTIAL_SCREENSHOT,
+    alt: "Marisol Reyes I Was There digital credential in Rolling GA",
   },
   {
     label: "Reconnect",
     title: "The next time the artist has something worth sharing, the relationship already exists.",
-    screenshot: NOVA_KESTREL_MY_SHOWS_SCREENSHOT,
-    alt: "My Shows in Rolling GA — Nova Kestrel Nashville credential and show history",
+    screenshot: MARISOL_REYES_MY_SHOWS_SCREENSHOT,
+    alt: "My Shows in Rolling GA — Marisol Reyes Brooklyn credential and show history",
   },
 ] as const;
 

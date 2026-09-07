@@ -23,16 +23,16 @@ export function HowItWorksCommerceJourney() {
         {HOW_IT_WORKS_COMMERCE_STAGES.map((stage, index) => (
           <li key={stage.title} className="mkt-how-it-works-unit">
             <div className="mkt-how-it-works-copy">
-              <span className="mb-4 block font-mono text-xs font-semibold tracking-[0.2em] text-mkt-purple">
+              <span className="mb-4 block font-mono text-sm font-semibold tracking-[0.2em] text-mkt-purple md:text-base">
                 {stage.step}
               </span>
-              <span className="mb-4 flex size-12 items-center justify-center rounded-full border border-white/20 text-mkt-fg">
-                <stage.icon className="size-5" strokeWidth={1.5} aria-hidden />
+              <span className="mb-5 flex size-14 items-center justify-center rounded-full border-2 border-white/20 text-mkt-fg md:size-16">
+                <stage.icon className="size-6 md:size-7" strokeWidth={1.5} aria-hidden />
               </span>
-              <h3 className="font-display text-sm uppercase tracking-[0.1em] text-mkt-fg sm:text-base">
+              <h3 className="font-display text-base uppercase tracking-[0.1em] text-mkt-fg md:text-lg lg:text-xl">
                 {stage.title}
               </h3>
-              <p className="mt-2 max-w-[16rem] text-sm leading-relaxed text-mkt-muted sm:max-w-xs sm:text-base">
+              <p className="mt-3 max-w-[20rem] text-base leading-relaxed text-mkt-muted md:max-w-none md:text-lg">
                 {stage.body}
               </p>
             </div>

@@ -20,7 +20,8 @@ import { hostedDemoBoardGateRequired } from "@/lib/production-env";
 import { demoModeEnabled, listDemoAccounts, type DemoAccount } from "@/server/demo/accounts";
 import { getDemoClockState } from "@/server/demo/clock";
 import { getDemoScenario } from "@/server/demo/scenario-state";
-import { startPersonaAction, startScottNovaNashvilleLiveAction } from "@/server/demo/persona-actions";
+import { startPersonaAction, startScottMarisolBrooklynLiveAction } from "@/server/demo/persona-actions";
+import { startArtistGuidedDemoAction } from "@/server/demo/artist-guided-demo-actions";
 
 export const metadata: Metadata = { title: "Demo board — Rolling GA" };
 export const dynamic = "force-dynamic";
@@ -65,7 +66,13 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
     getDemoScenario(searchParams),
   ]);
 
-  const artistAccounts = accounts.filter((a) => a.roles.includes("artist_member"));
+  const artistAccounts = accounts
+    .filter((a) => a.roles.includes("artist_member"))
+    .sort((a, b) => {
+      if (a.email === "elena@marisolreyes.example") return -1;
+      if (b.email === "elena@marisolreyes.example") return 1;
+      return a.displayName.localeCompare(b.displayName);
+    });
   const fanAccounts = accounts.filter((a) => a.roles.includes("fan"));
 
   return (
@@ -119,15 +126,15 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
               <section className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
                 <h2 className="text-lg font-semibold tracking-tight">Featured fan walkthrough</h2>
                 <p className="mt-2 text-sm text-muted-foreground text-balance">
-                  Sets the clock to Nashville live (June 12, 8:00 PM), signs in as Scott Weller, and
-                  opens Nova Kestrel at Cedar & Vine — ready to verify.
+                  Sets the clock to Brooklyn live (June 12, 8:00 PM), signs in as Scott Weller, and
+                  opens Marisol Reyes at Warehouse Nine — ready to verify.
                 </p>
-                <form action={startScottNovaNashvilleLiveAction} className="mt-4">
+                <form action={startScottMarisolBrooklynLiveAction} className="mt-4">
                   <Button
                     type="submit"
                     className="h-11 w-full bg-primary uppercase tracking-wider hover:bg-primary/90 sm:w-auto"
                   >
-                    Start Nashville live as Scott
+                    Start Brooklyn live as Scott
                   </Button>
                 </form>
               </section>
@@ -143,6 +150,28 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
 
         {perspective === "artist" && (
           <>
+            {boardAccess && (
+              <section className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
+                <h2 className="text-lg font-semibold tracking-tight">
+                  Featured artist walkthrough
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground text-balance">
+                  Six-step guided tour of Marisol Reyes Artist Studio — Brooklyn · A Tender Night.
+                  Signs in as Elena Vasquez and walks the real show → merch → fans → activation
+                  story.
+                </p>
+                <form action={startArtistGuidedDemoAction} className="mt-4">
+                  <input type="hidden" name="journeyId" value="marisol-artist-studio" />
+                  <Button
+                    type="submit"
+                    className="h-11 w-full bg-primary uppercase tracking-wider hover:bg-primary/90 sm:w-auto"
+                  >
+                    Run Marisol Artist Studio demo
+                  </Button>
+                </form>
+              </section>
+            )}
+
             {!boardAccess && hostedDemoBoardGateRequired() ? (
               <DemoAccessGate />
             ) : (

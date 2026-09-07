@@ -12,6 +12,9 @@ import {
 
   listActiveGuidedJourneys,
 
+  MARISOL_TENDER_NIGHT_JOURNEY,
+  MARISOL_TENDER_NIGHT_STEPS,
+
   NOVA_NASHVILLE_JOURNEY,
 
   NOVA_NASHVILLE_STEPS,
@@ -48,11 +51,27 @@ import {
 
 
 
+const brooklyn = getDemoShow("marisol-brooklyn")!;
+
 const nashville = getDemoShow("nova-nashville")!;
 
 const detroit = getDemoShow("atlas-detroit")!;
 
 
+
+function merchForMarisolStep(stepNumber: number) {
+  const step = MARISOL_TENDER_NIGHT_STEPS[stepNumber - 1]!;
+  return resolveMerchExperience({
+    now: brooklyn.startsAt,
+    show: brooklyn,
+    timePhase: step.scenario.timePhase,
+    fanState: step.scenario.fanState,
+    location: step.scenario.location,
+    fanHistory: step.scenario.fanHistory,
+    purchaseHistory: step.scenario.purchaseHistory,
+    merchRule: step.scenario.merchRule,
+  });
+}
 
 function merchForNovaStep(stepNumber: number) {
 
@@ -84,16 +103,15 @@ function merchForNovaStep(stepNumber: number) {
 
 describe("guided demo registry", () => {
 
-  it("lists only Nova Nashville as the active guided journey", () => {
-
+  it("lists only Marisol Tender Night as the active guided journey", () => {
     const active = listActiveGuidedJourneys();
-
     expect(active).toHaveLength(1);
+    expect(active[0]?.id).toBe("marisol-tender-night");
+    expect(getGuidedJourney("marisol-tender-night")).toBe(MARISOL_TENDER_NIGHT_JOURNEY);
+  });
 
-    expect(active[0]?.id).toBe("nova-nashville");
-
-    expect(getGuidedJourney("nova-nashville")).toBe(NOVA_NASHVILLE_JOURNEY);
-
+  it("maps legacy nova-nashville journey id to Marisol", () => {
+    expect(getGuidedJourney("nova-nashville")).toBe(MARISOL_TENDER_NIGHT_JOURNEY);
   });
 
 
@@ -106,17 +124,52 @@ describe("guided demo registry", () => {
 
 
 
-  it("exposes coming-soon placeholders including Degens", () => {
-
-    expect(COMING_SOON_GUIDED_JOURNEYS.some((j) => j.id === "degens-detroit")).toBe(true);
-
+  it("exposes coming-soon placeholders including Nova Nashville", () => {
+    expect(COMING_SOON_GUIDED_JOURNEYS.some((j) => j.id === "nova-nashville")).toBe(true);
   });
 
 });
 
 
 
-describe("Nova Nashville guided journey", () => {
+describe("Marisol Tender Night guided journey", () => {
+  it("has ten stable ordered steps", () => {
+    expect(MARISOL_TENDER_NIGHT_STEPS).toHaveLength(10);
+    expect(MARISOL_TENDER_NIGHT_STEPS.map((s) => s.step)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
+  it("targets the real Brooklyn show slug and routes", () => {
+    expect(MARISOL_TENDER_NIGHT_JOURNEY.showKey).toBe("marisol-brooklyn");
+    const step1 = getGuidedStep("marisol-tender-night", 1)!;
+    expect(resolveGuidedRoute(step1.route, brooklyn)).toBe(`/event/${brooklyn.slug}`);
+    const step8 = getGuidedStep("marisol-tender-night", 8)!;
+    expect(resolveGuidedRoute(step8.route, brooklyn)).toContain("tender-night-brooklyn-tee");
+  });
+
+  it("step 8 does not imply a completed purchase", () => {
+    const step = getGuidedStep("marisol-tender-night", 8)!;
+    const fanExperience = resolveGuidedStepFanExperience(step);
+    expect(fanExperience?.purchase).toBe("none");
+    expect(step.whatChanged).not.toMatch(/completed|confirmed|took home/i);
+  });
+
+  it("step 5 venue arrival unlocks show-exclusive merch", () => {
+    const step = MARISOL_TENDER_NIGHT_STEPS[4]!;
+    expect(isVenuePresenceActive("doors_open", "inside_venue")).toBe(true);
+    expect(merchForMarisolStep(5).showExclusivePurchasable).toBe(true);
+    expect(resolveGuidedRoute(step.route, brooklyn)).toContain("/shop");
+  });
+
+  it("step 1 is discover-only with no merch", () => {
+    const step = getGuidedStep("marisol-tender-night", 1)!;
+    expect(merchForMarisolStep(1).coreMerchPurchasable).toBe(false);
+    expect(merchForMarisolStep(1).coreMerchVisible).toBe(false);
+    expect(merchForMarisolStep(1).showExclusiveVisibility).toBe("teaser");
+    expect(guidedStepMerchLabel(step)).toBe("DISCOVER ONLY");
+  });
+});
+
+describe("Nova Nashville legacy journey data", () => {
 
   it("has ten stable ordered steps", () => {
 
@@ -165,8 +218,7 @@ describe("Nova Nashville guided journey", () => {
 
 
   it("step 8 does not imply a completed purchase", () => {
-
-    const step = getGuidedStep("nova-nashville", 8)!;
+    const step = NOVA_NASHVILLE_STEPS[7]!;
 
     const fanExperience = resolveGuidedStepFanExperience(step);
 
@@ -182,11 +234,9 @@ describe("Nova Nashville guided journey", () => {
 
     expect(NOVA_NASHVILLE_JOURNEY.showKey).toBe("nova-nashville");
 
-    const step1 = getGuidedStep("nova-nashville", 1)!;
-
+    const step1 = NOVA_NASHVILLE_STEPS[0]!;
     expect(resolveGuidedRoute(step1.route, nashville)).toBe(`/event/${nashville.slug}`);
-
-    const step8 = getGuidedStep("nova-nashville", 8)!;
+    const step8 = NOVA_NASHVILLE_STEPS[7]!;
 
     expect(resolveGuidedRoute(step8.route, nashville)).toContain("nashville-night-tee");
 
@@ -252,7 +302,7 @@ describe("Nova Nashville guided journey", () => {
 
   it("step 1 is discover-only with no merch", () => {
 
-    const step = getGuidedStep("nova-nashville", 1)!;
+    const step = NOVA_NASHVILLE_STEPS[0]!;
 
     expect(merchForNovaStep(1).coreMerchPurchasable).toBe(false);
 
@@ -274,7 +324,7 @@ describe("guided demo URL persistence", () => {
 
     const qs = guidedDemoQuery({
 
-      journeyId: "nova-nashville",
+      journeyId: "marisol-tender-night",
 
       step: 5,
 
@@ -286,7 +336,7 @@ describe("guided demo URL persistence", () => {
 
     const params = new URLSearchParams(qs);
 
-    expect(params.get("guided")).toBe("nova-nashville");
+    expect(params.get("guided")).toBe("marisol-tender-night");
 
     expect(params.get("step")).toBe("5");
 

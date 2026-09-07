@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 import { MktDisplayHeading, MktEyebrow, MktSectionShell } from "@/components/marketing/site";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +35,7 @@ export function AboutClosing() {
             >
               Start a Pilot Conversation <span aria-hidden>&rarr;</span>
             </Link>
-            <form action={experienceNovaKestrelAction} className="w-full sm:w-auto">
+            <form action={experienceArtistStudioAction} className="w-full sm:w-auto">
               <ExperienceNovaButton
                 label="Experience the Demo"
                 className="w-full border border-white/80 bg-transparent text-mkt-fg hover:bg-white/5 sm:w-auto"

@@ -1,72 +1,75 @@
+import Image from "next/image";
 import {
   HOME_HERO_BENEFITS,
-  NOVA_KESTREL_SHOP_SCREENSHOT,
+  MKT_PHOTOS,
 } from "@/components/marketing/home/marketing-home-fixtures";
-import { ExperienceNovaForm } from "@/components/marketing/experience-nova-form";
+import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
 import {
   MktBenefitRow,
   MktDisplayHeading,
   MktEyebrow,
-  MktPhoneFrame,
+  MktOutlineButton,
 } from "@/components/marketing/site";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 
 /**
- * Approved homepage hero — docs/website-reference/homepage-approved.png
- *
- * Hero concert photography: no approved asset in repo yet — dark gradient only
- * (see P2 visual completion report for exact photography requirement).
+ * Approved homepage hero — full-bleed stage photography with artist-focused copy.
  */
 export function HomeHero() {
   return (
-    <section className="relative isolate overflow-x-clip bg-mkt-bg">
-      <div className="absolute inset-0 bg-mkt-bg" aria-hidden>
-        <div className="absolute inset-0 bg-gradient-to-br from-[#120818] via-mkt-bg to-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_25%,rgba(123,60,255,0.28),transparent_50%)]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-mkt-bg via-black/40 to-black/20" />
-      </div>
+    <section className="relative isolate min-h-[calc(100dvh-4.75rem)] overflow-hidden lg:min-h-[calc(100dvh-5.75rem)]">
+      <Image
+        src={MKT_PHOTOS.heroHomeBackdrop}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="-z-20 object-cover object-[center_38%] brightness-[1.06] contrast-[1.04]"
+      />
 
-      <div className="relative mx-auto max-w-7xl px-5 pb-16 pt-10 sm:px-8 md:pb-20 md:pt-14 lg:px-10 lg:pb-24">
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10 xl:gap-16">
-          <div className="max-w-xl lg:max-w-none">
-            <MktEyebrow className="text-[0.6875rem] sm:text-xs">Live music lives on</MktEyebrow>
+      {/* Strong scrim on the left for copy; keep the stage and crowd visible on the right. */}
+      <div
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-black/75 via-black/35 to-black/10"
+        aria-hidden
+      />
+      <div
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-black/55 via-transparent to-black/20"
+        aria-hidden
+      />
 
-            <MktDisplayHeading
-              as="h1"
-              className="mt-5 text-[clamp(2.125rem,9vw,4.75rem)] leading-[0.9] sm:text-[clamp(2.5rem,7vw,4.75rem)]"
-              purple="The merch line."
-            >
-              Merch without
-            </MktDisplayHeading>
+      <div className="relative mx-auto flex min-h-[calc(100dvh-4.75rem)] max-w-7xl flex-col justify-between px-5 py-10 sm:px-8 sm:py-12 lg:min-h-[calc(100dvh-5.75rem)] lg:px-10 lg:py-14">
+        <div className="max-w-2xl pt-4 md:pt-8 lg:max-w-3xl lg:pt-10">
+          <MktEyebrow>For artists</MktEyebrow>
 
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-mkt-muted sm:text-lg">
-              Fans shop from their phones at the show. Artists can offer more without relying on the
-              physical merch table. The experience continues after the encore.
-            </p>
+          <MktDisplayHeading
+            as="h1"
+            className="mt-5 text-[clamp(2.25rem,9vw,5rem)] leading-[0.9] sm:text-[clamp(2.75rem,7.5vw,5rem)]"
+          >
+            More merch.
+            <span className="block">Bigger moments.</span>
+            <span className="block text-mkt-purple">Longer relationships.</span>
+          </MktDisplayHeading>
 
-            <ExperienceNovaForm
-              size="large"
-              demoLabel="Experience the Nova Kestrel Demo"
-              secondary={{ href: "/pilot#conversation", label: "Pilot with us", outline: true }}
-              className="mt-10"
-            />
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
+            Turn every show into more revenue and a lasting connection with your fans.
+          </p>
 
-            <MktBenefitRow items={HOME_HERO_BENEFITS} className="mt-14 border-t border-white/10 pt-12" />
+          <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5">
+            <form action={experienceArtistStudioAction} className="w-full sm:w-auto">
+              <ExperienceNovaButton
+                size="large"
+                label="See the Artist Demo"
+                className="w-full sm:w-auto"
+              />
+            </form>
+            <MktOutlineButton href="/pilot#conversation" className="w-full justify-center sm:w-auto">
+              Talk to Our Team
+            </MktOutlineButton>
           </div>
+        </div>
 
-          <div className="relative mx-auto w-full max-w-[320px] sm:max-w-[360px] lg:mx-0 lg:ml-auto lg:max-w-[400px]">
-            <p
-              className="pointer-events-none absolute -right-2 top-8 z-10 hidden max-w-[9rem] rotate-[-6deg] font-serif text-2xl leading-tight text-white/90 xl:block"
-              aria-hidden
-            >
-              See it. Shop it. Keep it.
-            </p>
-            <MktPhoneFrame
-              loading="eager"
-              screenshot={NOVA_KESTREL_SHOP_SCREENSHOT}
-              screenshotAlt="Nova Kestrel attendee shop in the Rolling GA app — unlocked show-night merchandise"
-              className="max-w-none lg:max-w-[340px]"
-            />
-          </div>
+        <div className="mt-12 border-t border-white/10 pt-10 md:pt-12 lg:mt-16">
+          <MktBenefitRow items={HOME_HERO_BENEFITS} size="large" />
         </div>
       </div>
     </section>

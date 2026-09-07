@@ -8,6 +8,7 @@ import {
   orderItems,
   orders,
   products,
+  artistConsents,
   verifiedAttendance,
 } from "@/db/schema";
 import { resolveEventState } from "@/lib/event-state";
@@ -45,6 +46,8 @@ export interface LiveCommandCenterSnapshot {
   timing: ReturnType<typeof withTiming>["timing"];
   expectedAttendance: number | null;
   verifiedAttendees: number;
+  connectedFans: number;
+  purchasingFans: number;
   orderCount: number;
   gmvCents: number;
   aovCents: number;
@@ -118,7 +121,8 @@ export async function loadLiveCommandCenterSnapshot(
   const now = demoNow();
   const timing = withTiming(event, now).timing;
 
-  const [verifiedAttendees, orderStats, topProductRows, dropSummaries] = await Promise.all([
+  const [verifiedAttendees, orderStats, topProductRows, dropSummaries, connectedFansRow, purchasingFansRow] =
+    await Promise.all([
     countVerifiedAttendance(event.id),
     db
       .select({
@@ -144,6 +148,30 @@ export async function loadLiveCommandCenterSnapshot(
       .orderBy(desc(sum(orderItems.quantity)))
       .limit(5),
     loadDropSummariesForEvent(event.id, artistId),
+    db
+      .select({ total: count(sql`distinct ${artistConsents.userId}`) })
+      .from(artistConsents)
+      .innerJoin(verifiedAttendance, eq(verifiedAttendance.userId, artistConsents.userId))
+      .where(
+        and(
+          eq(verifiedAttendance.eventId, event.id),
+          eq(artistConsents.artistId, artistId),
+          eq(artistConsents.consentType, "attendee_offers"),
+          eq(artistConsents.status, "granted"),
+        ),
+      ),
+    db
+      .select({ total: count(sql`distinct ${orders.userId}`) })
+      .from(orders)
+      .innerJoin(verifiedAttendance, eq(verifiedAttendance.userId, orders.userId))
+      .where(
+        and(
+          eq(verifiedAttendance.eventId, event.id),
+          eq(orders.eventId, event.id),
+          eq(orders.artistId, artistId),
+          eq(orders.status, "paid"),
+        ),
+      ),
   ]);
 
   const orderCount = Number(orderStats[0]?.orderCount ?? 0);
@@ -166,6 +194,8 @@ export async function loadLiveCommandCenterSnapshot(
     timing,
     expectedAttendance: event.expectedAttendance,
     verifiedAttendees,
+    connectedFans: Number(connectedFansRow[0]?.total ?? 0),
+    purchasingFans: Number(purchasingFansRow[0]?.total ?? 0),
     orderCount,
     gmvCents,
     aovCents,

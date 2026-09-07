@@ -45,7 +45,7 @@ export function FanAppShell({
           <span className="h-5 w-24 rounded-full bg-black" />
           <span>5G</span>
         </div>
-        <FanHeader displayName={displayName} cartCount={cartCount} />
+        <FanHeader displayName={displayName} cartCount={cartCount} homeHref={isGuided ? "/home" : "/"} />
         <div
           className={cn(
             "min-h-0 flex-1 overflow-y-auto overscroll-contain",

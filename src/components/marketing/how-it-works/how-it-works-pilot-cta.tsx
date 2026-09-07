@@ -1,5 +1,7 @@
 import { ExperienceNovaForm } from "@/components/marketing/experience-nova-form";
+import { MARKETING_DEMO_CTA_LABEL } from "@/components/marketing/home/marketing-home-fixtures";
 import { MktDisplayHeading, MktEyebrow, MktOutlineButton, MktSectionShell } from "@/components/marketing/site";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 
 export function HowItWorksPilotCta() {
   return (
@@ -27,7 +29,11 @@ export function HowItWorksPilotCta() {
             <MktOutlineButton href="/pilot#conversation" className="w-full justify-center sm:w-auto">
               Pilot With Us <span aria-hidden>&rarr;</span>
             </MktOutlineButton>
-            <ExperienceNovaForm demoLabel="Experience the Demo" className="justify-center" />
+            <ExperienceNovaForm
+              demoLabel={MARKETING_DEMO_CTA_LABEL}
+              action={experienceArtistStudioAction}
+              className="justify-center"
+            />
           </div>
         </div>
       </div>

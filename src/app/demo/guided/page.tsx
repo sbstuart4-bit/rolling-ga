@@ -8,7 +8,7 @@ import { COMING_SOON_GUIDED_JOURNEYS, listActiveGuidedJourneys } from "@/lib/gui
 import { demoModeEnabled } from "@/server/demo/accounts";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { startGuidedDemoAction } from "@/server/demo/guided-demo-actions";
-import { NOVA_KESTREL_DEMO_ASSETS } from "@/lib/demo-assets";
+import { MARISOL_REYES_DEMO_ASSETS } from "@/lib/demo-assets";
 
 export const metadata: Metadata = { title: "Guided demo — Rolling GA" };
 export const dynamic = "force-dynamic";
@@ -37,13 +37,21 @@ export default async function GuidedDemoChooserPage({
           <p className="mt-3 max-w-sm text-sm text-muted-foreground text-balance">
             {seedMissing ? (
               <>
-                Demo mode is enabled, but the seeded demo fan (Scott Weller) is missing from the
-                production database. Run migrations and the demo seed against this database, then
-                redeploy.
+                Demo mode is enabled, but the seeded demo personas are missing from this database
+                (Scott Weller for fan demos, Elena Vasquez for Artist Studio). Locally, run{" "}
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                  npm run db:reset
+                </code>{" "}
+                and restart{" "}
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                  npm run dev
+                </code>
+                . On a hosted deployment, run migrations and the demo seed against the production
+                database, then redeploy.
               </>
             ) : (
               <>
-                The Nova Kestrel guided demo is not enabled on this deployment yet. Set{" "}
+                The Marisol Reyes guided demo is not enabled on this deployment yet. Set{" "}
                 <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
                   ROLLING_GA_PUBLIC_GUIDED_DEMO=1
                 </code>{" "}
@@ -88,7 +96,7 @@ export default async function GuidedDemoChooserPage({
           <section className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center">
             <h2 className="text-lg font-semibold">Journey complete</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              You finished Nova Kestrel — Full Rolling GA Journey.
+              You finished Marisol Reyes — Full Rolling GA Journey.
             </p>
             <Button asChild className="mt-4 uppercase tracking-wider">
               <Link href="/demo?perspective=fan">Back to demo board</Link>
@@ -102,10 +110,10 @@ export default async function GuidedDemoChooserPage({
               key={journey.id}
               className="overflow-hidden rounded-2xl border border-primary/40 bg-primary/5 text-left"
             >
-              {journey.id === "nova-nashville" ? (
+              {journey.id === "marisol-tender-night" ? (
                 <div className="relative aspect-[16/9] w-full border-b border-primary/20">
                   <Image
-                    src={NOVA_KESTREL_DEMO_ASSETS.hero}
+                    src={MARISOL_REYES_DEMO_ASSETS.hero}
                     alt=""
                     fill
                     sizes="(min-width: 768px) 768px, 100vw"

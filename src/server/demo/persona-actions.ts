@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { createSession, destroySession } from "@/server/auth/session";
-import { demoNovaNashvilleEventSlug } from "@/lib/demo-calendar";
+import { demoMarisolBrooklynEventSlug } from "@/lib/demo-calendar";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
 import { applyDemoClockForPhase } from "./apply-demo-clock";
 import { setFanShowContextSlug } from "@/server/fans/show-context";
@@ -18,6 +18,7 @@ const SCOTT_EMAIL = "scott@example.com";
 const PERSONA_DESTINATIONS: Record<string, string> = {
   "scott@example.com": "/",
   "marcus@thedegens.example": "/studio/live",
+  "elena@marisolreyes.example": "/studio/live/evt_marisol_brooklyn",
   "dana@novakestrel.example": "/studio/drops",
   "priya@thelowcountry.example": "/studio/tour",
   "admin@rollingga.example": "/studio/insights",
@@ -45,12 +46,12 @@ export async function startPersonaAction(formData: FormData): Promise<void> {
   redirect(destination);
 }
 
-/** One-click fan walkthrough: Nashville live on the demo clock, signed in as Scott. */
-export async function startScottNovaNashvilleLiveAction(): Promise<void> {
+/** One-click fan walkthrough: Brooklyn live on the demo clock, signed in as Scott. */
+export async function startScottMarisolBrooklynLiveAction(): Promise<void> {
   if (!demoModeEnabled()) redirect("/welcome");
   if (!(await hasDemoBoardAccess())) redirect("/demo");
 
-  const show = getDemoShow("nova-nashville")!;
+  const show = getDemoShow("marisol-brooklyn")!;
   await applyDemoClockForPhase(show, "headliner");
 
   const [user] = await db
@@ -62,11 +63,16 @@ export async function startScottNovaNashvilleLiveAction(): Promise<void> {
 
   await destroySession();
   await createSession(user.id);
-  await setFanShowContextSlug(demoNovaNashvilleEventSlug());
-  redirect(`/event/${demoNovaNashvilleEventSlug()}`);
+  await setFanShowContextSlug(demoMarisolBrooklynEventSlug());
+  redirect(`/event/${demoMarisolBrooklynEventSlug()}`);
 }
 
-/** @deprecated Degens Detroit walkthrough — use startScottNovaNashvilleLiveAction. */
+/** @deprecated Use startScottMarisolBrooklynLiveAction — legacy Nova Nashville entry. */
+export async function startScottNovaNashvilleLiveAction(): Promise<void> {
+  await startScottMarisolBrooklynLiveAction();
+}
+
+/** @deprecated Degens Detroit walkthrough — use startScottMarisolBrooklynLiveAction. */
 export async function startScottDetroitLiveAction(): Promise<void> {
   const { demoDetroitEventSlug } = await import("@/lib/demo-calendar");
   if (!demoModeEnabled()) redirect("/welcome");

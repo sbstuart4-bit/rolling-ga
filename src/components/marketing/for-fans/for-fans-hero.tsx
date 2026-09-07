@@ -2,8 +2,10 @@ import {
   FOR_FANS_HERO_CREDENTIAL,
   FOR_FANS_HERO_UNLOCK,
 } from "@/components/marketing/for-fans/marketing-for-fans-fixtures";
+import { MARKETING_FAN_DEMO_CTA_LABEL } from "@/components/marketing/home/marketing-home-fixtures";
 import { ExperienceNovaForm } from "@/components/marketing/experience-nova-form";
 import { MktDisplayHeading, MktEyebrow, MktPhoneFrame } from "@/components/marketing/site";
+import { experienceMarisolReyesFanAction } from "@/server/marketing/demo-entry";
 
 export function ForFansHero() {
   return (
@@ -35,7 +37,8 @@ export function ForFansHero() {
 
             <ExperienceNovaForm
               size="large"
-              demoLabel="Experience the Nova Kestrel Demo"
+              demoLabel={MARKETING_FAN_DEMO_CTA_LABEL}
+              action={experienceMarisolReyesFanAction}
               secondary={{ href: "/how-it-works", label: "See how it works", outline: true }}
               className="mt-10"
             />
@@ -44,12 +47,12 @@ export function ForFansHero() {
           <div className="relative mx-auto w-full max-w-[min(100%,380px)] md:max-w-[400px] lg:mx-0 lg:ml-auto lg:max-w-[420px]">
             <MktPhoneFrame
               screenshot={FOR_FANS_HERO_UNLOCK}
-              screenshotAlt="Nova Kestrel in Rolling GA — venue arrival unlocks show-night exclusives"
+              screenshotAlt="Marisol Reyes in Rolling GA — venue arrival unlocks show-night exclusives"
               className="absolute left-0 top-6 hidden w-[78%] max-w-[280px] opacity-90 lg:block"
             />
             <MktPhoneFrame
               screenshot={FOR_FANS_HERO_CREDENTIAL}
-              screenshotAlt="Nova Kestrel I Was There digital credential in Rolling GA"
+              screenshotAlt="Marisol Reyes I Was There digital credential in Rolling GA"
               className="relative z-10 mx-auto max-w-none lg:ml-auto lg:max-w-[320px]"
             />
           </div>

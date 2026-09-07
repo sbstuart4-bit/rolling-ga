@@ -46,7 +46,7 @@ export function ForFansNight() {
             align="start"
             loading="eager"
             screenshot={FOR_FANS_NIGHT_UNLOCK}
-            screenshotAlt="Nova Kestrel event page in Rolling GA — venue arrival unlocks show-night exclusives"
+            screenshotAlt="Marisol Reyes event page in Rolling GA — venue arrival unlocks show-night exclusives"
             className="mkt-how-it-works-phone mt-6 md:mt-8"
           />
           <span className="mt-8 block text-center text-white/20 md:hidden" aria-hidden>
@@ -59,7 +59,7 @@ export function ForFansNight() {
             align="start"
             loading="eager"
             screenshot={FOR_FANS_NIGHT_SHOP}
-            screenshotAlt="Nova Kestrel attendee shop in Rolling GA — buy from your phone at the show"
+            screenshotAlt="Marisol Reyes attendee shop in Rolling GA — A Tender Night tour merchandise"
             className="mkt-how-it-works-phone mt-6 md:mt-8"
           />
         </div>

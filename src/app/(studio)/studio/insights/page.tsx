@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArtistGuidedDemoHighlight } from "@/components/demo/artist-guided-demo-highlight";
 import { InsightsDashboard } from "@/components/studio/insights-dashboard";
 import { EventInsightsPicker } from "@/components/studio/event-insights-picker";
 import { requireAuthWithRole } from "@/server/auth/request";
@@ -37,6 +38,7 @@ export default async function StudioInsightsPage({
 
   return (
     <div className="rounded-2xl bg-zinc-950 p-6 text-white lg:p-8">
+      <ArtistGuidedDemoHighlight />
       <InsightsDashboard
         snapshot={snapshot}
         pilotHref={`/studio/insights/pilot?events=${pilotQuery}`}

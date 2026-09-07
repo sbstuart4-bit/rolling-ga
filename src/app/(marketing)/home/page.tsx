@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { HomePage } from "@/components/marketing/home-page";
 
 export const metadata: Metadata = {
-  title: "Merch without the merch line.",
+  title: "More merch. Bigger moments. Longer relationships.",
   description:
-    "Fans shop from their phones at the show. Rolling GA is built and seeking artists and industry partners for pilots.",
+    "Turn every show into more revenue and a lasting connection with your fans. Rolling GA is built and seeking artists and industry partners for pilots.",
   alternates: { canonical: "/" },
 };
 

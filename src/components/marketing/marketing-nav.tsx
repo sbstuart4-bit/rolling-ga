@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
-import { RollingGaMark } from "@/components/brand/rolling-ga-mark";
+import { RollingGaHomeLink } from "@/components/brand/rolling-ga-mark";
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
 import { MARKETING_NAV } from "@/components/marketing/marketing-fixtures";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,13 +28,12 @@ export function MarketingNav() {
   return (
     <header className="sticky top-0 z-50 border-b border-mkt-border bg-mkt-bg/90 backdrop-blur-md">
       <div className="mx-auto flex h-[4.75rem] max-w-7xl items-center justify-between gap-6 px-5 sm:px-8 lg:h-[5.75rem] lg:gap-10 lg:px-10">
-        <Link href="/home" className="shrink-0" aria-label="Rolling GA home">
-          <RollingGaMark
-            size="xl"
-            tone="brand"
-            className="uppercase text-mkt-fg lg:font-medium"
-          />
-        </Link>
+        <RollingGaHomeLink
+          className="focus-visible:ring-mkt-purple focus-visible:ring-offset-mkt-bg"
+          markClassName="uppercase font-semibold text-mkt-fg lg:font-bold"
+          size="xl"
+          tone="brand"
+        />
 
         <nav aria-label="Primary" className="hidden items-center gap-9 lg:flex xl:gap-11">
           {MARKETING_NAV.map((item) => {
@@ -62,7 +61,7 @@ export function MarketingNav() {
           >
             Log in
           </Link>
-          <form action={experienceNovaKestrelAction}>
+          <form action={experienceArtistStudioAction}>
             <ExperienceNovaButton compact className="px-6 py-3 text-xs tracking-[0.14em]" />
           </form>
         </div>
@@ -81,7 +80,14 @@ export function MarketingNav() {
           <SheetContent side="right" className="border-mkt-border bg-mkt-bg px-0 text-mkt-fg">
             <SheetHeader className="border-b border-mkt-border px-6 pb-5 pt-1">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
-              <RollingGaMark size="xl" tone="brand" className="uppercase text-mkt-fg" />
+              <SheetClose asChild>
+                <RollingGaHomeLink
+                  className="focus-visible:ring-mkt-purple focus-visible:ring-offset-mkt-bg"
+                  markClassName="uppercase font-semibold text-mkt-fg"
+                  size="xl"
+                  tone="brand"
+                />
+              </SheetClose>
             </SheetHeader>
             <div className="flex flex-col gap-8 px-6 py-8">
               <nav aria-label="Primary" className="flex flex-col gap-5">
@@ -100,7 +106,7 @@ export function MarketingNav() {
                   </SheetClose>
                 ))}
               </nav>
-              <form action={experienceNovaKestrelAction}>
+              <form action={experienceArtistStudioAction}>
                 <ExperienceNovaButton className="w-full justify-center" />
               </form>
               <SheetClose asChild>

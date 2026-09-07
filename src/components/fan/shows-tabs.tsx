@@ -16,6 +16,8 @@ export interface ShowEntry {
   timezone: string;
   isPast: boolean;
   unlockCount?: number;
+  /** Clipped artist or show artwork for the passport thumbnail. */
+  thumbnailUrl?: string | null;
 }
 
 export function ShowsTabs({ shows }: { shows: ShowEntry[] }) {

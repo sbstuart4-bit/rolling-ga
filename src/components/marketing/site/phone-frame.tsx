@@ -51,6 +51,7 @@ export function MktPhoneFrame({
               alt={screenshotAlt}
               width={390}
               height={844}
+              unoptimized
               className="h-auto w-full"
               sizes={className?.includes("mkt-how-it-works-phone") ? "85vw" : "280px"}
               loading={loading}

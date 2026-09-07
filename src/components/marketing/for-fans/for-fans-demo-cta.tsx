@@ -1,6 +1,8 @@
 import { FOR_FANS_JOURNEY_STEPS } from "@/components/marketing/for-fans/marketing-for-fans-fixtures";
+import { MARKETING_FAN_DEMO_CTA_LABEL } from "@/components/marketing/home/marketing-home-fixtures";
 import { ExperienceNovaForm } from "@/components/marketing/experience-nova-form";
 import { MktDisplayHeading, MktEyebrow, MktSectionShell } from "@/components/marketing/site";
+import { experienceMarisolReyesFanAction } from "@/server/marketing/demo-entry";
 
 export function ForFansDemoCta() {
   return (
@@ -33,13 +35,14 @@ export function ForFansDemoCta() {
           </ol>
 
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-mkt-muted sm:text-lg">
-            Walk through the Nova Kestrel demo — a fictional artist experience — and see what the
+            Walk through the Marisol Reyes demo — a fictional artist experience — and see what the
             fan journey feels like from discover to reconnect.
           </p>
 
           <ExperienceNovaForm
             size="large"
-            demoLabel="Experience the Nova Kestrel Demo"
+            demoLabel={MARKETING_FAN_DEMO_CTA_LABEL}
+            action={experienceMarisolReyesFanAction}
             secondary={{ href: "/how-it-works", label: "See how it works", outline: true }}
             className="mt-10 justify-center"
           />

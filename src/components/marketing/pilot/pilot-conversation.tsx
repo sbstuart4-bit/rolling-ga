@@ -1,6 +1,7 @@
 import { PilotInquiryForm } from "@/components/marketing/pilot/pilot-inquiry-form";
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { MARKETING_DEMO_CTA_LABEL } from "@/components/marketing/home/marketing-home-fixtures";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 import { MktDisplayHeading, MktEyebrow, MktSectionShell } from "@/components/marketing/site";
 
 export function PilotConversation() {
@@ -30,14 +31,14 @@ export function PilotConversation() {
               Not ready for a pilot?
             </p>
             <p className="mt-2 text-base text-[#52525b]">See the experience first.</p>
-            <form action={experienceNovaKestrelAction} className="mt-5">
+            <form action={experienceArtistStudioAction} className="mt-5">
               <ExperienceNovaButton
-                label="Experience the Nova Kestrel Demo"
+                label={MARKETING_DEMO_CTA_LABEL}
                 className="border border-black/15 bg-transparent text-[#0a0a0a] hover:bg-black/[0.03]"
               />
             </form>
             <p className="mt-3 text-xs leading-relaxed text-[#71717a]">
-              Nova Kestrel is a fictional demo artist used to explore the Rolling GA experience.
+              Marisol Reyes is a fictional demo artist used to explore the Rolling GA experience.
             </p>
           </div>
         </div>
@@ -50,14 +51,14 @@ export function PilotConversation() {
           Not ready for a pilot?
         </p>
         <p className="mt-2 text-base text-[#52525b]">See the experience first.</p>
-        <form action={experienceNovaKestrelAction} className="mt-5">
+        <form action={experienceArtistStudioAction} className="mt-5">
           <ExperienceNovaButton
-            label="Experience the Nova Kestrel Demo"
+            label={MARKETING_DEMO_CTA_LABEL}
             className="w-full border border-black/15 bg-transparent text-[#0a0a0a] hover:bg-black/[0.03] sm:w-auto"
           />
         </form>
         <p className="mt-3 text-xs leading-relaxed text-[#71717a]">
-          Nova Kestrel is a fictional demo artist used to explore the Rolling GA experience.
+          Marisol Reyes is a fictional demo artist used to explore the Rolling GA experience.
         </p>
       </div>
     </MktSectionShell>

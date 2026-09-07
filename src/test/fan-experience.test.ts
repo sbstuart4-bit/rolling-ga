@@ -13,12 +13,12 @@ import {
 } from "@/lib/fan-experience/access-state";
 import { resolveMerchExperience } from "@/lib/merch-experience/resolver";
 
-const nashville = getDemoShow("nova-nashville")!;
+const brooklyn = getDemoShow("marisol-brooklyn")!;
 
 function experienceFor(scenario: typeof DEFAULT_DEMO_SCENARIO) {
   return resolveMerchExperience({
-    now: nashville.startsAt,
-    show: nashville,
+    now: brooklyn.startsAt,
+    show: brooklyn,
     timePhase: scenario.timePhase,
     fanState: scenario.fanState,
     location: scenario.location,
@@ -35,8 +35,8 @@ describe("resolveCredentialState", () => {
       fanState: "returning_fan",
       timePhase: "t_plus_7",
     } as const;
-    expect(resolveCredentialState(scenario, nashville.eventId, false)).toBe("none");
-    expect(resolveCredentialState(scenario, nashville.eventId, true)).toBe("earned");
+    expect(resolveCredentialState(scenario, brooklyn.eventId, false)).toBe("none");
+    expect(resolveCredentialState(scenario, brooklyn.eventId, true)).toBe("earned");
   });
 
   it("treats attended post-show as earned", () => {
@@ -45,7 +45,7 @@ describe("resolveCredentialState", () => {
       fanState: "attended",
       timePhase: "show_ended",
     } as const;
-    expect(resolveCredentialState(scenario, nashville.eventId, false)).toBe("earned");
+    expect(resolveCredentialState(scenario, brooklyn.eventId, false)).toBe("earned");
   });
 
   it("ignores stale DB credential when scenario rewinds before attendance", () => {
@@ -55,7 +55,7 @@ describe("resolveCredentialState", () => {
       timePhase: "doors_open",
       location: "inside_venue",
     } as const;
-    expect(resolveCredentialState(scenario, nashville.eventId, true)).toBe("none");
+    expect(resolveCredentialState(scenario, brooklyn.eventId, true)).toBe("none");
   });
 });
 
@@ -132,7 +132,7 @@ describe("resolveFanExperienceState", () => {
       ...DEFAULT_DEMO_SCENARIO,
       purchaseHistory: "show_exclusive",
     } as const;
-    expect(resolvePurchaseState(scenario, nashville.eventId)).toBe("completed");
+    expect(resolvePurchaseState(scenario, brooklyn.eventId)).toBe("completed");
   });
 
   it("exposes helper gates from access state", () => {
@@ -141,12 +141,12 @@ describe("resolveFanExperienceState", () => {
       timePhase: "t_minus_14",
     } as const;
     const fanExperience = resolveFanExperienceState({
-      eventId: nashville.eventId,
+      eventId: brooklyn.eventId,
       scenario,
       realVerified: false,
       timingState: timingStateForDemoPhase("t_minus_14"),
       storeOpen: true,
-      now: nashville.startsAt,
+      now: brooklyn.startsAt,
     });
     expect(fanExperience.access).toBe("preview_locked");
     expect(canPreviewShop(fanExperience.access)).toBe(true);

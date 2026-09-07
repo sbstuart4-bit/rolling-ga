@@ -3,6 +3,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
+import { withDevDatabaseRecovery } from "@/db/dev-bootstrap";
 import { users } from "@/db/schema";
 import {
   getGuidedJourney,
@@ -27,15 +28,17 @@ import { syncGuidedDemoFanRecords } from "./guided-demo-fan-reset";
 const SCOTT_EMAIL = "scott@example.com";
 
 export async function ensureScottSession(): Promise<string> {
-  const [user] = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, SCOTT_EMAIL))
-    .limit(1);
-  if (!user) throw new Error("Demo fan Scott Weller is not seeded.");
-  await destroySession();
-  await createSession(user.id);
-  return user.id;
+  return withDevDatabaseRecovery(async () => {
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, SCOTT_EMAIL))
+      .limit(1);
+    if (!user) throw new Error("Demo fan Scott Weller is not seeded.");
+    await destroySession();
+    await createSession(user.id);
+    return user.id;
+  });
 }
 
 export async function loadGuidedStepContext(

@@ -3,6 +3,10 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { parseGuidedDemoQuery } from "@/lib/guided-demo-entry";
+import {
+  applyArtistGuidedStepState,
+  loadArtistGuidedStepContext,
+} from "@/server/demo/artist-guided-demo-apply";
 import { applyGuidedStepState, loadGuidedStepContext } from "@/server/demo/guided-demo-apply";
 
 function safeReturnPath(raw: string | null, base: string): string | null {
@@ -17,7 +21,7 @@ function safeReturnPath(raw: string | null, base: string): string | null {
 }
 
 /**
- * Route handler entry for anonymous guided-demo fan routes.
+ * Route handler entry for anonymous guided-demo routes.
  * Cookie writes are only allowed here (and in Server Actions), not in layouts.
  */
 export async function handleEnterGuidedDemoRequest(request: Request): Promise<Response> {
@@ -38,6 +42,19 @@ export async function handleEnterGuidedDemoRequest(request: Request): Promise<Re
   }
 
   try {
+    if (parsed.perspective === "artist") {
+      const ctx = await loadArtistGuidedStepContext(parsed.journeyId, parsed.step, {
+        presenter: parsed.presenter,
+        autoplay: parsed.autoplay,
+      });
+      if (!ctx) {
+        return NextResponse.redirect(new URL("/demo/guided", base));
+      }
+
+      await applyArtistGuidedStepState(ctx);
+      return NextResponse.redirect(new URL(returnTo, base));
+    }
+
     const ctx = await loadGuidedStepContext(parsed.journeyId, parsed.step, {
       presenter: parsed.presenter,
       autoplay: parsed.autoplay,

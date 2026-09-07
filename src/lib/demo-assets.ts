@@ -46,8 +46,8 @@ export const DEMO_PRODUCT_IMAGES = {
   prd_mr_vinyl: "/demo/product-prd-mr-vinyl.png",
   prd_mr_scarf: "/demo/product-prd-mr-scarf.png",
   prd_mr_tote: "/demo/product-prd-mr-tote.png",
-  prd_mr_longsleeve: "/demo/product-prd-mr-longsleeve.png",
-  prd_mr_fan: "/demo/product-prd-mr-fan.png",
+  prd_mr_hoodie: "/demo/product-prd-mr-hoodie.png",
+  prd_mr_hat: "/demo/product-prd-mr-hat.png",
   prd_mr_7inch: "/demo/product-prd-mr-7inch.png",
   prd_mr_city_tee: "/demo/product-prd-mr-city-tee.png",
   prd_mr_necklace: "/demo/product-prd-mr-necklace.png",
@@ -80,6 +80,7 @@ export const THE_DEGENS_PRODUCT_IMAGES = Object.fromEntries(
 /** The Degens — tour, city, drop poster art, and product photography. */
 export const THE_DEGENS_DEMO_ASSETS = {
   logo: "/demo/logo-the-degens.png",
+  hero: "/demo/hero-the-degens.png",
   cityDetroit: "/demo/city-atlas-detroit.png",
   tourHero: "/demo/poster-atlas-void-signal-decay.png",
   dropPosters: {
@@ -93,12 +94,42 @@ export const THE_DEGENS_DEMO_ASSETS = {
   products: THE_DEGENS_PRODUCT_IMAGES,
 } as const;
 
+/** Marisol Reyes — brand hero and Brooklyn show photography. */
+export const MARISOL_REYES_DEMO_ASSETS = {
+  hero: "/demo/hero-marisol-reyes.png",
+} as const;
+
 /** Nova Kestrel — brand hero and Nashville show photography. */
 export const NOVA_KESTREL_DEMO_ASSETS = {
   hero: "/demo/hero-nova-kestrel.png",
 } as const;
 
+/** The Low Country — brand hero photography. */
+export const THE_LOW_COUNTRY_DEMO_ASSETS = {
+  hero: "/demo/hero-the-low-country.png",
+} as const;
+
+/** Pale Horses — brand hero photography. */
+export const PALE_HORSES_DEMO_ASSETS = {
+  hero: "/demo/hero-pale-horses.png",
+} as const;
+
+/** The Ossuary — brand hero photography. */
+export const THE_OSSUARY_DEMO_ASSETS = {
+  hero: "/demo/hero-the-ossuary.png",
+} as const;
+
 export type TheDegensDropArtworkKey = keyof typeof THE_DEGENS_DEMO_ASSETS.dropPosters;
+
+/** DJ Vantablack — brand hero photography. */
+export const DJ_VANTABLACK_DEMO_ASSETS = {
+  hero: "/demo/hero-dj-vantablack.png",
+} as const;
+
+/** Kite & Anchor — real band photography for passport / My Shows thumbnails. */
+export const KITE_AND_ANCHOR_DEMO_ASSETS = {
+  hero: "/demo/hero-kite-and-anchor.png",
+} as const;
 
 /** Artist brand imagery (logo + hero) where static png art exists. */
 export const DEMO_ARTIST_BRAND_IMAGES: Partial<
@@ -106,10 +137,28 @@ export const DEMO_ARTIST_BRAND_IMAGES: Partial<
 > = {
   art_the_degens: {
     logoUrl: THE_DEGENS_DEMO_ASSETS.logo,
-    heroImageUrl: THE_DEGENS_DEMO_ASSETS.tourHero,
+    heroImageUrl: THE_DEGENS_DEMO_ASSETS.hero,
   },
   art_nova_kestrel: {
     heroImageUrl: NOVA_KESTREL_DEMO_ASSETS.hero,
+  },
+  art_low_country: {
+    heroImageUrl: THE_LOW_COUNTRY_DEMO_ASSETS.hero,
+  },
+  art_marisol_reyes: {
+    heroImageUrl: MARISOL_REYES_DEMO_ASSETS.hero,
+  },
+  art_pale_horses: {
+    heroImageUrl: PALE_HORSES_DEMO_ASSETS.hero,
+  },
+  art_kite_anchor: {
+    heroImageUrl: KITE_AND_ANCHOR_DEMO_ASSETS.hero,
+  },
+  art_vantablack: {
+    heroImageUrl: DJ_VANTABLACK_DEMO_ASSETS.hero,
+  },
+  art_ossuary: {
+    heroImageUrl: THE_OSSUARY_DEMO_ASSETS.hero,
   },
 };
 
@@ -117,6 +166,7 @@ export const DEMO_ARTIST_BRAND_IMAGES: Partial<
 export const DEMO_EVENT_CITY_IMAGES: Partial<Record<string, string>> = {
   evt_atlas_detroit: THE_DEGENS_DEMO_ASSETS.cityDetroit,
   evt_nova_nashville: NOVA_KESTREL_DEMO_ASSETS.hero,
+  evt_marisol_brooklyn: MARISOL_REYES_DEMO_ASSETS.hero,
 };
 
 export function demoProductImage(productId: string): string | undefined {

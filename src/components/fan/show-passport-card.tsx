@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BadgeCheck, MapPin } from "lucide-react";
 import { formatEventDateShort } from "@/lib/format";
@@ -22,7 +23,17 @@ export function ShowPassportCard({ entry }: { entry: ShowEntry }) {
         </div>
 
         <div className="relative px-4 pb-4 pt-3">
-          <div className="mb-3 h-16 overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 via-muted to-background" />
+          <div className="relative mb-3 h-20 overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 via-muted to-background">
+            {entry.thumbnailUrl ? (
+              <Image
+                src={entry.thumbnailUrl}
+                alt=""
+                fill
+                sizes="(min-width: 512px) 480px, 100vw"
+                className="object-cover object-top"
+              />
+            ) : null}
+          </div>
 
           <div className="space-y-1">
             <p className="truncate font-medium">{entry.artistName}</p>

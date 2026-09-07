@@ -50,7 +50,7 @@ export function ForArtistsMerchOpportunity() {
             align="start"
             loading="eager"
             screenshot={FOR_ARTISTS_SHOP_SCREENSHOT}
-            screenshotAlt="Nova Kestrel attendee shop in Rolling GA — buy from your phone at the show"
+            screenshotAlt="Marisol Reyes attendee shop in Rolling GA — A Tender Night tour merchandise"
             className="mkt-how-it-works-phone mx-auto lg:mx-0"
           />
         </div>

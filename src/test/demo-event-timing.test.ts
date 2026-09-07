@@ -10,11 +10,11 @@ import { resolveDemoAwareEventTiming } from "@/server/demo/demo-event-timing";
 import { getGuidedStep } from "@/lib/guided-demo";
 import { resolveGuidedStepFanExperience } from "@/server/demo/guided-demo-state";
 
-const nashville = getDemoShow("nova-nashville")!;
+const brooklyn = getDemoShow("marisol-brooklyn")!;
 
 const doorsOpenScenario = {
-  artist: "nova_kestrel" as const,
-  showKey: "nova-nashville" as const,
+  artist: "marisol_reyes" as const,
+  showKey: "marisol-brooklyn" as const,
   timePhase: "doors_open" as const,
   fanState: "at_venue" as const,
   location: "inside_venue" as const,
@@ -25,12 +25,12 @@ const doorsOpenScenario = {
 
 describe("resolveDemoAwareEventTiming", () => {
   it("treats doors open as live even though demo clock is before startsAt", () => {
-    const now = resolveTimePhaseDate(nashville, "doors_open");
+    const now = resolveTimePhaseDate(brooklyn, "doors_open");
     const raw = resolveEventState(
       {
-        startsAt: nashville.startsAt,
-        endsAt: nashville.endsAt,
-        doorsAt: nashville.doorsAt,
+        startsAt: brooklyn.startsAt,
+        endsAt: brooklyn.endsAt,
+        doorsAt: brooklyn.doorsAt,
         postShowWindowMinutes: null,
         cancelled: false,
       },
@@ -39,15 +39,15 @@ describe("resolveDemoAwareEventTiming", () => {
     );
     const demoAware = resolveDemoAwareEventTiming(
       {
-        startsAt: nashville.startsAt,
-        endsAt: nashville.endsAt,
-        doorsAt: nashville.doorsAt,
+        startsAt: brooklyn.startsAt,
+        endsAt: brooklyn.endsAt,
+        doorsAt: brooklyn.doorsAt,
         postShowWindowMinutes: null,
         cancelled: false,
         tourWindowMinutes: 480,
       },
       doorsOpenScenario,
-      nashville.eventId,
+      brooklyn.eventId,
       now,
     );
 
@@ -56,18 +56,18 @@ describe("resolveDemoAwareEventTiming", () => {
   });
 
   it("falls back to timestamp timing when no scenario applies", () => {
-    const now = resolveTimePhaseDate(nashville, "t_minus_14");
+    const now = resolveTimePhaseDate(brooklyn, "t_minus_14");
     const timing = resolveDemoAwareEventTiming(
       {
-        startsAt: nashville.startsAt,
-        endsAt: nashville.endsAt,
-        doorsAt: nashville.doorsAt,
+        startsAt: brooklyn.startsAt,
+        endsAt: brooklyn.endsAt,
+        doorsAt: brooklyn.doorsAt,
         postShowWindowMinutes: null,
         cancelled: false,
         tourWindowMinutes: 480,
       },
       null,
-      nashville.eventId,
+      brooklyn.eventId,
       now,
     );
 
@@ -77,28 +77,28 @@ describe("resolveDemoAwareEventTiming", () => {
 
 describe("guided demo doors open", () => {
   it("step 5 unlocks fan experience with demo-aware live timing", () => {
-    const step = getGuidedStep("nova-nashville", 5)!;
+    const step = getGuidedStep("marisol-tender-night", 5)!;
     const fanExperience = resolveGuidedStepFanExperience(step)!;
-    const now = resolveTimePhaseDate(nashville, "doors_open");
+    const now = resolveTimePhaseDate(brooklyn, "doors_open");
 
     expect(fanExperience.access).toBe("live_unlocked");
 
     const timing = resolveDemoAwareEventTiming(
       {
-        startsAt: nashville.startsAt,
-        endsAt: nashville.endsAt,
-        doorsAt: nashville.doorsAt,
+        startsAt: brooklyn.startsAt,
+        endsAt: brooklyn.endsAt,
+        doorsAt: brooklyn.doorsAt,
         postShowWindowMinutes: null,
         cancelled: false,
         tourWindowMinutes: 480,
       },
       step.scenario,
-      nashville.eventId,
+      brooklyn.eventId,
       now,
     );
 
     const resolved = resolveFanExperienceState({
-      eventId: nashville.eventId,
+      eventId: brooklyn.eventId,
       scenario: step.scenario,
       realVerified: false,
       timingState: timing.state,

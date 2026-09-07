@@ -73,7 +73,7 @@ export const ABOUT_CAPABILITIES = [
 export const ABOUT_PILOT_STATES = [
   {
     title: "Working experience",
-    body: "A fan-facing Rolling GA journey has been built and can be experienced through the Nova Kestrel demo.",
+    body: "A fan-facing Rolling GA journey has been built and can be experienced through the Marisol Reyes demo.",
   },
   {
     title: "Pilot questions",

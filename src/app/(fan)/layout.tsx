@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { FanAppShell } from "@/components/fan/fan-app-shell";
 import { GuidedDemoAuthGate } from "@/components/demo/guided-demo-auth-gate";
-import { GuidedDemoMobileChrome } from "@/components/demo/guided-demo-mobile-chrome";
+import { GuidedDemoMobileChromeGate } from "@/components/demo/guided-demo-mobile-chrome-gate";
 import { GuidedDemoShell } from "@/components/demo/guided-demo-shell";
 import {
   getActiveGuidedDemoContext,
@@ -31,7 +31,7 @@ async function parseGuidedEntryFromHeaders(): Promise<{
 
   try {
     const parsed = parseGuidedDemoQuery(new URL(guidedEntry, "http://local").searchParams);
-    if (!parsed) return null;
+    if (!parsed || parsed.perspective !== "fan") return null;
     return {
       guided: parsed.journeyId,
       step: String(parsed.step),
@@ -86,7 +86,7 @@ export default async function FanLayout({ children }: LayoutProps<"/">) {
         presentation={guidedDemo ? "guided" : "default"}
         guidedMobileChrome={
           guidedDemo && guidedContext ? (
-            <GuidedDemoMobileChrome
+            <GuidedDemoMobileChromeGate
               journey={guidedDemo.journey}
               step={guidedDemo.step}
               session={guidedDemo.session}

@@ -78,6 +78,9 @@ export interface ShowCohortMetrics {
   event: NonNullable<Awaited<ReturnType<typeof getEventById>>>;
   originalVerifiedAttendees: number;
   connectedAfterShow: number;
+  connectedFans: number;
+  purchasingFans: number;
+  repeatPurchasers: number;
   showNightGmvCents: number;
   postShowGmv30DaysCents: number;
   postShowGmv90DaysCents: number;
@@ -639,11 +642,29 @@ export async function loadShowCohortMetrics(
       ),
     );
 
+  const connectedFansRows = await db
+    .select({ total: count(sql`distinct ${artistConsents.userId}`) })
+    .from(artistConsents)
+    .innerJoin(verifiedAttendance, eq(verifiedAttendance.userId, artistConsents.userId))
+    .where(
+      and(
+        eq(verifiedAttendance.eventId, eventId),
+        eq(artistConsents.artistId, artistId),
+        eq(artistConsents.consentType, "attendee_offers"),
+        eq(artistConsents.status, "granted"),
+      ),
+    );
+
+  const connectedFans = Number(connectedFansRows[0]?.total ?? 0);
+
   if (verifiedUserIds.length === 0) {
     return {
       event,
       originalVerifiedAttendees: 0,
       connectedAfterShow: Number(connectedAfterShow[0]?.total ?? 0),
+      connectedFans: 0,
+      purchasingFans: 0,
+      repeatPurchasers: 0,
       showNightGmvCents: 0,
       postShowGmv30DaysCents: 0,
       postShowGmv90DaysCents: 0,
@@ -662,6 +683,7 @@ export async function loadShowCohortMetrics(
   let postShow90 = 0;
   let totalObserved = 0;
   let fansWithRepeat = 0;
+  let purchasingFans = 0;
 
   for (const userId of verifiedUserIds) {
     const verifiedSet = new Set([eventId]);
@@ -677,6 +699,7 @@ export async function loadShowCohortMetrics(
       }
     }
 
+    if (attributedOrderCount >= 1) purchasingFans += 1;
     if (attributedOrderCount >= 2) fansWithRepeat += 1;
 
     showNightGmv += sumAttributedGmv(allAttributed, "show_night");
@@ -689,6 +712,9 @@ export async function loadShowCohortMetrics(
     event,
     originalVerifiedAttendees: originalVerified,
     connectedAfterShow: Number(connectedAfterShow[0]?.total ?? 0),
+    connectedFans,
+    purchasingFans,
+    repeatPurchasers: fansWithRepeat,
     showNightGmvCents: showNightGmv,
     postShowGmv30DaysCents: postShow30,
     postShowGmv90DaysCents: postShow90,

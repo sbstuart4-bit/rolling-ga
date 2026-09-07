@@ -1,22 +1,25 @@
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
 import { MktOutlineButton } from "@/components/marketing/site";
 import { cn } from "@/lib/utils";
+
+type DemoEntryAction = (formData: FormData) => Promise<void>;
 
 export function ExperienceNovaForm({
   size = "default",
   demoLabel,
   secondary,
   className,
+  action,
 }: {
   size?: "default" | "large";
   demoLabel?: string;
   secondary?: { href: string; label: string; outline?: boolean };
   className?: string;
+  action: DemoEntryAction;
 }) {
   return (
     <div className={cn("flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5", className)}>
-      <form action={experienceNovaKestrelAction} className="w-full sm:w-auto">
+      <form action={action} className="w-full sm:w-auto">
         <ExperienceNovaButton size={size} label={demoLabel} className="w-full sm:w-auto" />
       </form>
       {secondary ? (

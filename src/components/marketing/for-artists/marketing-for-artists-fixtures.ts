@@ -9,9 +9,9 @@ import {
   Users,
 } from "lucide-react";
 import {
-  NOVA_KESTREL_CREDENTIAL_SCREENSHOT,
-  NOVA_KESTREL_MY_SHOWS_SCREENSHOT,
-  NOVA_KESTREL_SHOP_SCREENSHOT,
+  MARISOL_REYES_CREDENTIAL_SCREENSHOT,
+  MARISOL_REYES_MY_SHOWS_SCREENSHOT,
+  MARISOL_REYES_SHOP_SCREENSHOT,
 } from "@/components/marketing/home/marketing-home-fixtures";
 
 export const FOR_ARTISTS_HERO_BENEFITS = [
@@ -65,13 +65,13 @@ export const FOR_ARTISTS_RELATIONSHIP_CAPABILITIES = [
 export const FOR_ARTISTS_RELATIONSHIP_SCREENS = [
   {
     label: "You were there",
-    screenshot: NOVA_KESTREL_CREDENTIAL_SCREENSHOT,
-    alt: "Nova Kestrel I Was There digital credential in Rolling GA",
+    screenshot: MARISOL_REYES_CREDENTIAL_SCREENSHOT,
+    alt: "Marisol Reyes I Was There digital credential in Rolling GA",
   },
   {
     label: "My shows",
-    screenshot: NOVA_KESTREL_MY_SHOWS_SCREENSHOT,
-    alt: "My Shows in Rolling GA — Nova Kestrel Nashville credential and show history",
+    screenshot: MARISOL_REYES_MY_SHOWS_SCREENSHOT,
+    alt: "My Shows in Rolling GA — Marisol Reyes Brooklyn credential and show history",
   },
 ] as const;
 
@@ -94,4 +94,4 @@ export const FOR_ARTISTS_LEARN_QUESTIONS = [
   },
 ] as const;
 
-export const FOR_ARTISTS_SHOP_SCREENSHOT = NOVA_KESTREL_SHOP_SCREENSHOT;
+export const FOR_ARTISTS_SHOP_SCREENSHOT = MARISOL_REYES_SHOP_SCREENSHOT;

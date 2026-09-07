@@ -4,7 +4,8 @@ import {
   FOR_ARTISTS_SHOP_SCREENSHOT,
 } from "@/components/marketing/for-artists/marketing-for-artists-fixtures";
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { MARKETING_DEMO_CTA_LABEL } from "@/components/marketing/home/marketing-home-fixtures";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 import {
   MktBenefitRow,
   MktDisplayHeading,
@@ -49,10 +50,10 @@ export function ForArtistsHero() {
               >
                 Pilot With Us <span aria-hidden>&rarr;</span>
               </Link>
-              <form action={experienceNovaKestrelAction} className="w-full sm:w-auto">
+              <form action={experienceArtistStudioAction} className="w-full sm:w-auto">
                 <ExperienceNovaButton
                   size="large"
-                  label="Experience the Nova Kestrel Demo"
+                  label={MARKETING_DEMO_CTA_LABEL}
                   className="w-full border border-white/80 bg-transparent text-mkt-fg hover:bg-white/5 sm:w-auto"
                 />
               </form>
@@ -62,7 +63,7 @@ export function ForArtistsHero() {
           <div className="mx-auto w-full max-w-[min(100%,380px)] md:max-w-[360px] lg:mx-0 lg:ml-auto lg:max-w-[400px]">
             <MktPhoneFrame
               screenshot={FOR_ARTISTS_SHOP_SCREENSHOT}
-              screenshotAlt="Nova Kestrel attendee shop in Rolling GA — show-night merchandise from your phone"
+              screenshotAlt="Marisol Reyes attendee shop in Rolling GA — A Tender Night tour merchandise"
               className="max-w-none lg:max-w-[340px]"
             />
           </div>

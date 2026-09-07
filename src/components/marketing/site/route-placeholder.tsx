@@ -1,5 +1,7 @@
 import { MktDisplayHeading, MktEyebrow, MktSectionShell } from "@/components/marketing/site";
 import { ExperienceNovaForm } from "@/components/marketing/experience-nova-form";
+import { MARKETING_DEMO_CTA_LABEL } from "@/components/marketing/home/marketing-home-fixtures";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 
 /**
  * Minimal route shell used until P2–P6 page builds land.
@@ -21,7 +23,12 @@ export function MarketingRoutePlaceholder({
         {title}
       </MktDisplayHeading>
       <p className="mkt-body mt-8 max-w-2xl text-base text-mkt-muted">{description}</p>
-      <ExperienceNovaForm className="mt-12" secondary={{ href: "/pilot", label: "Talk to us about a pilot" }} />
+      <ExperienceNovaForm
+        className="mt-12"
+        demoLabel={MARKETING_DEMO_CTA_LABEL}
+        action={experienceArtistStudioAction}
+        secondary={{ href: "/pilot", label: "Talk to us about a pilot" }}
+      />
     </MktSectionShell>
   );
 }

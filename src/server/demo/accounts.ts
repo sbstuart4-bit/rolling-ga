@@ -32,6 +32,8 @@ const BLURBS: Partial<Record<PlatformRole, string>> = {
  */
 const BLURBS_BY_EMAIL: Record<string, string> = {
   "scott@example.com": "A fan's view: passport of past shows, credentials, and drops.",
+  "elena@marisolreyes.example":
+    "Merch manager for Marisol Reyes — A Tender Night tour, Brooklyn show, drops, fans and insights.",
   "marcus@thedegens.example": "Runs The Degens' Studio — tour, drops, brand and fan CRM.",
   "dana@novakestrel.example": "Merch manager for Nova Kestrel — drops and bundles, can publish.",
   "priya@thelowcountry.example": "Tour manager for The Low Country — dates only, can't publish.",
@@ -65,6 +67,12 @@ const STATIC_DEMO_ACCOUNTS: DemoAccount[] = [
     displayName: "Marcus Vale",
     roles: ["artist_member"],
     blurb: BLURBS_BY_EMAIL["marcus@thedegens.example"]!,
+  },
+  {
+    email: "elena@marisolreyes.example",
+    displayName: "Elena Vasquez",
+    roles: ["artist_member"],
+    blurb: BLURBS_BY_EMAIL["elena@marisolreyes.example"]!,
   },
   {
     email: "dana@novakestrel.example",

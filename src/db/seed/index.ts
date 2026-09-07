@@ -131,7 +131,7 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
    * ---------------------------------------------------------------- */
 
   const artwork = new Map<string, string>();
-  for (const artist of FULL_ARTISTS) {
+  for (const artist of [...FULL_ARTISTS, ...HISTORICAL_ARTISTS]) {
     artwork.set(`logo:${artist.id}`, generateWordmark(artist.name, artist.palette));
   }
 
@@ -180,7 +180,34 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
       id: artist.id,
       slug: artist.slug,
       name: artist.name,
+      bio: artist.bio,
       isDemo: true,
+    });
+
+    const brandAssets = demoArtistBrandImages(artist.id);
+
+    await db.insert(artistBrand).values({
+      artistId: artist.id,
+      logoUrl: brandAssets?.logoUrl ?? artwork.get(`logo:${artist.id}`),
+      heroImageUrl:
+        brandAssets?.heroImageUrl ??
+        generatePoster(
+          `${artist.slug}-brand`,
+          artist.name,
+          "Rolling GA verified",
+          artist.palette,
+        ),
+      background: artist.palette.background,
+      surface: artist.palette.surface,
+      foreground: artist.palette.foreground,
+      mutedForeground: artist.mutedForeground,
+      accent: artist.palette.accent,
+      accentForeground: artist.accentForeground,
+      accentSecondary: artist.palette.accentSecondary,
+      border: artist.border,
+      fontId: artist.fontId,
+      merchPhotographyNote: artist.merchPhotographyNote,
+      showMessaging: artist.showMessaging,
     });
   }
   counts.artists = FULL_ARTISTS.length + HISTORICAL_ARTISTS.length;
@@ -214,7 +241,7 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
     signalDecay: "tor_signal_decay",
     goldHour: "tor_gold_hour",
     riverSessions: "tor_river_sessions",
-    violeta: "tor_violeta",
+    tenderNight: "tor_violeta",
   };
 
   await insertTour(db, {
@@ -247,12 +274,13 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
   });
 
   await insertTour(db, {
-    id: tourIds.violeta,
+    id: tourIds.tenderNight,
     artist: MARISOL_REYES,
-    slug: "violeta",
-    name: "Violeta",
-    year: now.getFullYear() - 1,
-    postShowWindowMinutes: 240,
+    slug: "a-tender-night",
+    name: "A Tender Night",
+    year: now.getFullYear(),
+    postShowWindowMinutes: 720,
+    freeShippingThresholdCents: 7500,
   });
 
   const historicalTourIds = new Map<string, string>();
@@ -388,15 +416,15 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
       key: "marisol-brooklyn",
       id: "evt_marisol_brooklyn",
       artistId: MARISOL_REYES.id,
-      tourId: tourIds.violeta,
+      tourId: tourIds.tenderNight,
       venueId: "ven_warehouse_nine_brooklyn",
-      slug: `marisol-reyes-violeta-brooklyn-${DEMO_YEAR}`,
-      doorsAt: demoCalendarDate(7, 8, 18, 0),
-      startsAt: demoCalendarDate(7, 8, 20, 0),
-      endsAt: demoCalendarDate(7, 8, 22, 30),
+      slug: `marisol-reyes-a-tender-night-brooklyn-${DEMO_YEAR}`,
+      doorsAt: demoCalendarDate(6, 12, 18, 0),
+      startsAt: demoCalendarDate(6, 12, 20, 0),
+      endsAt: demoCalendarDate(6, 12, 22, 30),
       expectedAttendance: 2400,
       actualAttendance: null,
-      localMessage: "Brooklyn — the Violeta run returns.",
+      localMessage: "Brooklyn — music for a more tender night.",
       postShowWindowMinutes: null,
     },
   ];
@@ -426,7 +454,7 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
       plan.artistId === THE_DEGENS.id
         ? tourIds.signalDecay
         : plan.artistId === MARISOL_REYES.id
-          ? tourIds.violeta
+          ? tourIds.tenderNight
           : historicalTourIds.get(plan.artistId)!;
 
     eventSeeds.push({
@@ -488,6 +516,11 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
   await db.insert(eventThemes).values({
     eventId: "evt_nova_nashville",
     cityArtworkUrl: generateCityArtwork("nova-nashville", "Nashville", NOVA_KESTREL.palette),
+  });
+
+  await db.insert(eventThemes).values({
+    eventId: "evt_marisol_brooklyn",
+    cityArtworkUrl: generateCityArtwork("marisol-brooklyn", "Brooklyn", MARISOL_REYES.palette),
   });
 
   await db.insert(eventThemes).values({
@@ -589,6 +622,14 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
       canPublish: true,
     },
     {
+      id: demoUserId("team_marisol"),
+      email: "elena@marisolreyes.example",
+      name: "Elena Vasquez",
+      artistId: MARISOL_REYES.id,
+      role: "merch_manager" as const,
+      canPublish: true,
+    },
+    {
       id: demoUserId("team_low"),
       email: "priya@thelowcountry.example",
       name: "Priya Nair",
@@ -683,7 +724,7 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
     { artist: THE_DEGENS, items: THE_DEGENS_PRODUCTS, tourId: tourIds.signalDecay },
     { artist: NOVA_KESTREL, items: NOVA_KESTREL_PRODUCTS, tourId: tourIds.goldHour },
     { artist: LOW_COUNTRY, items: LOW_COUNTRY_PRODUCTS, tourId: tourIds.riverSessions },
-    { artist: MARISOL_REYES, items: MARISOL_PRODUCTS, tourId: tourIds.violeta },
+    { artist: MARISOL_REYES, items: MARISOL_PRODUCTS, tourId: tourIds.tenderNight },
   ];
 
   const variantsByProduct = new Map<string, { id: string; size: string | null }[]>();
@@ -833,6 +874,14 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
       description: "Cedar & Vine, tonight.",
     },
     {
+      id: "aud_brooklyn_attendees",
+      artistId: MARISOL_REYES.id,
+      name: "Verified Brooklyn attendees",
+      ruleKind: "event_attendees" as const,
+      params: { eventId: "evt_marisol_brooklyn" },
+      description: "Warehouse Nine, tonight.",
+    },
+    {
       id: "aud_austin_attendees",
       artistId: LOW_COUNTRY.id,
       name: "Austin — one year ago",
@@ -852,6 +901,7 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
 
   const detroit = eventByKey.get("atlas-detroit")!;
   const nashville = eventByKey.get("nova-nashville")!;
+  const brooklyn = eventByKey.get("marisol-brooklyn")!;
   const austin = eventByKey.get("low-austin")!;
   const toronto = eventByKey.get("atlas-toronto")!;
 
@@ -1051,6 +1101,80 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
       palette: LOW_COUNTRY.palette,
     },
     {
+      id: "drp_tender_night_standard",
+      artistId: MARISOL_REYES.id,
+      tourId: tourIds.tenderNight,
+      eventId: null,
+      slug: "a-tender-night",
+      title: "A Tender Night",
+      description: "The tour collection.",
+      audienceSegmentId: null,
+      startsAt: new Date(now.getTime() - 45 * DAY),
+      endsAt: null,
+      status: "live" as const,
+      displayPriority: 20,
+      exclusivityType: "standard" as const,
+      artworkKey: "tender-night-drop",
+      artworkTitle: "A Tender Night",
+      products: [
+        "prd_mr_tee",
+        "prd_mr_hoodie",
+        "prd_mr_hat",
+        "prd_mr_print",
+        "prd_mr_vinyl",
+        "prd_mr_tote",
+        "prd_mr_7inch",
+        "prd_mr_necklace",
+      ],
+      quantityLimit: null,
+      anniversaryOfEventId: null,
+      palette: MARISOL_REYES.palette,
+    },
+    {
+      id: "drp_brooklyn_postshow",
+      artistId: MARISOL_REYES.id,
+      tourId: tourIds.tenderNight,
+      eventId: brooklyn.id,
+      slug: "brooklyn-post-show",
+      title: "Brooklyn, After",
+      description:
+        "The attendee store stays open for a few hours after the room empties. Then it closes for good.",
+      audienceSegmentId: "aud_brooklyn_attendees",
+      startsAt: brooklyn.endsAt,
+      endsAt: new Date(brooklyn.endsAt.getTime() + 12 * HOUR),
+      status: "live" as const,
+      displayPriority: 70,
+      exclusivityType: "post_show" as const,
+      artworkKey: "brooklyn-post-show",
+      artworkTitle: "Brooklyn",
+      products: ["prd_mr_city_tee", "prd_mr_scarf", "prd_mr_print"],
+      quantityLimit: null,
+      anniversaryOfEventId: null,
+      palette: MARISOL_REYES.palette,
+    },
+    {
+      id: "drp_brooklyn_encore",
+      artistId: MARISOL_REYES.id,
+      tourId: tourIds.tenderNight,
+      eventId: brooklyn.id,
+      slug: "brooklyn-encore",
+      title: "Encore Drop",
+      description:
+        "Opened from the side of the stage during the encore. It closes when the timer does.",
+      audienceSegmentId: "aud_brooklyn_attendees",
+      startsAt: new Date(brooklyn.startsAt.getTime() + 75 * MINUTE),
+      endsAt: new Date(brooklyn.startsAt.getTime() + 75 * MINUTE + 42 * MINUTE + 18_000),
+      status: "live" as const,
+      displayPriority: 100,
+      exclusivityType: "flash" as const,
+      artworkKey: "brooklyn-encore",
+      artworkTitle: "Encore",
+      products: ["prd_mr_city_tee"],
+      quantityLimit: 300,
+      anniversaryOfEventId: null,
+      palette: MARISOL_REYES.palette,
+    },
+    {
       id: "drp_chicago_scheduled",
       artistId: THE_DEGENS.id,
       tourId: tourIds.signalDecay,
@@ -1223,7 +1347,7 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
    * ---------------------------------------------------------------- */
 
   const primaryFanEventKeys = [
-    "nova-nashville",
+    "marisol-brooklyn",
     "low-austin",
     ...historicalPlan.map((_, index) => `history-${index}`),
   ];
@@ -1278,10 +1402,10 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
   for (const userId of crowdIds.slice(120, 172)) {
     await db.insert(verifiedAttendance).values({
       userId,
-      eventId: nashville.id,
+      eventId: brooklyn.id,
       method: "event_qr",
-      verifiedAt: new Date(nashville.doorsAt.getTime() + rng.randInt(10, 120) * MINUTE),
-      tokenId: `evk_${nashville.id}`,
+      verifiedAt: new Date(brooklyn.doorsAt.getTime() + rng.randInt(10, 120) * MINUTE),
+      tokenId: `evk_${brooklyn.id}`,
       isDemo: true,
     });
   }
@@ -1305,16 +1429,17 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
 
   const consentTypes = ["drops", "anniversary", "show_news", "attendee_offers"] as const;
 
-  // The primary fan is connected to Nova Kestrel and The Low Country, but has not yet
+  // The primary fan is connected to Marisol Reyes and The Low Country, but has not yet
   // agreed to hear from The Degens — so the post-verification prompt has something to ask.
   for (const type of consentTypes) {
+    if (type === "drops") continue;
     await db.insert(artistConsents).values({
       userId: primaryFanId,
-      artistId: NOVA_KESTREL.id,
+      artistId: MARISOL_REYES.id,
       consentType: type,
       status: "granted",
       source: "post_verification_prompt",
-      grantedAt: new Date(nashville.endsAt.getTime() - 30 * MINUTE),
+      grantedAt: new Date(brooklyn.endsAt.getTime() - 30 * MINUTE),
       isDemo: true,
     });
   }
@@ -1665,6 +1790,113 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
     commerceSource: "event_scoped",
   });
   counts.orders += 2;
+
+  // Brooklyn A Tender Night — artist studio guided demo commerce story.
+  const brooklynAttendees = crowdIds.slice(120, 172);
+  let brooklynOrders = 0;
+
+  for (const [index, userId] of brooklynAttendees.entries()) {
+    if (!rng.randBool(0.78)) continue;
+    await db.insert(artistConsents).values({
+      userId,
+      artistId: MARISOL_REYES.id,
+      consentType: "attendee_offers",
+      status: "granted",
+      source: "post_verification_prompt",
+      grantedAt: new Date(brooklyn.endsAt.getTime() + rng.randInt(5, 90) * MINUTE),
+      isDemo: true,
+    });
+    counts.consents++;
+  }
+
+  for (const [index, userId] of brooklynAttendees.entries()) {
+    if (!rng.randBool(0.55)) continue;
+
+    const productIds = ["prd_mr_tee", "prd_mr_hoodie", "prd_mr_hat", "prd_mr_print"] as const;
+    const productId = rng.pick([...productIds]);
+    const variantId = rng.pick(variantsByProduct.get(productId)!).id;
+
+    await placeOrder({
+      userId,
+      artistId: MARISOL_REYES.id,
+      eventId: brooklyn.id,
+      status: rng.randBool(0.6) ? "paid" : "allocated",
+      placedAt: new Date(brooklyn.doorsAt.getTime() + rng.randInt(40, 180) * MINUTE),
+      lines: [
+        {
+          productId,
+          variantId,
+          quantity: 1,
+          dropId: index % 3 === 0 ? "drp_brooklyn_encore" : "drp_tender_night_standard",
+        },
+      ],
+      shippingOptionId: "shp_marisol_standard",
+      commerceSource: "event_scoped",
+    });
+    brooklynOrders++;
+  }
+
+  await placeOrder({
+    userId: primaryFanId,
+    artistId: MARISOL_REYES.id,
+    eventId: brooklyn.id,
+    status: "paid",
+    placedAt: new Date(brooklyn.startsAt.getTime() + 85 * MINUTE),
+    lines: [
+      {
+        productId: "prd_mr_tee",
+        variantId: rng.pick(variantsByProduct.get("prd_mr_tee")!).id,
+        quantity: 1,
+        dropId: "drp_tender_night_standard",
+      },
+    ],
+    shippingOptionId: "shp_marisol_standard",
+    commerceSource: "event_scoped",
+  });
+  brooklynOrders++;
+
+  await placeOrder({
+    userId: primaryFanId,
+    artistId: MARISOL_REYES.id,
+    eventId: brooklyn.id,
+    status: "delivered",
+    placedAt: new Date(brooklyn.endsAt.getTime() + 3 * DAY),
+    lines: [
+      {
+        productId: "prd_mr_city_tee",
+        variantId: rng.pick(variantsByProduct.get("prd_mr_city_tee")!).id,
+        quantity: 1,
+        dropId: "drp_brooklyn_postshow",
+      },
+    ],
+    shippingOptionId: "shp_marisol_standard",
+    commerceSource: "event_scoped",
+  });
+  brooklynOrders++;
+
+  for (const userId of brooklynAttendees.slice(0, 18)) {
+    if (!rng.randBool(0.45)) continue;
+    await placeOrder({
+      userId,
+      artistId: MARISOL_REYES.id,
+      eventId: brooklyn.id,
+      status: "paid",
+      placedAt: new Date(brooklyn.endsAt.getTime() + rng.randInt(1, 20) * DAY),
+      lines: [
+        {
+          productId: "prd_mr_city_tee",
+          variantId: rng.pick(variantsByProduct.get("prd_mr_city_tee")!).id,
+          quantity: 1,
+          dropId: "drp_brooklyn_postshow",
+        },
+      ],
+      shippingOptionId: "shp_marisol_standard",
+      commerceSource: "event_scoped",
+    });
+    brooklynOrders++;
+  }
+
+  counts.orders += brooklynOrders;
 
   // Nashville post-show orders, so the recently-ended state has real sales behind it.
   for (const userId of crowdIds.slice(120, 148)) {

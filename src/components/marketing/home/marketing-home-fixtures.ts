@@ -1,47 +1,141 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  CalendarDays,
+  BarChart3,
+  Eye,
   Heart,
-  MapPin,
+  Music,
   Package,
+  ShoppingBag,
+  ShoppingCart,
   Smartphone,
-  Sparkles,
+  Star,
+  Ticket,
   TrendingUp,
   Truck,
+  Users,
 } from "lucide-react";
 
+/** Real concert and editorial photography — not stock. */
+export const MKT_PHOTOS = {
+  heroHomeBackdrop: "/marketing/hero-home-backdrop.png",
+  /** Wide B&W official merch booth — homepage opportunity section backdrop. */
+  opportunityBackdrop: "/marketing/merch-line-bw.png",
+  marisolPortrait: "/marketing/marisol-reyes-portrait.png",
+  merchLine: "/marketing/merch-line-bw.png",
+  frontRowCrowd: "/marketing/fan-front-row-crowd.png",
+  arenaStage: "/marketing/arena-stage-blue.png",
+  pilotVenue: "/marketing/pilot-merch-table.png",
+  backstageAmp: "/marketing/backstage-amp.png",
+  /** Problem card crops — same documentary set as the opportunity backdrop. */
+  problemLongLines: "/marketing/merch-line-bw.png",
+  problemSoldOut: "/marketing/merch-line-bw.png",
+  problemCarryAll: "/marketing/pilot-merch-table.png",
+} as const;
+
 export const HOME_HERO_BENEFITS = [
-  { icon: TrendingUp, label: "More sales for artists" },
-  { icon: Heart, label: "Better fan experience" },
-  { icon: Package, label: "No stockouts" },
-  { icon: Sparkles, label: "Show lives on" },
+  { icon: BarChart3, label: "Increase merch sales" },
+  { icon: Package, label: "Sell more products" },
+  { icon: Users, label: "Know your fans" },
+  { icon: Heart, label: "Keep the moment going" },
 ] as const satisfies readonly { icon: LucideIcon; label: string }[];
 
 export const HOME_PROBLEM_ITEMS = [
   {
     title: "Long lines",
-    body: "Fans shouldn't spend the show waiting to buy a shirt.",
-    photoLabel: "Approved photography: fans waiting in a long merch line at a concert",
+    body: "Fans wait. Many walk away.",
+    photo: MKT_PHOTOS.problemLongLines,
+    photoAlt: "Fans waiting in a long official merchandise line at a concert",
+    objectPosition: "50% 88%",
   },
   {
     title: "Sold-out sizes",
-    body: "Physical inventory limits what artists can sell.",
-    photoLabel: "Approved photography: sold-out sizes sign on a merch table at a show",
+    body: "Limited inventory means lost sales.",
+    photo: MKT_PHOTOS.problemSoldOut,
+    photoAlt: "Sold-out sizes on the official merchandise display",
+    objectPosition: "50% 18%",
   },
   {
-    title: "Carry it all night",
-    body: "Buying merch shouldn't mean carrying it through the concert.",
-    photoLabel: "Approved photography: fan carrying a merch bag through a concert crowd",
+    title: "Fans carry it all",
+    body: "It gets in the way of the show experience.",
+    photo: MKT_PHOTOS.problemCarryAll,
+    photoAlt: "Fans carrying multiple shirts away from the merch table",
+    objectPosition: "72% 55%",
   },
 ] as const;
 
-/** Real Nova guided-demo UI — captured from the product, not illustrated. */
-export const NOVA_KESTREL_SHOP_SCREENSHOT = "/marketing/nova-kestrel-shop-mobile.png";
-export const NOVA_KESTREL_DISCOVER_SCREENSHOT = "/marketing/nova-kestrel-discover-mobile.png";
-export const NOVA_KESTREL_UNLOCK_SCREENSHOT = "/marketing/nova-kestrel-unlock-mobile.png";
-export const NOVA_KESTREL_RECEIVE_SCREENSHOT = "/marketing/nova-kestrel-receive-mobile.png";
-export const NOVA_KESTREL_MY_SHOWS_SCREENSHOT = "/marketing/nova-kestrel-my-shows-mobile.png";
-export const NOVA_KESTREL_CREDENTIAL_SCREENSHOT = "/marketing/nova-kestrel-credential-mobile.png";
+export const HOME_BETTER_WAY_BENEFITS = [
+  "Sell more, without bigger merch tables",
+  "Offer exclusive, city-specific drops",
+  "Reduce stockouts and leftover inventory",
+  "Keep more of the value",
+  "Turn show nights into long-term fan relationships",
+] as const;
+
+/** Bump when marketing screenshots are re-captured so browsers skip stale PNG cache. */
+export const MARKETING_SCREENSHOT_VERSION = "10";
+
+/** Real Marisol guided-demo UI — captured from the product, not illustrated. */
+export const MARISOL_REYES_SHOP_SCREENSHOT = `/marketing/marisol-reyes-shop-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
+export const MARISOL_REYES_DISCOVER_SCREENSHOT = `/marketing/marisol-reyes-discover-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
+export const MARISOL_REYES_UNLOCK_SCREENSHOT = `/marketing/marisol-reyes-unlock-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
+export const MARISOL_REYES_RECEIVE_SCREENSHOT = `/marketing/marisol-reyes-receive-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
+export const MARISOL_REYES_MY_SHOWS_SCREENSHOT = `/marketing/marisol-reyes-my-shows-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
+export const MARISOL_REYES_CREDENTIAL_SCREENSHOT = `/marketing/marisol-reyes-credential-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
+export const MARISOL_REYES_STUDIO_SCREENSHOT = `/marketing/marisol-reyes-artist-studio-desktop.png?v=${MARKETING_SCREENSHOT_VERSION}`;
+
+/** Primary marketing demo CTA label across the site. */
+export const MARKETING_DEMO_CTA_LABEL = "See the Artist Demo";
+
+/** Fan-journey demo CTA for /for-fans and fan-focused sections. */
+export const MARKETING_FAN_DEMO_CTA_LABEL = "Experience Marisol's Show";
+
+/** @deprecated Use MARISOL_REYES_* screenshot constants. */
+export const NOVA_KESTREL_SHOP_SCREENSHOT = MARISOL_REYES_SHOP_SCREENSHOT;
+export const NOVA_KESTREL_DISCOVER_SCREENSHOT = MARISOL_REYES_DISCOVER_SCREENSHOT;
+export const NOVA_KESTREL_UNLOCK_SCREENSHOT = MARISOL_REYES_UNLOCK_SCREENSHOT;
+export const NOVA_KESTREL_RECEIVE_SCREENSHOT = MARISOL_REYES_RECEIVE_SCREENSHOT;
+export const NOVA_KESTREL_MY_SHOWS_SCREENSHOT = MARISOL_REYES_MY_SHOWS_SCREENSHOT;
+export const NOVA_KESTREL_CREDENTIAL_SCREENSHOT = MARISOL_REYES_CREDENTIAL_SCREENSHOT;
+
+export const HOME_SOLUTION_RAIL = [
+  { icon: Eye, label: "See it" },
+  { icon: ShoppingCart, label: "Buy it" },
+  { icon: Music, label: "Enjoy the show" },
+  { icon: Package, label: "Get it delivered" },
+] as const satisfies readonly { icon: LucideIcon; label: string }[];
+
+export const HOME_RELATIONSHIP_RAIL = [
+  { icon: Ticket, label: "I Was There" },
+  { icon: Users, label: "Show history" },
+  { icon: Star, label: "Known fan" },
+  { icon: ShoppingBag, label: "Drops" },
+  { icon: BarChart3, label: "Return" },
+] as const satisfies readonly { icon: LucideIcon; label: string }[];
+
+/** Illustrative Artist Studio tour overview — Marisol Reyes demo data. */
+export const HOME_STUDIO_OVERVIEW = {
+  artistName: "Marisol Reyes",
+  portrait: MKT_PHOTOS.marisolPortrait,
+  kpis: [
+    { label: "Total Merch Sales", value: "$284,620", delta: "+42%" },
+    { label: "Purchasing Fans", value: "12,480", delta: "+39%" },
+    { label: "Repeat Purchasers", value: "28%", delta: "+12%" },
+    { label: "Avg. Order Value", value: "$56", delta: "+18%" },
+  ],
+  salesByShow: [
+    { city: "Brooklyn", pct: 92 },
+    { city: "Denver", pct: 68 },
+    { city: "Chicago", pct: 78 },
+    { city: "Toronto", pct: 55 },
+    { city: "Nashville", pct: 72 },
+    { city: "Atlanta", pct: 48 },
+  ],
+  topProducts: [
+    { name: "Tender Night Brooklyn Tee", units: "1,420 Units Sold" },
+    { name: "More Tender Nights Hoodie", units: "980 Units Sold" },
+    { name: "A Tender Night Poster", units: "742 Units Sold" },
+  ],
+} as const;
 
 export interface HomeHowItWorksStage {
   icon: LucideIcon;
@@ -51,64 +145,42 @@ export interface HomeHowItWorksStage {
   alt: string;
 }
 
-/** Each stage is an independent responsive unit: copy + one real product screenshot. */
 export const HOME_HOW_IT_WORKS_STAGES: readonly HomeHowItWorksStage[] = [
   {
-    icon: CalendarDays,
-    title: "Discover",
-    body: "See what's coming.",
-    screenshot: NOVA_KESTREL_DISCOVER_SCREENSHOT,
-    alt: "Nova Kestrel show page in Rolling GA — discover the Nashville show before doors",
-  },
-  {
-    icon: MapPin,
-    title: "Unlock",
-    body: "Being at the show unlocks what others can't get.",
-    screenshot: NOVA_KESTREL_UNLOCK_SCREENSHOT,
-    alt: "Nova Kestrel event page in Rolling GA — venue arrival unlocks show-night exclusives",
-  },
-  {
     icon: Smartphone,
-    title: "Shop",
-    body: "Buy from your phone. Skip the merch line.",
-    screenshot: NOVA_KESTREL_SHOP_SCREENSHOT,
-    alt: "Nova Kestrel attendee shop in Rolling GA — buy Nashville Night Tee from your phone at the show",
-  },
-  {
-    icon: Truck,
-    title: "Receive",
-    body: "Leave the merch behind. We'll send it to you.",
-    screenshot: NOVA_KESTREL_RECEIVE_SCREENSHOT,
-    alt: "Rolling GA order confirmation — It's yours, your piece of tonight is on its way with shipping details",
+    title: "See it",
+    body: "Browse Marisol Reyes merch from your phone at the show.",
+    screenshot: MARISOL_REYES_SHOP_SCREENSHOT,
+    alt: "Marisol Reyes attendee shop in Rolling GA — A Tender Night tour merchandise",
   },
 ];
 
 export const HOME_ARTIST_VALUE_BENEFITS = [
   {
     icon: TrendingUp,
-    label: "Capture show-night demand",
-    body: "Pilot hypothesis: extend merch sales beyond the physical table window.",
+    label: "Increase merch sales",
+    body: "Capture show-night demand beyond the physical table window.",
   },
   {
     icon: Package,
-    label: "Digital catalog at the show",
-    body: "Pilot hypothesis: offer more SKUs without adding table inventory.",
+    label: "Sell more products",
+    body: "Offer more SKUs without adding table inventory.",
   },
   {
-    icon: Sparkles,
-    label: "Less table friction",
-    body: "Pilot hypothesis: reduce line bottlenecks and size sellouts on the floor.",
+    icon: Users,
+    label: "Know your fans",
+    body: "Turn attendance into permissioned, ongoing relationships.",
   },
   {
     icon: Heart,
-    label: "Permissioned relationships",
-    body: "Pilot hypothesis: turn attendance into an ongoing artist–fan channel.",
+    label: "Keep the moment going",
+    body: "Post-show drops and credentials extend the night.",
   },
 ] as const;
 
 export const HOME_FAN_RELATIONSHIP_BENEFITS = [
-  { icon: Sparkles, label: "Exclusive drops" },
-  { icon: Smartphone, label: "Shop from your phone" },
-  { icon: Truck, label: "Delivered after the show" },
-  { icon: Heart, label: "I Was There credentials" },
+  { icon: Star, label: "I Was There credentials" },
+  { icon: Users, label: "Show history" },
+  { icon: ShoppingBag, label: "Exclusive drops" },
+  { icon: Heart, label: "Known fan status" },
 ] as const satisfies readonly { icon: LucideIcon; label: string }[];

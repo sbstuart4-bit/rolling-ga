@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { StudioNav } from "./studio-nav";
 import { ArtistSwitcher, type StudioArtistOption } from "./artist-switcher";
 import { DemoBoardReturn } from "@/components/demo/demo-board-return";
+import { cn } from "@/lib/utils";
 
 /**
  * The Studio is desktop and tablet first: a persistent sidebar from `lg`, collapsing to
@@ -19,12 +20,14 @@ export function StudioShell({
   activeArtistId,
   userName,
   demoMode = false,
+  guidedDemoActive = false,
   children,
 }: {
   artists: StudioArtistOption[];
   activeArtistId: string | null;
   userName: string;
   demoMode?: boolean;
+  guidedDemoActive?: boolean;
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -76,7 +79,14 @@ export function StudioShell({
           <span className="text-sm font-semibold">{activeArtist?.name ?? "Artist Studio"}</span>
         </header>
 
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
+        <main
+          className={cn(
+            "min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8",
+            guidedDemoActive && "pb-28 xl:pb-8",
+          )}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 function StarMark({ className }: { className?: string }) {
@@ -50,6 +51,32 @@ export function RollingGaMark({
       />
       Rolling<span className={accent}>&nbsp;GA</span>
     </span>
+  );
+}
+
+/** Logo wordmark that links to the marketing homepage. */
+export function RollingGaHomeLink({
+  className,
+  markClassName,
+  size = "default",
+  tone = "brand",
+}: {
+  className?: string;
+  markClassName?: string;
+  size?: "sm" | "default" | "lg" | "xl";
+  tone?: "brand" | "mono";
+}) {
+  return (
+    <Link
+      href="/home"
+      className={cn(
+        "inline-flex shrink-0 rounded-sm transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        className,
+      )}
+      aria-label="Rolling GA home"
+    >
+      <RollingGaMark size={size} tone={tone} className={markClassName} />
+    </Link>
   );
 }
 

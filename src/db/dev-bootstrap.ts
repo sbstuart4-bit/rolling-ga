@@ -1,11 +1,18 @@
 import { rmSync } from "node:fs";
 import { resolve } from "node:path";
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { demoAnchorDate } from "@/lib/demo-calendar";
 import { resolveDatabaseUrl } from "@/lib/production-env";
 import { createDb, resolvePgliteDir, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
+import { users } from "./schema";
+
+/** Guided demos hard-fail when either persona is missing — not just when the crowd fill is absent. */
+const REQUIRED_DEMO_PERSONA_EMAILS = [
+  "scott@example.com",
+  "elena@marisolreyes.example",
+] as const;
 
 let bootstrapPromise: Promise<void> | null = null;
 
@@ -15,6 +22,26 @@ function globalDbSlot(): { __rollingGaDb?: DbHandle } {
 
 /** True when PGlite WASM aborts — usually a corrupt or contended data directory. */
 export function isPgliteAbortError(error: unknown): boolean {
+  const text = collectErrorText(error);
+  return /Aborted\(\)/.test(text) || /RuntimeError.*Aborted/.test(text);
+}
+
+/** On-disk PGlite files are missing or inconsistent — common after db:reset while dev is running. */
+export function isPgliteCorruptionError(error: unknown): boolean {
+  const text = collectErrorText(error);
+  return (
+    /58P01/.test(text) ||
+    /could not open file/i.test(text) ||
+    /mdopenfork/i.test(text) ||
+    /duplicate key value violates unique constraint/i.test(text)
+  );
+}
+
+function shouldRecoverPglite(error: unknown): boolean {
+  return isPgliteAbortError(error) || isPgliteCorruptionError(error);
+}
+
+function collectErrorText(error: unknown): string {
   const parts: string[] = [];
   let current: unknown = error;
   for (let depth = 0; depth < 4 && current; depth++) {
@@ -26,8 +53,7 @@ export function isPgliteAbortError(error: unknown): boolean {
       break;
     }
   }
-  const text = parts.join(" ");
-  return /Aborted\(\)/.test(text) || /RuntimeError.*Aborted/.test(text);
+  return parts.join(" ");
 }
 
 async function demoUserCount(handle: DbHandle): Promise<number | null> {
@@ -36,6 +62,18 @@ async function demoUserCount(handle: DbHandle): Promise<number | null> {
       sql`select count(*)::int as count from users where is_demo = true`,
     );
     return Number(rows[0]?.count ?? 0);
+  } catch {
+    return null;
+  }
+}
+
+async function requiredDemoPersonasPresent(handle: DbHandle): Promise<boolean | null> {
+  try {
+    const rows = await handle.db
+      .select({ email: users.email })
+      .from(users)
+      .where(inArray(users.email, [...REQUIRED_DEMO_PERSONA_EMAILS]));
+    return rows.length === REQUIRED_DEMO_PERSONA_EMAILS.length;
   } catch {
     return null;
   }
@@ -50,6 +88,22 @@ async function closeGlobalHandle(): Promise<void> {
     /* already closed */
   }
   slot.__rollingGaDb = undefined;
+}
+
+/**
+ * Drops the in-process PGlite handle so the next open reads the on-disk cluster.
+ * Needed after an external `npm run db:reset` while `next dev` stays running.
+ */
+async function reopenPgliteFromDisk(): Promise<DbHandle> {
+  await closeGlobalHandle();
+  bootstrapPromise = null;
+  const handle = createDb();
+  globalDbSlot().__rollingGaDb = handle;
+  return handle;
+}
+
+function isDemoSeedMissingError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes("not seeded");
 }
 
 /** Removes the on-disk PGlite cluster so the next open starts clean. Dev only. */
@@ -82,17 +136,25 @@ async function bootstrapDevDatabase(): Promise<void> {
   let handle = globalDbSlot().__rollingGaDb ?? createDb();
   if (handle.driver !== "pglite") return;
 
-  const seeded = await demoUserCount(handle);
-  if (seeded !== null && seeded > 0) return;
-
   try {
     await runMigrations(handle);
-    if ((await demoUserCount(handle)) === 0) {
-      await seedDemoData(handle.db, demoAnchorDate());
+
+    if (await requiredDemoPersonasPresent(handle)) {
+      globalDbSlot().__rollingGaDb = handle;
+      return;
     }
-    globalDbSlot().__rollingGaDb = handle;
+
+    if (globalDbSlot().__rollingGaDb) {
+      handle = await reopenPgliteFromDisk();
+      await runMigrations(handle);
+      if (await requiredDemoPersonasPresent(handle)) {
+        return;
+      }
+    }
+
+    await recoverPgliteCluster();
   } catch (error) {
-    if (!isPgliteAbortError(error)) throw error;
+    if (!shouldRecoverPglite(error)) throw error;
     await recoverPgliteCluster();
   }
 }
@@ -122,9 +184,17 @@ export async function withDevDatabaseRecovery<T>(operation: () => Promise<T>): P
   try {
     return await operation();
   } catch (error) {
-    if (!isPgliteAbortError(error) || resolveDatabaseUrl() || process.env.NODE_ENV === "production") {
+    if (resolveDatabaseUrl() || process.env.NODE_ENV === "production") {
       throw error;
     }
+
+    if (isDemoSeedMissingError(error)) {
+      bootstrapPromise = null;
+      await recoverPgliteCluster();
+      return operation();
+    }
+
+    if (!shouldRecoverPglite(error)) throw error;
     bootstrapPromise = null;
     await recoverPgliteCluster();
     return operation();

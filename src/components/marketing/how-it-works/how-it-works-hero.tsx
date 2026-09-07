@@ -1,6 +1,10 @@
-import { NOVA_KESTREL_UNLOCK_SCREENSHOT } from "@/components/marketing/home/marketing-home-fixtures";
+import {
+  MARISOL_REYES_UNLOCK_SCREENSHOT,
+  MARKETING_DEMO_CTA_LABEL,
+} from "@/components/marketing/home/marketing-home-fixtures";
 import { ExperienceNovaForm } from "@/components/marketing/experience-nova-form";
 import { MktDisplayHeading, MktEyebrow, MktPhoneFrame } from "@/components/marketing/site";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 
 export function HowItWorksHero() {
   return (
@@ -31,15 +35,16 @@ export function HowItWorksHero() {
 
             <ExperienceNovaForm
               size="large"
-              demoLabel="Experience the Nova Kestrel Demo"
+              demoLabel={MARKETING_DEMO_CTA_LABEL}
+              action={experienceArtistStudioAction}
               className="mt-10"
             />
           </div>
 
           <div className="mx-auto w-full max-w-[320px] sm:max-w-[360px] lg:mx-0 lg:ml-auto lg:max-w-[400px]">
             <MktPhoneFrame
-              screenshot={NOVA_KESTREL_UNLOCK_SCREENSHOT}
-              screenshotAlt="Nova Kestrel in Rolling GA — venue arrival unlocks show-night exclusives"
+              screenshot={MARISOL_REYES_UNLOCK_SCREENSHOT}
+              screenshotAlt="Marisol Reyes in Rolling GA — venue arrival unlocks show-night exclusives"
               className="max-w-none lg:max-w-[340px]"
             />
           </div>

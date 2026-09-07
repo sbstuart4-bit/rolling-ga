@@ -5,7 +5,7 @@ export const DEMO_YEAR = 2026;
 export const DEMO_ANCHOR_MONTH = 6;
 export const DEMO_ANCHOR_DAY = 1;
 
-/** Flagship demo show on the seeded calendar — Nova Kestrel at Nashville. */
+/** Flagship demo show on the seeded calendar — Marisol Reyes at Brooklyn. */
 export const DEMO_SHOW_MONTH = 6;
 export const DEMO_SHOW_DAY = 12;
 
@@ -27,7 +27,12 @@ export function demoShowDate(): Date {
   return new Date(DEMO_YEAR, DEMO_SHOW_MONTH - 1, DEMO_SHOW_DAY, 20, 0, 0, 0);
 }
 
-/** Flagship demo show slug — Nova Kestrel at Nashville on the seeded calendar. */
+/** Flagship demo show slug — Marisol Reyes at Brooklyn on the seeded calendar. */
+export function demoMarisolBrooklynEventSlug(): string {
+  return `marisol-reyes-a-tender-night-brooklyn-${DEMO_YEAR}`;
+}
+
+/** @deprecated Use demoMarisolBrooklynEventSlug — legacy Nova Nashville slug. */
 export function demoNovaNashvilleEventSlug(): string {
   return `nova-kestrel-gold-hour-nashville-${DEMO_YEAR}`;
 }
@@ -77,6 +82,19 @@ export function demoClockDaysAndHoursForDate(date: Date): { days: number; hours:
   return offsetToDaysAndHours(demoClockOffsetForDate(date));
 }
 
+/** Marisol Brooklyn — doors open, verification window, and live set (seeded show times). */
+export function demoMarisolBrooklynDoorsOpen(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 18, 0));
+}
+
+export function demoMarisolBrooklynLive(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 20, 0));
+}
+
+export function demoMarisolBrooklynPostShow(): { days: number; hours: number } {
+  return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 22, 30));
+}
+
 /** Nova Nashville — doors open, verification window, and live set (seeded show times). */
 export function demoNovaNashvilleDoorsOpen(): { days: number; hours: number } {
   return demoClockDaysAndHoursForDate(demoCalendarDate(DEMO_SHOW_MONTH, DEMO_SHOW_DAY, 17, 0));
@@ -103,9 +121,9 @@ export function demoDetroitPostShow(): { days: number; hours: number } {
   return demoClockDaysAndHoursForDate(demoCalendarDate(6, 30, 23, 30));
 }
 
-/** Day index on the demo clock when the flagship show plays (Nova · Nashville · June 12). */
+/** Day index on the demo clock when the flagship show plays (Marisol · Brooklyn · June 12). */
 export function demoShowDayIndex(): number {
-  return demoNovaNashvilleLive().days;
+  return demoMarisolBrooklynLive().days;
 }
 
 const DEMO_CLOCK_DATE_FMT = new Intl.DateTimeFormat("en-US", {

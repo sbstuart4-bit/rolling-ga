@@ -7,6 +7,7 @@ import { demoModeEnabled } from "@/lib/demo-mode";
 import {
   getGuidedJourney,
   getGuidedStep,
+  normalizeGuidedJourneyId,
   resolveGuidedRoute,
   type GuidedJourneyId,
 } from "@/lib/guided-demo";
@@ -29,13 +30,18 @@ function redirectToStep(ctx: ActiveGuidedDemoContext): never {
   redirect(`${route}${join}${qs}`);
 }
 
+function journeyIdFromForm(formData: FormData): GuidedJourneyId | null {
+  return normalizeGuidedJourneyId(String(formData.get("journeyId") ?? "")) ?? null;
+}
+
 export async function startGuidedDemoAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
   const publicMarketingEntry = formData.get("publicMarketingEntry") === "1";
   if (!publicMarketingEntry && !(await hasDemoBoardAccess())) redirect("/demo");
 
-  const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
+  const journeyId = journeyIdFromForm(formData);
+  if (!journeyId) redirect("/demo/guided");
   const presenter = formData.get("presenter") === "1";
 
   const ctx = await loadGuidedStepContext(journeyId, 1, { presenter });
@@ -48,7 +54,8 @@ export async function startGuidedDemoAction(formData: FormData): Promise<void> {
 export async function guidedDemoNextAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
-  const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
+  const journeyId = journeyIdFromForm(formData);
+  if (!journeyId) redirect("/demo/guided");
   const currentStep = Number.parseInt(String(formData.get("step") ?? "1"), 10);
   const journey = getGuidedJourney(journeyId);
   if (!journey) redirect("/demo/guided");
@@ -68,7 +75,8 @@ export async function guidedDemoNextAction(formData: FormData): Promise<void> {
 export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
-  const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
+  const journeyId = journeyIdFromForm(formData);
+  if (!journeyId) redirect("/demo/guided");
   const currentStep = Number.parseInt(String(formData.get("step") ?? "1"), 10);
   const prevStep = Math.max(1, currentStep - 1);
 
@@ -82,7 +90,8 @@ export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
 export async function guidedDemoGoToStepAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
-  const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
+  const journeyId = journeyIdFromForm(formData);
+  if (!journeyId) redirect("/demo/guided");
   const stepNumber = Number.parseInt(String(formData.get("step") ?? "1"), 10);
 
   const ctx = await loadGuidedStepContext(journeyId, stepNumber);
@@ -95,7 +104,8 @@ export async function guidedDemoGoToStepAction(formData: FormData): Promise<void
 export async function toggleGuidedDemoAutoplayAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
-  const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
+  const journeyId = journeyIdFromForm(formData);
+  if (!journeyId) return;
   const step = Number.parseInt(String(formData.get("step") ?? "1"), 10);
   const autoplay = formData.get("autoplay") === "1";
 
@@ -109,7 +119,8 @@ export async function toggleGuidedDemoAutoplayAction(formData: FormData): Promis
 export async function toggleGuidedDemoPresenterAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
 
-  const journeyId = String(formData.get("journeyId") ?? "") as GuidedJourneyId;
+  const journeyId = journeyIdFromForm(formData);
+  if (!journeyId) return;
   const step = Number.parseInt(String(formData.get("step") ?? "1"), 10);
   const presenter = formData.get("presenter") === "1";
 

@@ -87,8 +87,8 @@ export interface DemoScenario {
 }
 
 export const DEFAULT_DEMO_SCENARIO: DemoScenario = {
-  artist: "nova_kestrel",
-  showKey: "nova-nashville",
+  artist: "marisol_reyes",
+  showKey: "marisol-brooklyn",
   timePhase: "t_minus_14",
   fanState: "unknown",
   location: "outside_venue",

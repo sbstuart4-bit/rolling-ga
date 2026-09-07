@@ -5,6 +5,9 @@ import { resetDemoDatabase } from "@/db/reset-demo-data";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { destroySession } from "@/server/auth/session";
 import {
+  demoMarisolBrooklynDoorsOpen,
+  demoMarisolBrooklynLive,
+  demoMarisolBrooklynPostShow,
   demoNovaNashvilleDoorsOpen,
   demoNovaNashvilleLive,
   demoNovaNashvillePostShow,
@@ -58,16 +61,34 @@ export async function setDemoClockAction(days: number, hours: number): Promise<v
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
 }
 
+export async function jumpToMarisolBrooklynDoorsOpenAction(): Promise<void> {
+  const { days, hours } = demoMarisolBrooklynDoorsOpen();
+  applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
+}
+
+export async function jumpToMarisolBrooklynLiveAction(): Promise<void> {
+  const { days, hours } = demoMarisolBrooklynLive();
+  applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
+}
+
+export async function jumpToMarisolBrooklynPostShowAction(): Promise<void> {
+  const { days, hours } = demoMarisolBrooklynPostShow();
+  applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
+}
+
+/** @deprecated Use jumpToMarisolBrooklynDoorsOpenAction — legacy Nova Nashville preset. */
 export async function jumpToNovaNashvilleDoorsOpenAction(): Promise<void> {
   const { days, hours } = demoNovaNashvilleDoorsOpen();
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
 }
 
+/** @deprecated Use jumpToMarisolBrooklynLiveAction — legacy Nova Nashville preset. */
 export async function jumpToNovaNashvilleLiveAction(): Promise<void> {
   const { days, hours } = demoNovaNashvilleLive();
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));
 }
 
+/** @deprecated Use jumpToMarisolBrooklynPostShowAction — legacy Nova Nashville preset. */
 export async function jumpToNovaNashvillePostShowAction(): Promise<void> {
   const { days, hours } = demoNovaNashvillePostShow();
   applyClockMutation(() => setDemoClockDaysAndHours(days, hours));

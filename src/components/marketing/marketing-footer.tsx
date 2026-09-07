@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Circle } from "lucide-react";
-import { RollingGaMark } from "@/components/brand/rolling-ga-mark";
+import { RollingGaHomeLink } from "@/components/brand/rolling-ga-mark";
 import {
   MARKETING_FOOTER_COLUMNS,
   MARKETING_TAGLINE,
 } from "@/components/marketing/marketing-fixtures";
-import { experienceNovaKestrelAction } from "@/server/marketing/demo-entry";
+import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 
 /**
  * Approved footer — docs/website-reference.
@@ -18,7 +18,12 @@ export function MarketingFooter() {
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.1fr_2fr] lg:gap-16">
           <div className="space-y-6">
-            <RollingGaMark size="lg" tone="brand" className="text-mkt-fg" />
+            <RollingGaHomeLink
+              className="focus-visible:ring-mkt-purple focus-visible:ring-offset-mkt-bg"
+              markClassName="font-semibold text-mkt-fg"
+              size="lg"
+              tone="brand"
+            />
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-mkt-purple">
               {MARKETING_TAGLINE}
             </p>
@@ -50,7 +55,7 @@ export function MarketingFooter() {
                   {col.links.map((link) => (
                     <li key={`${col.title}-${link.label}`}>
                       {link.label === "Demo" ? (
-                        <form action={experienceNovaKestrelAction}>
+                        <form action={experienceArtistStudioAction}>
                           <button
                             type="submit"
                             className="text-sm text-mkt-muted transition-colors hover:text-mkt-fg"

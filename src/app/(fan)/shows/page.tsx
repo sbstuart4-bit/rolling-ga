@@ -5,6 +5,7 @@ import { PassportStatsBar } from "@/components/fan/passport-stats-bar";
 import { ShowsTabs, type ShowEntry } from "@/components/fan/shows-tabs";
 import { requireAuth } from "@/server/auth/request";
 import { loadPassportWithAccess } from "@/server/fans/passport-access";
+import { resolvePassportHeroImages } from "@/server/theme/passport-hero";
 import { resolveEventState } from "@/lib/event-state";
 import { getActiveDemoScenarioContext } from "@/server/demo/scenario-state";
 import { demoNow } from "@/server/demo/clock";
@@ -21,6 +22,14 @@ export default async function MyShowsPage() {
   const welcomeBack =
     demoScenario?.scenario.fanHistory === "second_show" &&
     demoScenario.scenario.fanState === "attended";
+
+  const heroByEventId = await resolvePassportHeroImages(
+    passport.map((entry) => ({
+      eventId: entry.eventId,
+      artistId: entry.artistId,
+      tourId: entry.tourId,
+    })),
+  );
 
   const shows: ShowEntry[] = passport.map((entry) => {
     const state = resolveEventState(
@@ -43,6 +52,7 @@ export default async function MyShowsPage() {
       timezone: entry.timezone,
       isPast: state.state !== "upcoming",
       unlockCount: entry.access.unlockCount,
+      thumbnailUrl: heroByEventId.get(entry.eventId) ?? null,
     };
   });
 

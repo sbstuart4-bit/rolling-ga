@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ArtistGuidedDemoHighlight } from "@/components/demo/artist-guided-demo-highlight";
 import { FanCohortDashboard } from "@/components/studio/fan-cohort-dashboard";
 import { ShowCohortPicker } from "@/components/studio/show-cohort-picker";
 import { requireAuthWithRole } from "@/server/auth/request";
@@ -41,6 +42,7 @@ export default async function StudioFanCohortPage({
 
   return (
     <div className="p-6">
+      <ArtistGuidedDemoHighlight />
       <FanCohortDashboard
         cohort={cohort}
         eventPicker={

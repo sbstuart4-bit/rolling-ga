@@ -5,7 +5,7 @@ import { demoAnchorDate } from "@/lib/demo-calendar";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { resolveDatabaseUrl } from "@/lib/production-env";
 import { canSeedProductionDemoDatabase } from "./demo-bootstrap-policy";
-import { createDb, resolvePgliteDir, type DbHandle } from "./client";
+import { createDb, resolvePgliteDir, truncateAllTables, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
 import { users } from "./schema";
@@ -166,13 +166,25 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
   try {
     await runMigrations(handle);
 
-    if (await requiredDemoPersonasPresent(handle)) {
+    const personasPresent = await requiredDemoPersonasPresent(handle);
+    if (personasPresent) {
       return;
     }
 
     const userCount = await countAllUsers(handle);
-    if (!canSeedProductionDemoDatabase(userCount)) {
+    const seededDemoUsers = await demoUserCount(handle);
+    if (
+      !canSeedProductionDemoDatabase({
+        userCount,
+        demoUserCount: seededDemoUsers,
+        personasPresent: false,
+      })
+    ) {
       return;
+    }
+
+    if ((userCount ?? 0) > 0) {
+      await truncateAllTables(handle);
     }
 
     await seedDemoData(handle.db, demoAnchorDate());

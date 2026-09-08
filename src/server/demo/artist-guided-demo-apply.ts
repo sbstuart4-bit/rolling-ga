@@ -12,14 +12,16 @@ import {
 } from "@/lib/artist-guided-demo";
 import { MARISOL_ARTIST_ID } from "@/lib/demo-user-ids";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
-import { canAccessArtist, hasAnyRole } from "@/server/auth/guards";
 import {
   createSession,
   destroySession,
   getAuthContext,
   setActiveArtist,
-  type AuthContext,
 } from "@/server/auth/session";
+import {
+  isElenaMarisolDemoSession,
+  repairElenaMarisolDemoAccount,
+} from "@/server/demo/ensure-demo-personas";
 import { applyDemoClockForPhase, applyDemoClockForPhaseInMemory } from "./apply-demo-clock";
 import {
   getArtistGuidedDemoSession,
@@ -29,17 +31,12 @@ import {
 
 const ELENA_EMAIL = "elena@marisolreyes.example";
 
-/** Artist Studio guided demo always narrates as Elena on the Marisol account. */
-export function isElenaMarisolDemoSession(ctx: AuthContext): boolean {
-  return (
-    ctx.email === ELENA_EMAIL &&
-    hasAnyRole(ctx, ["artist_member", "rga_admin"]) &&
-    canAccessArtist(ctx, MARISOL_ARTIST_ID)
-  );
-}
+export { isElenaMarisolDemoSession } from "@/server/demo/ensure-demo-personas";
 
 export async function ensureElenaSession(): Promise<string> {
   return withDevDatabaseRecovery(async () => {
+    await repairElenaMarisolDemoAccount();
+
     const [user] = await db
       .select({ id: users.id })
       .from(users)

@@ -11,8 +11,11 @@ import {
   type GuidedJourneyId,
 } from "@/lib/guided-demo";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
-import { hasAnyRole } from "@/server/auth/guards";
-import { createSession, destroySession, type AuthContext } from "@/server/auth/session";
+import { createSession, destroySession } from "@/server/auth/session";
+import {
+  isScottDemoSession,
+  repairScottDemoAccount,
+} from "@/server/demo/ensure-demo-personas";
 import { getActiveEventToken } from "@/server/events/queries";
 import { setFanShowContextSlug } from "@/server/fans/show-context";
 import { verifyAttendance } from "@/server/verification/service";
@@ -28,13 +31,12 @@ import { syncGuidedDemoFanRecords } from "./guided-demo-fan-reset";
 
 const SCOTT_EMAIL = "scott@example.com";
 
-/** Fan guided demo always narrates as Scott Weller. */
-export function isScottDemoSession(ctx: AuthContext): boolean {
-  return ctx.email === SCOTT_EMAIL && hasAnyRole(ctx, ["fan"]);
-}
+export { isScottDemoSession } from "@/server/demo/ensure-demo-personas";
 
 export async function ensureScottSession(): Promise<string> {
   return withDevDatabaseRecovery(async () => {
+    await repairScottDemoAccount();
+
     const [user] = await db
       .select({ id: users.id })
       .from(users)

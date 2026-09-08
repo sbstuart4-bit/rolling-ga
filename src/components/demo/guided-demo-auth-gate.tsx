@@ -29,7 +29,7 @@ export function GuidedDemoAuthGate({
       if (cancelled) return;
 
       if (result.ok) {
-        router.refresh();
+        window.location.reload();
         return;
       }
 

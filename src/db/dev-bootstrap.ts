@@ -1,6 +1,6 @@
 import { rmSync } from "node:fs";
 import { resolve } from "node:path";
-import { inArray, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { demoAnchorDate } from "@/lib/demo-calendar";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { resolveDatabaseUrl } from "@/lib/production-env";
@@ -8,14 +8,9 @@ import { canSeedProductionDemoDatabase } from "./demo-bootstrap-policy";
 import { createDb, resolvePgliteDir, truncateAllTables, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
-import { users } from "./schema";
+import { areRequiredDemoPersonasReady } from "@/server/demo/ensure-demo-personas";
 
-/** Guided demos hard-fail when either persona is missing — not just when the crowd fill is absent. */
-const REQUIRED_DEMO_PERSONA_EMAILS = [
-  "scott@example.com",
-  "elena@marisolreyes.example",
-] as const;
-
+/** Guided demos hard-fail when either persona is missing — not just when the user row exists. */
 let bootstrapPromise: Promise<void> | null = null;
 
 function globalDbSlot(): { __rollingGaDb?: DbHandle } {
@@ -69,13 +64,9 @@ async function demoUserCount(handle: DbHandle): Promise<number | null> {
   }
 }
 
-async function requiredDemoPersonasPresent(handle: DbHandle): Promise<boolean | null> {
+async function requiredDemoPersonasPresent(): Promise<boolean | null> {
   try {
-    const rows = await handle.db
-      .select({ email: users.email })
-      .from(users)
-      .where(inArray(users.email, [...REQUIRED_DEMO_PERSONA_EMAILS]));
-    return rows.length === REQUIRED_DEMO_PERSONA_EMAILS.length;
+    return await areRequiredDemoPersonasReady();
   } catch {
     return null;
   }
@@ -166,7 +157,7 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
   try {
     await runMigrations(handle);
 
-    const personasPresent = await requiredDemoPersonasPresent(handle);
+    const personasPresent = await requiredDemoPersonasPresent();
     if (personasPresent) {
       return;
     }
@@ -200,7 +191,7 @@ async function bootstrapDevDatabase(): Promise<void> {
   try {
     await runMigrations(handle);
 
-    if (await requiredDemoPersonasPresent(handle)) {
+    if (await requiredDemoPersonasPresent()) {
       globalDbSlot().__rollingGaDb = handle;
       return;
     }
@@ -208,7 +199,7 @@ async function bootstrapDevDatabase(): Promise<void> {
     if (globalDbSlot().__rollingGaDb) {
       handle = await reopenPgliteFromDisk();
       await runMigrations(handle);
-      if (await requiredDemoPersonasPresent(handle)) {
+      if (await requiredDemoPersonasPresent()) {
         return;
       }
     }

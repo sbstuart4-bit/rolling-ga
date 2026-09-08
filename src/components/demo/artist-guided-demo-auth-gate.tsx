@@ -30,7 +30,7 @@ export function ArtistGuidedDemoAuthGate({
         if (cancelled) return;
 
         if (result.ok) {
-          router.refresh();
+          window.location.reload();
           return;
         }
 

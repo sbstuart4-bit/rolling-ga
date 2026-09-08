@@ -15,7 +15,7 @@ import {
   resolveArtistGuidedStepRoute,
 } from "@/server/demo/artist-guided-demo-state";
 import { MARISOL_BROOKLYN_EVENT_ID, DEMO_SCOTT_FAN_ID, MARISOL_ARTIST_ID } from "@/lib/demo-user-ids";
-import { isElenaMarisolDemoSession } from "@/server/demo/artist-guided-demo-apply";
+import { isElenaMarisolDemoSession } from "@/server/demo/ensure-demo-personas";
 import type { AuthContext } from "@/server/auth/session";
 import {
   isArtistGuidedDemoQuery,

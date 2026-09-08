@@ -2,50 +2,47 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { RollingGaLogo } from "@/components/brand/rolling-ga-mark";
 import { Button } from "@/components/ui/button";
-import { bootstrapGuidedDemoSessionAction } from "@/server/demo/guided-demo-bootstrap-action";
 
+const BOOTSTRAP_ATTEMPTS_KEY = "rga-fan-guided-bootstrap-attempts";
+
+/**
+ * Anonymous fan guided-demo entry — bounce through the enter-guided route handler
+ * so session cookies are written in a supported context.
+ */
 export function GuidedDemoAuthGate({
-  guided,
-  step,
-  presenter,
-  autoplay,
+  guided: _guided,
+  step: _step,
+  presenter: _presenter,
+  autoplay: _autoplay,
 }: {
   guided: string;
   step: string;
   presenter?: string;
   autoplay?: string;
 }) {
-  const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
   const [redirectTo, setRedirectTo] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    let cancelled = false;
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    const attempts = Number(sessionStorage.getItem(BOOTSTRAP_ATTEMPTS_KEY) ?? "0");
 
-    void bootstrapGuidedDemoSessionAction({ guided, step, presenter, autoplay }).then((result) => {
-      if (cancelled) return;
-
-      if (result.ok) {
-        window.location.reload();
-        return;
-      }
-
-      if (result.redirectTo) {
-        router.replace(result.redirectTo);
-        return;
-      }
-
-      setError(result.error);
+    if (attempts >= 2) {
+      sessionStorage.removeItem(BOOTSTRAP_ATTEMPTS_KEY);
+      setError(
+        "Demo sign-in did not complete. The Scott fan demo account may be missing from the database — try again in a few minutes.",
+      );
       setRedirectTo("/home");
-    });
+      return;
+    }
 
-    return () => {
-      cancelled = true;
-    };
-  }, [guided, step, presenter, autoplay, router]);
+    sessionStorage.setItem(BOOTSTRAP_ATTEMPTS_KEY, String(attempts + 1));
+    window.location.replace(
+      `/api/demo/enter-guided?returnTo=${encodeURIComponent(returnTo)}`,
+    );
+  }, []);
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-[#121212] px-6 py-16 text-center">

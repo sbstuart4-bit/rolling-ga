@@ -8,7 +8,11 @@ import { canSeedProductionDemoDatabase } from "./demo-bootstrap-policy";
 import { createDb, resolvePgliteDir, truncateAllTables, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
-import { areRequiredDemoPersonasReady } from "@/server/demo/ensure-demo-personas";
+import {
+  areRequiredDemoPersonasReady,
+  repairElenaMarisolDemoAccount,
+  repairScottDemoAccount,
+} from "@/server/demo/ensure-demo-personas";
 
 /** Guided demos hard-fail when either persona is missing — not just when the user row exists. */
 let bootstrapPromise: Promise<void> | null = null;
@@ -157,7 +161,11 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
   try {
     await runMigrations(handle);
 
-    const personasPresent = await requiredDemoPersonasPresent();
+    let personasPresent = await requiredDemoPersonasPresent();
+    if (!personasPresent) {
+      await Promise.all([repairElenaMarisolDemoAccount(), repairScottDemoAccount()]);
+      personasPresent = await requiredDemoPersonasPresent();
+    }
     if (personasPresent) {
       return;
     }

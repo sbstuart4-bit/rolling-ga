@@ -8,7 +8,7 @@ import {
   getActiveGuidedDemoContext,
   guidedStepContextSummary,
 } from "@/server/demo/guided-demo-state";
-import { syncGuidedDemoClock } from "@/server/demo/guided-demo-apply";
+import { isScottDemoSession, syncGuidedDemoClock } from "@/server/demo/guided-demo-apply";
 import { hydrateDemoClockFromCookie } from "@/server/demo/clock";
 import { requireAuth } from "@/server/auth/request";
 import { getAuthContext } from "@/server/auth/session";
@@ -48,12 +48,10 @@ async function parseGuidedEntryFromHeaders(): Promise<{
  * on desktop so Live never becomes a website layout.
  */
 export default async function FanLayout({ children }: LayoutProps<"/">) {
+  const pendingGuided = await parseGuidedEntryFromHeaders();
   const existingAuth = await getAuthContext();
-  if (!existingAuth) {
-    const pendingGuided = await parseGuidedEntryFromHeaders();
-    if (pendingGuided) {
-      return <GuidedDemoAuthGate {...pendingGuided} />;
-    }
+  if (pendingGuided && (!existingAuth || !isScottDemoSession(existingAuth))) {
+    return <GuidedDemoAuthGate {...pendingGuided} />;
   }
 
   const ctx = await requireAuth();

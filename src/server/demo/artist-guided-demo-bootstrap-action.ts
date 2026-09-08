@@ -1,5 +1,6 @@
 "use server";
 
+import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { getAuthContext } from "@/server/auth/session";
 import {
@@ -20,6 +21,8 @@ export async function bootstrapArtistGuidedDemoSessionAction(params: {
   if (!demoModeEnabled()) {
     return { ok: false, error: "Demo mode is not enabled.", redirectTo: "/demo/guided?unavailable=1" };
   }
+
+  await ensureDevDatabaseReady();
 
   try {
     const existing = await getAuthContext();

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
+import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { parseGuidedDemoQuery } from "@/lib/guided-demo-entry";
 import {
@@ -30,6 +31,8 @@ export async function handleEnterGuidedDemoRequest(request: Request): Promise<Re
   if (!demoModeEnabled()) {
     return NextResponse.redirect(new URL("/demo/guided?unavailable=1", base));
   }
+
+  await ensureDevDatabaseReady();
 
   const returnTo = safeReturnPath(new URL(base).searchParams.get("returnTo"), base);
   if (!returnTo) {

@@ -1,8 +1,9 @@
 "use server";
 
+import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { getAuthContext } from "@/server/auth/session";
-import { ensureGuidedDemoFromSearchParams } from "./guided-demo-apply";
+import { ensureGuidedDemoFromSearchParams, isScottDemoSession } from "./guided-demo-apply";
 
 export type BootstrapGuidedDemoResult =
   | { ok: true }
@@ -18,11 +19,20 @@ export async function bootstrapGuidedDemoSessionAction(params: {
     return { ok: false, error: "Demo mode is not enabled.", redirectTo: "/demo/guided?unavailable=1" };
   }
 
-  if (await getAuthContext()) {
-    return { ok: true };
-  }
+  await ensureDevDatabaseReady();
 
   try {
+    const existing = await getAuthContext();
+    if (existing && isScottDemoSession(existing)) {
+      await ensureGuidedDemoFromSearchParams({
+        guided: params.guided,
+        step: params.step,
+        presenter: params.presenter,
+        autoplay: params.autoplay,
+      });
+      return { ok: true };
+    }
+
     await ensureGuidedDemoFromSearchParams({
       guided: params.guided,
       step: params.step,

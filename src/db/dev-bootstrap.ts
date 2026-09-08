@@ -2,7 +2,9 @@ import { rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { inArray, sql } from "drizzle-orm";
 import { demoAnchorDate } from "@/lib/demo-calendar";
+import { demoModeEnabled } from "@/lib/demo-mode";
 import { resolveDatabaseUrl } from "@/lib/production-env";
+import { canSeedProductionDemoDatabase } from "./demo-bootstrap-policy";
 import { createDb, resolvePgliteDir, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
@@ -79,6 +81,17 @@ async function requiredDemoPersonasPresent(handle: DbHandle): Promise<boolean | 
   }
 }
 
+async function countAllUsers(handle: DbHandle): Promise<number | null> {
+  try {
+    const rows = await handle.db.execute<{ count: number }>(
+      sql`select count(*)::int as count from users`,
+    );
+    return Number(rows[0]?.count ?? 0);
+  } catch {
+    return null;
+  }
+}
+
 async function closeGlobalHandle(): Promise<void> {
   const slot = globalDbSlot();
   if (!slot.__rollingGaDb) return;
@@ -116,11 +129,26 @@ function removePgliteDataDir(): void {
 }
 
 /**
- * In local dev with PGlite, migrate and seed automatically when the schema or demo
- * rows are missing. Avoids a blank /demo after clone when someone skips `db:setup`.
+ * Ensures migrations and demo personas exist before guided-demo entry.
+ *
+ * - Local PGlite: migrate/seed/recover automatically.
+ * - Hosted Postgres with demo mode: migrate, then seed when the database is empty
+ *   (or when ROLLING_GA_ALLOW_DEMO_SEED=1).
  */
 export async function ensureDevDatabaseReady(): Promise<void> {
-  if (resolveDatabaseUrl()) return;
+  if (resolveDatabaseUrl()) {
+    if (!demoModeEnabled()) return;
+
+    if (!bootstrapPromise) {
+      bootstrapPromise = bootstrapProductionDemoDatabase().catch((error) => {
+        bootstrapPromise = null;
+        throw error;
+      });
+    }
+    await bootstrapPromise;
+    return;
+  }
+
   if (process.env.NODE_ENV === "production") return;
 
   if (!bootstrapPromise) {
@@ -130,6 +158,27 @@ export async function ensureDevDatabaseReady(): Promise<void> {
     });
   }
   await bootstrapPromise;
+}
+
+async function bootstrapProductionDemoDatabase(): Promise<void> {
+  const handle = createDb();
+
+  try {
+    await runMigrations(handle);
+
+    if (await requiredDemoPersonasPresent(handle)) {
+      return;
+    }
+
+    const userCount = await countAllUsers(handle);
+    if (!canSeedProductionDemoDatabase(userCount)) {
+      return;
+    }
+
+    await seedDemoData(handle.db, demoAnchorDate());
+  } finally {
+    await handle.close();
+  }
 }
 
 async function bootstrapDevDatabase(): Promise<void> {
@@ -184,14 +233,18 @@ export async function withDevDatabaseRecovery<T>(operation: () => Promise<T>): P
   try {
     return await operation();
   } catch (error) {
-    if (resolveDatabaseUrl() || process.env.NODE_ENV === "production") {
-      throw error;
-    }
-
     if (isDemoSeedMissingError(error)) {
       bootstrapPromise = null;
+      if (resolveDatabaseUrl()) {
+        await ensureDevDatabaseReady();
+        return operation();
+      }
       await recoverPgliteCluster();
       return operation();
+    }
+
+    if (resolveDatabaseUrl() || process.env.NODE_ENV === "production") {
+      throw error;
     }
 
     if (!shouldRecoverPglite(error)) throw error;

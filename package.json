@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "npm run db:migrate && tsx src/db/seed-if-allowed.ts && npm run build",
+    "db:seed-if-allowed": "tsx src/db/seed-if-allowed.ts",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

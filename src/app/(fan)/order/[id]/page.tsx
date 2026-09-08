@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { EventCommerceTakeover } from "@/components/fan/event-commerce-takeover";
 import { EventCommerceBody } from "@/components/fan/event-commerce-chrome";
 import { EventReturnLink } from "@/components/fan/event-commerce-context";
-import { formatDeliveryWindow, formatMoney } from "@/lib/format";
+import { formatDeliveryWindow, formatMoney, formatDateTime } from "@/lib/format";
+import { resolveFulfillmentStatus } from "@/lib/fulfillment";
+import { FULFILLMENT_STATUS_LABELS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { requireAuth } from "@/server/auth/request";
 import { getOrder, listOrderItems } from "@/server/commerce/queries";
@@ -46,6 +48,7 @@ export default async function OrderPage(props: PageProps<"/order/[id]">) {
         }
       : null;
   const branded = Boolean(eventContext);
+  const fulfillmentStatus = resolveFulfillmentStatus(order.fulfillmentStatus, order.status);
 
   return (
     <EventCommerceTakeover
@@ -155,6 +158,34 @@ export default async function OrderPage(props: PageProps<"/order/[id]">) {
             </div>
           </section>
         )}
+
+        {fulfillmentStatus ? (
+          <section className="space-y-2 text-left">
+            <h2 className={cn("eyebrow", branded ? "text-artist-muted" : "text-muted-foreground")}>
+              Fulfillment
+            </h2>
+            <div
+              className={cn(
+                "rounded-xl border px-4 py-3 text-sm",
+                branded ? "border-artist-border bg-artist-surface" : "border-border bg-card",
+              )}
+            >
+              <p className={cn("font-medium", branded && "text-artist-fg")}>
+                {FULFILLMENT_STATUS_LABELS[fulfillmentStatus]}
+              </p>
+              {order.promisedDeliveryAt ? (
+                <p className={cn("mt-1", branded ? "text-artist-muted" : "text-muted-foreground")}>
+                  Promised by {formatDateTime(order.promisedDeliveryAt, order.eventTimezone ?? undefined)}
+                </p>
+              ) : null}
+              {order.actualDeliveredAt ? (
+                <p className={cn("mt-1", branded ? "text-artist-muted" : "text-muted-foreground")}>
+                  Delivered {formatDateTime(order.actualDeliveredAt, order.eventTimezone ?? undefined)}
+                </p>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
 
         <section
           className={cn(

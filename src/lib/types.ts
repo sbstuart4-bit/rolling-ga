@@ -166,6 +166,8 @@ export const AUDIENCE_RULE_KINDS = [
   "repeat_attendees",
   "fan_segment",
   "invite_list",
+  /** Show cohort activation — params carry originEventId, cohortStage, and publish-time snapshot. */
+  "show_cohort",
 ] as const;
 export type AudienceRuleKind = (typeof AUDIENCE_RULE_KINDS)[number];
 
@@ -178,6 +180,7 @@ export const AUDIENCE_RULE_LABELS: Record<AudienceRuleKind, string> = {
   repeat_attendees: "Repeat attendees",
   fan_segment: "Saved fan segment",
   invite_list: "Invite / VIP list",
+  show_cohort: "Show relationship cohort",
 };
 
 export interface AudienceRuleParams {
@@ -191,6 +194,16 @@ export interface AudienceRuleParams {
   apparelSize?: string;
   city?: string;
   userIds?: string[];
+  /** `show_cohort` — originating show for the relationship cohort. */
+  originEventId?: string;
+  /** `show_cohort` — funnel stage (connected, purchasing, post_show, repeat). */
+  cohortStage?: string;
+  /** Frozen fan membership at publish time — authoritative for eligibility. */
+  snapshotUserIds?: string[];
+  /** ISO timestamp when the audience snapshot was taken. */
+  snapshotAt?: string;
+  /** Eligible fan count recorded at publish. */
+  eligibleCountAtPublish?: number;
 }
 
 export const ORDER_STATUSES = [
@@ -235,6 +248,122 @@ export const ORDER_FULFILLMENT_FLOW: OrderStatus[] = [
   "shipped",
   "delivered",
 ];
+
+/**
+ * Artist-facing fulfillment lifecycle — separate from payment/commerce `orders.status`.
+ * Maps operationally to RECEIVED → PRODUCTION → PACKED → SHIPPED → DELIVERED (+ EXCEPTION).
+ */
+export const FULFILLMENT_STATUSES = [
+  "received",
+  "production",
+  "packed",
+  "shipped",
+  "delivered",
+  "exception",
+] as const;
+export type FulfillmentStatus = (typeof FULFILLMENT_STATUSES)[number];
+
+export const FULFILLMENT_STATUS_LABELS: Record<FulfillmentStatus, string> = {
+  received: "Received",
+  production: "In production",
+  packed: "Packed",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  exception: "Exception",
+};
+
+export const FULFILLMENT_PIPELINE_ORDER: FulfillmentStatus[] = [
+  "received",
+  "production",
+  "packed",
+  "shipped",
+  "delivered",
+];
+
+export const FULFILLMENT_EXCEPTION_TYPES = [
+  "production_delay",
+  "address_issue",
+  "item_unavailable",
+  "carrier_delay",
+  "delivery_failed",
+  "other",
+] as const;
+export type FulfillmentExceptionType = (typeof FULFILLMENT_EXCEPTION_TYPES)[number];
+
+export const FULFILLMENT_EXCEPTION_LABELS: Record<FulfillmentExceptionType, string> = {
+  production_delay: "Production delay",
+  address_issue: "Address issue",
+  item_unavailable: "Item unavailable",
+  carrier_delay: "Carrier delay",
+  delivery_failed: "Delivery failed",
+  other: "Other",
+};
+
+export const FULFILLMENT_EXCEPTION_STATUSES = ["open", "in_progress", "resolved"] as const;
+export type FulfillmentExceptionStatus = (typeof FULFILLMENT_EXCEPTION_STATUSES)[number];
+
+export const FULFILLMENT_EXCEPTION_STATUS_LABELS: Record<FulfillmentExceptionStatus, string> = {
+  open: "Open",
+  in_progress: "In progress",
+  resolved: "Resolved",
+};
+
+/** Ops exception resolution actions — audit trail only unless noted. */
+export const EXCEPTION_ACTION_TYPES = [
+  "opened",
+  "add_note",
+  "start_progress",
+  "retry_production",
+  "return_to_production",
+  "mark_item_unavailable",
+  "confirm_address",
+  "hold_order",
+  "record_carrier_update",
+  "return_to_handoff",
+  "record_delivery_retry",
+  "resolve",
+] as const;
+export type ExceptionActionType = (typeof EXCEPTION_ACTION_TYPES)[number];
+
+export const EXCEPTION_ACTION_LABELS: Record<ExceptionActionType, string> = {
+  opened: "Exception opened",
+  add_note: "Note added",
+  start_progress: "Triage started",
+  retry_production: "Retry production",
+  return_to_production: "Return to production",
+  mark_item_unavailable: "Item marked unavailable",
+  confirm_address: "Address confirmed",
+  hold_order: "Order held",
+  record_carrier_update: "Carrier update recorded",
+  return_to_handoff: "Returned to handoff",
+  record_delivery_retry: "Delivery retry recorded",
+  resolve: "Exception resolved",
+};
+
+/** Unit-level production work lifecycle (Ops Phase 2). */
+export const PRODUCTION_WORK_STATUSES = ["queued", "in_production", "complete"] as const;
+export type ProductionWorkStatus = (typeof PRODUCTION_WORK_STATUSES)[number];
+
+export const PRODUCTION_WORK_STATUS_LABELS: Record<ProductionWorkStatus, string> = {
+  queued: "Queued",
+  in_production: "In production",
+  complete: "Complete",
+};
+
+/** Whether an order line requires on-demand production or is treated as stocked. */
+export const PRODUCTION_REQUIREMENT_MODES = ["on_demand", "stocked"] as const;
+export type ProductionRequirementMode = (typeof PRODUCTION_REQUIREMENT_MODES)[number];
+
+/** Undelivered promise health for operational dashboards. */
+export const DELIVERY_PROMISE_STATES = [
+  "within_promise",
+  "at_risk",
+  "past_promise",
+  "delivered_within_promise",
+  "delivered_past_promise",
+  "not_applicable",
+] as const;
+export type DeliveryPromiseState = (typeof DELIVERY_PROMISE_STATES)[number];
 
 export const ORDER_STATUS_TONE: Record<OrderStatus, StatusLevel> = {
   pending: "yellow",

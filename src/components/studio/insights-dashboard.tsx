@@ -2,6 +2,8 @@ import Link from "next/link";
 import { AlertTriangle, ArrowRight } from "lucide-react";
 import { TrendChart } from "@/components/shared/trend-chart";
 import { formatMoney, formatEventDate } from "@/lib/format";
+import { fulfillmentHref } from "@/lib/fulfillment";
+import { pilotReportHref } from "@/lib/pilot-report/goals";
 import {
   COMMERCE_MOMENT_LABELS,
   DEFAULT_PILOT_CRITERIA,
@@ -14,10 +16,12 @@ import { cn } from "@/lib/utils";
 export function InsightsDashboard({
   snapshot,
   pilotHref,
+  economicsHref,
   eventPicker,
 }: {
   snapshot: EventInsightsSnapshot;
   pilotHref: string;
+  economicsHref?: string;
   eventPicker?: React.ReactNode;
 }) {
   const { event, scorecard, rollingGa, endlessAisle, shipping, fans, drops, moments, isDemoData } =
@@ -41,6 +45,29 @@ export function InsightsDashboard({
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {eventPicker}
+          {economicsHref ? (
+            <Link
+              href={economicsHref}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-200 hover:bg-emerald-500/20"
+            >
+              Show economics
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          ) : null}
+          <Link
+            href={fulfillmentHref(event.id)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-sm font-medium text-sky-200 hover:bg-sky-500/20"
+          >
+            View fulfillment
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
+          <Link
+            href={pilotReportHref(event.id)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-sm font-medium text-violet-200 hover:bg-violet-500/20"
+          >
+            Pilot report
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
           <Link
             href={pilotHref}
             className="inline-flex items-center gap-1.5 rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-sm font-medium text-violet-200 hover:bg-violet-500/20"

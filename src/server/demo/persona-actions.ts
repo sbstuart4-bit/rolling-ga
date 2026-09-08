@@ -22,7 +22,7 @@ const PERSONA_DESTINATIONS: Record<string, string> = {
   "dana@novakestrel.example": "/studio/drops",
   "priya@thelowcountry.example": "/studio/tour",
   "admin@rollingga.example": "/studio/insights",
-  "ops@rollingga.example": "/ops/events",
+  "ops@rollingga.example": "/ops",
 };
 
 /**

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { Db } from "../client";
 import {
   artistBrand,
@@ -17,6 +17,7 @@ import {
   eventThemes,
   eventVerificationTokens,
   events,
+  eventShowEconomics,
   fanPreferences,
   inventory,
   orderItems,
@@ -42,6 +43,11 @@ import {
   theDegensDropPoster,
 } from "@/lib/demo-assets";
 import { generateEventToken, generateOrderNumber } from "@/lib/token";
+import {
+  MARISOL_BROOKLYN_ECONOMICS_CONFIG,
+  MARISOL_BROOKLYN_ECONOMICS_EVENT_ID,
+  MARISOL_BROOKLYN_PHYSICAL_BASELINE,
+} from "@/lib/show-economics/marisol-brooklyn-fixture";
 import type { ProductAccessType } from "@/lib/types";
 import {
   generateCityArtwork,
@@ -49,6 +55,11 @@ import {
   generateProductShot,
   generateWordmark,
 } from "./artwork";
+import { seedBrooklynFulfillment } from "./brooklyn-fulfillment";
+import { seedNashvilleFulfillment } from "./nashville-fulfillment";
+import { seedBrooklynProductionWork, seedNashvilleProductionWork } from "./production-work";
+import { seedBrooklynPackHandoff, seedNashvillePackHandoff } from "./pack-handoff";
+import { seedBrooklynPilotGoals } from "./brooklyn-pilot-goals";
 import {
   THE_DEGENS,
   THE_DEGENS_PRODUCTS,
@@ -1898,6 +1909,175 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
 
   counts.orders += brooklynOrders;
 
+  // Brooklyn show economics baseline — idempotent upsert for guided demo.
+  await db
+    .insert(eventShowEconomics)
+    .values({
+      eventId: MARISOL_BROOKLYN_ECONOMICS_EVENT_ID,
+      platformFeeBasisPoints: MARISOL_BROOKLYN_ECONOMICS_CONFIG.platformFeeBasisPoints,
+      digitalVenueCommissionTreatment: MARISOL_BROOKLYN_ECONOMICS_CONFIG.digitalVenueCommissionTreatment,
+      digitalVenueCommissionPercent: MARISOL_BROOKLYN_ECONOMICS_CONFIG.digitalVenueCommissionPercent,
+      physicalMerchGmvCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.physicalMerchGmvCents,
+      unitsBrought: MARISOL_BROOKLYN_PHYSICAL_BASELINE.unitsBrought,
+      unitsSold: MARISOL_BROOKLYN_PHYSICAL_BASELINE.unitsSold,
+      stockoutCount: MARISOL_BROOKLYN_PHYSICAL_BASELINE.stockoutCount,
+      physicalVenueCommissionTreatment: MARISOL_BROOKLYN_PHYSICAL_BASELINE.venueCommissionTreatment,
+      physicalVenueCommissionPercent: MARISOL_BROOKLYN_PHYSICAL_BASELINE.venueCommissionPercent,
+      laborCostCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.laborCostCents,
+      otherPhysicalCostCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.otherPhysicalCostCents,
+      physicalProductCostCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.physicalProductCostCents,
+      isDemo: true,
+    })
+    .onConflictDoUpdate({
+      target: eventShowEconomics.eventId,
+      set: {
+        platformFeeBasisPoints: MARISOL_BROOKLYN_ECONOMICS_CONFIG.platformFeeBasisPoints,
+        digitalVenueCommissionTreatment: MARISOL_BROOKLYN_ECONOMICS_CONFIG.digitalVenueCommissionTreatment,
+        digitalVenueCommissionPercent: MARISOL_BROOKLYN_ECONOMICS_CONFIG.digitalVenueCommissionPercent,
+        physicalMerchGmvCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.physicalMerchGmvCents,
+        unitsBrought: MARISOL_BROOKLYN_PHYSICAL_BASELINE.unitsBrought,
+        unitsSold: MARISOL_BROOKLYN_PHYSICAL_BASELINE.unitsSold,
+        stockoutCount: MARISOL_BROOKLYN_PHYSICAL_BASELINE.stockoutCount,
+        physicalVenueCommissionTreatment: MARISOL_BROOKLYN_PHYSICAL_BASELINE.venueCommissionTreatment,
+        physicalVenueCommissionPercent: MARISOL_BROOKLYN_PHYSICAL_BASELINE.venueCommissionPercent,
+        laborCostCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.laborCostCents,
+        otherPhysicalCostCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.otherPhysicalCostCents,
+        physicalProductCostCents: MARISOL_BROOKLYN_PHYSICAL_BASELINE.physicalProductCostCents,
+        isDemo: true,
+      },
+    });
+
+  // Brooklyn Encore activation — cohort-targeted drop with publish-time audience snapshot.
+  const connectedBrooklynRows = await db
+    .select({ userId: artistConsents.userId })
+    .from(artistConsents)
+    .innerJoin(verifiedAttendance, eq(verifiedAttendance.userId, artistConsents.userId))
+    .where(
+      and(
+        eq(verifiedAttendance.eventId, brooklyn.id),
+        eq(artistConsents.artistId, MARISOL_REYES.id),
+        eq(artistConsents.consentType, "attendee_offers"),
+        eq(artistConsents.status, "granted"),
+      ),
+    );
+  const connectedBrooklynIds = [...new Set(connectedBrooklynRows.map((r) => r.userId))].sort();
+  const activationStartsAt = new Date(brooklyn.endsAt.getTime() + 7 * DAY);
+  const activationEndsAt = new Date(activationStartsAt.getTime() + 48 * HOUR);
+  const activationSnapshotAt = activationStartsAt.toISOString();
+
+  await db
+    .insert(audienceSegments)
+    .values({
+      id: "aud_brooklyn_connected_cohort",
+      artistId: MARISOL_REYES.id,
+      name: "Brooklyn Connected Fans",
+      description: "Frozen snapshot of fans connected at A Tender Night · Brooklyn.",
+      ruleKind: "show_cohort",
+      params: {
+        originEventId: brooklyn.id,
+        cohortStage: "connected",
+        snapshotUserIds: connectedBrooklynIds,
+        snapshotAt: activationSnapshotAt,
+        eligibleCountAtPublish: connectedBrooklynIds.length,
+      },
+      isDemo: true,
+    })
+    .onConflictDoUpdate({
+      target: audienceSegments.id,
+      set: {
+        params: {
+          originEventId: brooklyn.id,
+          cohortStage: "connected",
+          snapshotUserIds: connectedBrooklynIds,
+          snapshotAt: activationSnapshotAt,
+          eligibleCountAtPublish: connectedBrooklynIds.length,
+        },
+        updatedAt: new Date(),
+      },
+    });
+
+  await db
+    .insert(drops)
+    .values({
+      id: "drp_brooklyn_encore_activation",
+      artistId: MARISOL_REYES.id,
+      tourId: tourIds.tenderNight,
+      eventId: brooklyn.id,
+      slug: "brooklyn-encore-activation",
+      title: "Brooklyn Encore Drop",
+      description:
+        "48-hour drop for Brooklyn connected fans — activated from the A Tender Night relationship cohort.",
+      audienceSegmentId: "aud_brooklyn_connected_cohort",
+      quantityLimit: null,
+      quantitySold: 0,
+      startsAt: activationStartsAt,
+      endsAt: activationEndsAt,
+      status: "live",
+      displayPriority: 95,
+      notificationsEnabled: true,
+      exclusivityType: "flash",
+      publishedAt: activationStartsAt,
+      isDemo: true,
+    })
+    .onConflictDoUpdate({
+      target: drops.id,
+      set: {
+        audienceSegmentId: "aud_brooklyn_connected_cohort",
+        startsAt: activationStartsAt,
+        endsAt: activationEndsAt,
+        title: "Brooklyn Encore Drop",
+        description:
+          "48-hour drop for Brooklyn connected fans — activated from the A Tender Night relationship cohort.",
+        updatedAt: new Date(),
+      },
+    });
+
+  await db
+    .insert(dropProducts)
+    .values({
+      id: "dpr_brooklyn_encore_activation_print",
+      dropId: "drp_brooklyn_encore_activation",
+      productId: "prd_mr_print",
+      displayOrder: 0,
+    })
+    .onConflictDoNothing();
+
+  const existingActivationOrders = await db
+    .select({ id: orderItems.id })
+    .from(orderItems)
+    .where(eq(orderItems.dropId, "drp_brooklyn_encore_activation"))
+    .limit(1);
+
+  if (existingActivationOrders.length === 0) {
+    const activationPurchasers = connectedBrooklynIds.slice(0, 8);
+    for (const [index, userId] of activationPurchasers.entries()) {
+      await placeOrder({
+        userId,
+        artistId: MARISOL_REYES.id,
+        eventId: brooklyn.id,
+        status: index % 2 === 0 ? "paid" : "delivered",
+        placedAt: new Date(activationStartsAt.getTime() + (index + 1) * 6 * HOUR),
+        lines: [
+          {
+            productId: "prd_mr_print",
+            variantId: "prd_mr_print_v0",
+            quantity: 1,
+            dropId: "drp_brooklyn_encore_activation",
+          },
+        ],
+        shippingOptionId: "shp_marisol_standard",
+        commerceSource: "event_scoped",
+      });
+      brooklynOrders++;
+    }
+    counts.orders += activationPurchasers.length;
+  }
+
+  await seedBrooklynFulfillment(db, brooklyn.id, MARISOL_REYES.id);
+  await seedBrooklynPilotGoals(db);
+  await seedBrooklynProductionWork(db, brooklyn.id, MARISOL_REYES.id);
+  await seedBrooklynPackHandoff(db, brooklyn.id, MARISOL_REYES.id);
+
   // Nashville post-show orders, so the recently-ended state has real sales behind it.
   for (const userId of crowdIds.slice(120, 148)) {
     await placeOrder({
@@ -1918,6 +2098,10 @@ export async function seedDemoData(db: Db, anchorDate?: Date): Promise<string> {
     });
     counts.orders++;
   }
+
+  await seedNashvilleFulfillment(db, nashville.id, NOVA_KESTREL.id);
+  await seedNashvilleProductionWork(db, nashville.id, NOVA_KESTREL.id);
+  await seedNashvillePackHandoff(db, nashville.id, NOVA_KESTREL.id);
 
   await recomputeDropSales(db);
   await recomputeInventoryReservations(db);

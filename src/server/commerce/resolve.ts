@@ -49,6 +49,7 @@ export type LineRejection =
   | "drop_closed"
   | "post_show_closed"
   | "not_eligible"
+  | "audience_not_eligible"
   | "out_of_stock"
   | "unsupported_line";
 
@@ -93,6 +94,8 @@ export interface ResolveLineInput {
   dropId?: string | null;
   /** The show the fan is shopping from, used to attribute the cart. */
   eventId?: string | null;
+  /** Fan user id — required for audience-restricted drops. */
+  userId?: string | null;
   /**
    * Claimed context from the add-to-cart form. When present the resolved product must
    * match both, which is what stops Artist B's product being bought under Artist A.
@@ -166,6 +169,7 @@ export async function resolveLine(input: ResolveLineInput): Promise<LineResult> 
     status: string;
     startsAt: Date;
     endsAt: Date | null;
+    audienceSegmentId: string | null;
   } | null = null;
 
   if (input.dropId) {
@@ -177,6 +181,7 @@ export async function resolveLine(input: ResolveLineInput): Promise<LineResult> 
         status: drops.status,
         startsAt: drops.startsAt,
         endsAt: drops.endsAt,
+        audienceSegmentId: drops.audienceSegmentId,
       })
       .from(drops)
       .where(eq(drops.id, input.dropId))
@@ -208,6 +213,18 @@ export async function resolveLine(input: ResolveLineInput): Promise<LineResult> 
     if (!link) return reject("drop_mismatch", "That product isn't part of this drop.");
 
     basePriceCents = link.dropPriceCents ?? product.basePriceCents;
+
+    const { isFanEligibleForDropAudience } = await import("@/server/activation/queries");
+    const audienceGate = await isFanEligibleForDropAudience(
+      input.userId,
+      drop.audienceSegmentId,
+    );
+    if (!audienceGate.eligible) {
+      return reject(
+        "audience_not_eligible",
+        audienceGate.reason ?? "You are not in the audience for this drop.",
+      );
+    }
   }
 
   const commerceEventId = input.eventId ?? product.eventId ?? drop?.eventId ?? null;
@@ -308,6 +325,7 @@ export async function resolveCartForCheckout(
           productId: bundleItem.productId,
           variantId: bundleItem.variantId,
           quantity: bundleItem.quantity * item.quantity,
+          userId,
           attendance,
           now,
         });
@@ -330,6 +348,7 @@ export async function resolveCartForCheckout(
       variantId: item.variantId,
       dropId: item.dropId,
       quantity: item.quantity,
+      userId,
       attendance,
       now,
     });

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { AlertCircle, Check, Loader2, Zap } from "lucide-react";
+import { AlertCircle, Check, Loader2, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { createFlashDropAction, type FlashDropState } from "@/server/studio/drop-actions";
 import { formatEventDate } from "@/lib/format";
+import type { CohortFunnelStage } from "@/lib/relationship-intelligence/types";
+import { cohortStageLabel } from "@/lib/relationship-intelligence/types";
 
 /**
  * Two-step flash drop creation.
@@ -25,15 +27,13 @@ import { formatEventDate } from "@/lib/format";
  * Step 2: the reviewed configuration is carried back in hidden fields and publishing
  * requires a second, explicit submission. An accidental submit can only ever reach the
  * preview.
- *
- * Which step a submission means is carried by the submit button's own name and value,
- * so it is decided by the button the artist actually pressed.
  */
 export function CreateFlashDropForm({
   artistId,
   events,
   products,
   defaults,
+  audienceContext,
 }: {
   artistId: string;
   events: { id: string; slug: string; startsAt: Date; timezone: string; venueCity: string; artistName: string }[];
@@ -44,6 +44,14 @@ export function CreateFlashDropForm({
     eventId?: string;
     durationMinutes?: string;
     productIds?: string[];
+    cohortStage?: CohortFunnelStage;
+  };
+  audienceContext?: {
+    cohortStage: CohortFunnelStage;
+    audienceLabel: string;
+    eligibleFanCount: number;
+    originShowLabel: string;
+    artistName: string;
   };
 }) {
   const [state, action, pending] = useActionState<FlashDropState, FormData>(
@@ -51,8 +59,6 @@ export function CreateFlashDropForm({
     {},
   );
 
-  // "Edit" returns to the form without discarding the server's preview. Each server
-  // response is a new object, so a fresh preview clears the editing flag.
   const [editing, setEditing] = React.useState(false);
   const [lastPreview, setLastPreview] = React.useState(state.preview);
   if (lastPreview !== state.preview) {
@@ -65,18 +71,42 @@ export function CreateFlashDropForm({
   return (
     <form action={action} className="space-y-6">
       <input type="hidden" name="artistId" value={artistId} />
+      {defaults?.cohortStage ? (
+        <input type="hidden" name="cohortStage" value={defaults.cohortStage} />
+      ) : null}
+
+      {audienceContext ? (
+        <section className="rounded-2xl border border-violet-500/30 bg-violet-500/10 p-5 space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-600 dark:text-violet-300">
+            Who will get access
+          </p>
+          <p className="font-medium">{audienceContext.artistName}</p>
+          <p className="text-sm text-muted-foreground">{audienceContext.originShowLabel}</p>
+          <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+            <Users className="mt-0.5 size-5 shrink-0 text-violet-500" aria-hidden />
+            <div>
+              <p className="font-medium">Audience</p>
+              <p className="text-sm text-muted-foreground">{audienceContext.audienceLabel}</p>
+              <p className="mt-1 text-sm font-semibold tabular-nums">
+                {audienceContext.eligibleFanCount.toLocaleString("en-US")} eligible fans
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {preview ? (
         <>
           <ConfirmPreview preview={preview} events={events} />
-          {/* Carries the reviewed configuration into the confirming submission. The
-              server re-validates all of it regardless. */}
           <input type="hidden" name="title" value={preview.title} />
           {preview.description && (
             <input type="hidden" name="description" value={preview.description} />
           )}
           <input type="hidden" name="eventId" value={preview.eventId} />
           <input type="hidden" name="durationMinutes" value={preview.durationMinutes} />
+          {preview.cohortStage && (
+            <input type="hidden" name="cohortStage" value={preview.cohortStage} />
+          )}
           {preview.productIds.map((productId) => (
             <input key={productId} type="hidden" name="productIds" value={productId} />
           ))}
@@ -90,7 +120,7 @@ export function CreateFlashDropForm({
               name="title"
               required
               defaultValue={defaults?.title}
-              placeholder="e.g. 48-Hour Brooklyn Encore Drop"
+              placeholder="e.g. Brooklyn Encore Drop"
               className="h-11"
             />
           </div>
@@ -233,28 +263,54 @@ function ConfirmPreview({
         </div>
       </div>
 
-      <dl className="grid grid-cols-2 gap-3 text-sm">
+      <dl className="grid gap-3 text-sm sm:grid-cols-2">
         <div>
-          <dt className="eyebrow text-muted-foreground">Drop name</dt>
+          <dt className="eyebrow text-muted-foreground">Drop</dt>
           <dd className="font-medium">{preview.title}</dd>
         </div>
-        {event && (
+        {preview.originShowLabel ? (
+          <div>
+            <dt className="eyebrow text-muted-foreground">Origin show</dt>
+            <dd className="font-medium">{preview.originShowLabel}</dd>
+          </div>
+        ) : event ? (
           <div>
             <dt className="eyebrow text-muted-foreground">Show</dt>
             <dd className="font-medium">{event.venueCity}</dd>
           </div>
-        )}
+        ) : null}
+        {preview.audienceLabel ? (
+          <div className="sm:col-span-2">
+            <dt className="eyebrow text-muted-foreground">Audience</dt>
+            <dd className="font-medium">
+              {preview.audienceLabel}
+              {preview.eligibleFanCount != null
+                ? ` · ${preview.eligibleFanCount.toLocaleString("en-US")} eligible fans`
+                : ""}
+            </dd>
+          </div>
+        ) : null}
+        {preview.cohortStage ? (
+          <div>
+            <dt className="eyebrow text-muted-foreground">Cohort stage</dt>
+            <dd className="font-medium">{cohortStageLabel(preview.cohortStage)}</dd>
+          </div>
+        ) : null}
         <div>
           <dt className="eyebrow text-muted-foreground">Duration</dt>
           <dd className="font-medium">
             {preview.durationMinutes < 60
               ? `${preview.durationMinutes} min`
-              : `${preview.durationMinutes / 60} hr`}
+              : preview.durationMinutes === 2880
+                ? "48 hours"
+                : `${preview.durationMinutes / 60} hr`}
           </dd>
         </div>
         <div>
           <dt className="eyebrow text-muted-foreground">Products</dt>
-          <dd className="font-medium">{preview.productCount}</dd>
+          <dd className="font-medium">
+            {preview.productNames?.join(", ") ?? preview.productCount}
+          </dd>
         </div>
       </dl>
     </div>

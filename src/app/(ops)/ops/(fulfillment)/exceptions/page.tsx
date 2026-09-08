@@ -1,85 +1,41 @@
 import type { Metadata } from "next";
+import { OpsExceptionsWorkbench } from "@/components/ops/ops-exceptions-workbench";
+import type { ExceptionQueueFilter } from "@/lib/exceptions";
+import { demoModeEnabled } from "@/lib/demo-mode";
 import { requireAuthWithRole } from "@/server/auth/request";
-import { db } from "@/db";
-import { artists, orders, shipments } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { ensureOpsDemoClock } from "@/server/ops/demo-clock";
+import { loadExceptionsQueue } from "@/server/ops/exception-queries";
 
-export const metadata: Metadata = { title: "Exceptions — Fulfillment" };
+export const metadata: Metadata = { title: "Exceptions — Rolling GA Ops" };
+export const dynamic = "force-dynamic";
 
-export default async function OpsExceptionsPage() {
-  await requireAuthWithRole(["fulfillment_operator", "rga_admin"], "/ops/exceptions");
+function parseFilter(raw: string | undefined): ExceptionQueueFilter {
+  if (
+    raw === "in_progress" ||
+    raw === "past_promise" ||
+    raw === "at_risk" ||
+    raw === "resolved" ||
+    raw === "all"
+  ) {
+    return raw;
+  }
+  return "open";
+}
 
-  const exceptionOrders = await db
-    .select({
-      id: orders.id,
-      orderNumber: orders.orderNumber,
-      status: orders.status,
-      shippingName: orders.shippingName,
-      artistName: artists.name,
-    })
-    .from(orders)
-    .innerJoin(artists, eq(artists.id, orders.artistId))
-    .where(eq(orders.status, "exception"))
-    .orderBy(desc(orders.placedAt))
-    .limit(50);
+export default async function OpsExceptionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string; event?: string }>;
+}) {
+  const ctx = await requireAuthWithRole(["fulfillment_operator", "rga_admin"], "/ops/exceptions");
+  if (demoModeEnabled()) {
+    await ensureOpsDemoClock();
+  }
 
-  const exceptionShipments = await db
-    .select({
-      id: shipments.id,
-      exceptionReason: shipments.exceptionReason,
-      orderNumber: orders.orderNumber,
-      artistName: artists.name,
-    })
-    .from(shipments)
-    .innerJoin(orders, eq(orders.id, shipments.orderId))
-    .innerJoin(artists, eq(artists.id, orders.artistId))
-    .where(eq(shipments.status, "exception"))
-    .orderBy(desc(shipments.createdAt))
-    .limit(50);
+  const params = await searchParams;
+  const filter = parseFilter(params.filter);
+  const eventId = params.event ?? undefined;
+  const snapshot = await loadExceptionsQueue(ctx, filter, eventId);
 
-  const hasExceptions = exceptionOrders.length > 0 || exceptionShipments.length > 0;
-
-  return (
-    <div className="space-y-8 p-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Exceptions</h1>
-
-      {!hasExceptions ? (
-        <div className="rounded-2xl border border-dashed border-border bg-muted/30 py-20 text-center">
-          <p className="text-4xl mb-3">✅</p>
-          <p className="font-semibold">No exceptions</p>
-          <p className="mt-1 text-sm text-muted-foreground">All orders and shipments are on track.</p>
-        </div>
-      ) : (
-        <>
-          {exceptionOrders.length > 0 && (
-            <section className="space-y-3">
-              <h2 className="eyebrow text-muted-foreground">Order exceptions</h2>
-              <ul className="space-y-2">
-                {exceptionOrders.map((order) => (
-                  <li key={order.id} className="rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4">
-                    <p className="font-medium">{order.shippingName}</p>
-                    <p className="text-sm text-muted-foreground">{order.orderNumber} · {order.artistName}</p>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {exceptionShipments.length > 0 && (
-            <section className="space-y-3">
-              <h2 className="eyebrow text-muted-foreground">Shipment exceptions</h2>
-              <ul className="space-y-2">
-                {exceptionShipments.map((s) => (
-                  <li key={s.id} className="rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4">
-                    <p className="font-medium">{s.orderNumber} · {s.artistName}</p>
-                    {s.exceptionReason && <p className="text-sm text-muted-foreground">{s.exceptionReason}</p>}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </>
-      )}
-    </div>
-  );
+  return <OpsExceptionsWorkbench snapshot={snapshot} filter={filter} eventId={eventId} />;
 }

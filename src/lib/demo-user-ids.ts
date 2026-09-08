@@ -23,3 +23,5 @@ export const DEMO_ELENA_MARISOL_ID = demoUserId("team_marisol");
 
 export const MARISOL_ARTIST_ID = "art_marisol_reyes";
 export const MARISOL_BROOKLYN_EVENT_ID = "evt_marisol_brooklyn";
+export const BROOKLYN_ENCORE_ACTIVATION_DROP_ID = "drp_brooklyn_encore_activation";
+export const BROOKLYN_CONNECTED_COHORT_AUDIENCE_ID = "aud_brooklyn_connected_cohort";

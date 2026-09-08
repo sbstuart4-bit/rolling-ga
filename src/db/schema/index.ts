@@ -5,4 +5,7 @@ export * from "./catalog";
 export * from "./drops";
 export * from "./commerce";
 export * from "./campaigns";
+export * from "./show-economics";
+export * from "./pilot-report";
+export * from "./production-work";
 export { newId } from "./_shared";

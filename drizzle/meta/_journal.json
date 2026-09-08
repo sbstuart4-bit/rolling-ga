@@ -22,6 +22,55 @@
       "when": 1788552000000,
       "tag": "0002_commerce_attribution",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788553000000,
+      "tag": "0003_show_economics",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788554000000,
+      "tag": "0004_show_cohort_audience",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788555000000,
+      "tag": "0005_fulfillment",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788556000000,
+      "tag": "0006_pilot_goals",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788557000000,
+      "tag": "0007_production_work",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788558000000,
+      "tag": "0008_pack_handoff",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788559000000,
+      "tag": "0009_exception_resolution",
+      "breakpoints": true
     }
   ]
 }

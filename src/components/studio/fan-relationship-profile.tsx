@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { formatEventDate, formatMoney, formatPercent, initialsOf } from "@/lib/format";
+import { formatEventDate, formatMoney, initialsOf } from "@/lib/format";
 import {
   FanRelationshipIcon,
   ObservedValueBadge,
@@ -15,7 +15,7 @@ const PHASE_LABELS = {
 } as const;
 
 export function FanRelationshipProfileView({ profile }: { profile: FanRelationshipProfile }) {
-  const { observedValue, relationshipStarted } = profile;
+  const { observedValue, relationshipStarted, lastActivityAt } = profile;
 
   return (
     <div className="space-y-8">
@@ -42,23 +42,53 @@ export function FanRelationshipProfileView({ profile }: { profile: FanRelationsh
         >
           {initialsOf(profile.displayName)}
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Verified fan
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">{profile.displayName}</h1>
           <p className="text-sm text-muted-foreground">{profile.email}</p>
-          {relationshipStarted && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Relationship started:{" "}
-              <span className="text-foreground">
-                {relationshipStarted.artistName} · {relationshipStarted.venueCity} ·{" "}
-                {formatEventDate(relationshipStarted.startsAt, relationshipStarted.timezone)}
-              </span>
-            </p>
-          )}
         </div>
       </div>
+
+      {relationshipStarted ? (
+        <section className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-600 dark:text-violet-300">
+            Relationship start
+          </p>
+          <p className="mt-2 text-lg font-semibold">{relationshipStarted.artistName}</p>
+          {relationshipStarted.tourName ? (
+            <p className="text-sm text-muted-foreground">{relationshipStarted.tourName}</p>
+          ) : null}
+          <p className="mt-1 text-sm">
+            {relationshipStarted.venueCity} ·{" "}
+            {formatEventDate(relationshipStarted.startsAt, relationshipStarted.timezone)}
+          </p>
+        </section>
+      ) : null}
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SummaryMetric label="Shows attended" value={String(observedValue.showsAttended)} />
+        <SummaryMetric label="Show-night GMV" value={formatMoney(observedValue.showNightGmvCents)} />
+        <SummaryMetric label="Post-show GMV" value={formatMoney(observedValue.postShowGmvCents)} />
+        <SummaryMetric
+          label="Total observed fan value"
+          value={formatMoney(observedValue.totalObservedGmvCents)}
+          accent
+        />
+        <SummaryMetric
+          label="Last activity"
+          value={
+            lastActivityAt
+              ? lastActivityAt.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "—"
+          }
+        />
+      </section>
 
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
@@ -82,6 +112,9 @@ export function FanRelationshipProfileView({ profile }: { profile: FanRelationsh
                     })}
                   </p>
                   <p className="font-medium">{entry.label}</p>
+                  {entry.detail ? (
+                    <p className="text-xs text-violet-600 dark:text-violet-300">{entry.detail}</p>
+                  ) : null}
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     {entry.amountCents != null && (
                       <ObservedValueBadge cents={entry.amountCents} />
@@ -139,6 +172,30 @@ export function FanRelationshipProfileView({ profile }: { profile: FanRelationsh
           </div>
         </dl>
       </section>
+    </div>
+  );
+}
+
+function SummaryMetric({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-4">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p
+        className={cn(
+          "mt-1 text-xl font-semibold tabular-nums",
+          accent && "text-emerald-600 dark:text-emerald-400",
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }

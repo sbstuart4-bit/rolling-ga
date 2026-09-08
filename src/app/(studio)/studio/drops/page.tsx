@@ -73,7 +73,7 @@ export default async function StudioDropsPage() {
                   </p>
                 </div>
                 <Button asChild size="sm" variant="outline">
-                  <Link href={`/studio/drops/${drop.id}`}>Edit</Link>
+                  <Link href={`/studio/drops/${drop.id}`}>View results</Link>
                 </Button>
               </li>
             );

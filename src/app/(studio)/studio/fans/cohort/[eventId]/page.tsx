@@ -6,16 +6,20 @@ import { ShowCohortPicker } from "@/components/studio/show-cohort-picker";
 import { requireAuthWithRole } from "@/server/auth/request";
 import { defaultArtistId } from "@/server/auth/guards";
 import { listEventsForArtist } from "@/server/events/queries";
-import { loadShowCohortMetrics } from "@/server/studio/fan-relationship-queries";
+import { loadShowCohortDetail } from "@/server/studio/fan-relationship-queries";
+import { listActivationsForEvent } from "@/server/activation/queries";
 
-export const metadata: Metadata = { title: "Show cohort value — Artist Studio" };
+export const metadata: Metadata = { title: "Show cohort — Artist Studio" };
 
 export default async function StudioFanCohortPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ eventId: string }>;
+  searchParams: Promise<{ stage?: string }>;
 }) {
   const { eventId } = await params;
+  const { stage } = await searchParams;
   const ctx = await requireAuthWithRole(
     ["artist_member", "rga_admin"],
     `/studio/fans/cohort/${eventId}`,
@@ -24,9 +28,10 @@ export default async function StudioFanCohortPage({
 
   if (!artistId) return <div className="p-6 text-muted-foreground">Select an artist.</div>;
 
-  const [cohort, events] = await Promise.all([
-    loadShowCohortMetrics(ctx, artistId, eventId),
+  const [cohort, events, activations] = await Promise.all([
+    loadShowCohortDetail(ctx, artistId, eventId, stage),
     listEventsForArtist(artistId),
+    listActivationsForEvent(artistId, eventId),
   ]);
 
   if (!cohort) notFound();
@@ -45,6 +50,7 @@ export default async function StudioFanCohortPage({
       <ArtistGuidedDemoHighlight />
       <FanCohortDashboard
         cohort={cohort}
+        activations={activations}
         eventPicker={
           pickerEvents.length > 1 ? (
             <ShowCohortPicker events={pickerEvents} currentEventId={eventId} />

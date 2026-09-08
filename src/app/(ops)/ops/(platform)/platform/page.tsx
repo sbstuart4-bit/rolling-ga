@@ -46,13 +46,12 @@ export default async function PlatformOpsOverviewPage() {
       </section>
 
       <section className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-5">
-        <h2 className="font-semibold text-sky-100">Fulfillment operations</h2>
+        <h2 className="font-semibold text-sky-100">Fulfillment command center</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Orders, inventory, pick/pack, and shipments remain in the fulfillment desk — separate
-          from platform ops.
+          Show operations, promise control, and prioritized exceptions for Rolling GA internal ops.
         </p>
-        <Link href="/ops/events" className="mt-3 inline-block text-sm font-medium text-sky-400 hover:underline">
-          Open fulfillment console →
+        <Link href="/ops" className="mt-3 inline-block text-sm font-medium text-sky-400 hover:underline">
+          Open command center →
         </Link>
       </section>
     </div>

@@ -38,6 +38,10 @@ beforeAll(async () => {
 }, 120_000);
 
 afterAll(async () => {
-  await handle?.close();
+  try {
+    await handle?.close();
+  } catch {
+    // PGlite may already be closed after tests that reset modules.
+  }
   handle = undefined;
 });

@@ -55,7 +55,7 @@ export function enrichResolvedTheme(
   return {
     ...theme,
     logoUrl: resolveDemoThemeUrl(theme.logoUrl, brand?.logoUrl),
-    heroImageUrl: resolveDemoThemeUrl(theme.heroImageUrl, brand?.heroImageUrl),
+    heroImageUrl: resolveDemoThemeUrl(theme.heroImageUrl, tourArt ?? brand?.heroImageUrl),
     cityArtworkUrl: resolveDemoThemeUrl(theme.cityArtworkUrl, city),
     tourArtworkUrl: resolveDemoThemeUrl(theme.tourArtworkUrl, tourArt),
   };

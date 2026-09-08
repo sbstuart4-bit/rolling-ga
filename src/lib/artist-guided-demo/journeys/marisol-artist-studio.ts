@@ -96,12 +96,12 @@ export const MARISOL_ARTIST_STUDIO_STEPS: ArtistGuidedDemoStep[] = [
     whyItMatters:
       "Rolling GA doesn't merely tell the artist who their fans are — it lets the artist continue the relationship.",
     timePhase: "t_plus_7",
-    route: "/studio/drops/new?event={eventId}&prefill=brooklyn-encore",
+    route: "/studio/drops/new?event={eventId}&prefill=brooklyn-encore&cohort=connected",
     nextCta: "See the value →",
     presenter: {
-      say: "This is the Brooklyn encore — 48 hours, verified attendees, one exclusive product.",
-      pointOut: "Flash drop creation uses the real drop engine — preview before publish.",
-      next: "Close with the relationship value this show created.",
+      say: "Brooklyn connected fans — 48 hours, A Tender Night Poster, audience already attached.",
+      pointOut: "Preview shows audience size and eligibility — publish through the real drop engine.",
+      next: "Close with show-night vs post-show vs activated revenue.",
     },
   }),
   step({

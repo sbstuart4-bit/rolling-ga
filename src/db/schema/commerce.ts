@@ -2,6 +2,14 @@ import { index, pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import {
   ORDER_STATUSES,
   type OrderStatus,
+  FULFILLMENT_STATUSES,
+  type FulfillmentStatus,
+  FULFILLMENT_EXCEPTION_TYPES,
+  type FulfillmentExceptionType,
+  FULFILLMENT_EXCEPTION_STATUSES,
+  type FulfillmentExceptionStatus,
+  EXCEPTION_ACTION_TYPES,
+  type ExceptionActionType,
   PAYMENT_METHOD_KINDS,
   type PaymentMethodKind,
   COMMERCE_SOURCES,
@@ -22,10 +30,10 @@ import {
   timestampCol,
   updatedAt,
 } from "./_shared";
+import { users } from "./identity";
 import { bundles, products, productVariants } from "./catalog";
 import { drops } from "./drops";
 import { artists, events, tours } from "./events";
-import { users } from "./identity";
 
 const CART_STATUSES = ["active", "converted", "abandoned"] as const;
 type CartStatus = (typeof CART_STATUSES)[number];
@@ -156,6 +164,17 @@ export const orders = pgTable(
       .notNull()
       .default("generic"),
     status: text("status").$type<OrderStatus>().notNull().default("pending"),
+    /** Artist-facing fulfillment lifecycle — distinct from payment/commerce status. */
+    fulfillmentStatus: text("fulfillment_status").$type<FulfillmentStatus>(),
+    promisedDeliveryAt: timestampCol("promised_delivery_at"),
+    actualDeliveredAt: timestampCol("actual_delivered_at"),
+    fulfillmentReceivedAt: timestampCol("fulfillment_received_at"),
+    productionStartedAt: timestampCol("production_started_at"),
+    packingStartedAt: timestampCol("packing_started_at"),
+    fulfillmentPackedAt: timestampCol("fulfillment_packed_at"),
+    readyForHandoffAt: timestampCol("ready_for_handoff_at"),
+    handedToCarrierAt: timestampCol("handed_to_carrier_at"),
+    fulfillmentShippedAt: timestampCol("fulfillment_shipped_at"),
     subtotalCents: cents("subtotal_cents").notNull(),
     discountCents: cents("discount_cents").notNull().default(0),
     taxCents: cents("tax_cents").notNull().default(0),
@@ -193,8 +212,10 @@ export const orders = pgTable(
     index("orders_event_idx").on(t.eventId),
     index("orders_commerce_source_idx").on(t.commerceSource),
     index("orders_status_idx").on(t.status),
+    index("orders_fulfillment_status_idx").on(t.fulfillmentStatus),
     index("orders_placed_at_idx").on(t.placedAt),
     oneOf("orders_status_check", t.status, ORDER_STATUSES),
+    oneOf("orders_fulfillment_status_check", t.fulfillmentStatus, FULFILLMENT_STATUSES),
     oneOf("orders_commerce_source_check", t.commerceSource, COMMERCE_SOURCES),
     oneOf("orders_payment_method_kind_check", t.paymentMethodKind, PAYMENT_METHOD_KINDS),
   ],
@@ -262,5 +283,53 @@ export const shipments = pgTable(
     index("shipments_order_idx").on(t.orderId),
     index("shipments_status_idx").on(t.status),
     oneOf("shipments_status_check", t.status, SHIPMENT_STATUSES),
+  ],
+);
+
+export const orderFulfillmentExceptions = pgTable(
+  "order_fulfillment_exceptions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => newId("ofx")),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    type: text("type").$type<FulfillmentExceptionType>().notNull(),
+    status: text("status")
+      .$type<FulfillmentExceptionStatus>()
+      .notNull()
+      .default("open"),
+    note: text("note"),
+    createdAt: createdAt(),
+    resolvedAt: timestampCol("resolved_at"),
+    isDemo: isDemo(),
+  },
+  (t) => [
+    index("order_fulfillment_exceptions_order_idx").on(t.orderId),
+    oneOf("order_fulfillment_exceptions_type_check", t.type, FULFILLMENT_EXCEPTION_TYPES),
+    oneOf("order_fulfillment_exceptions_status_check", t.status, FULFILLMENT_EXCEPTION_STATUSES),
+  ],
+);
+
+export const fulfillmentExceptionActions = pgTable(
+  "fulfillment_exception_actions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => newId("fxa")),
+    exceptionId: text("exception_id")
+      .notNull()
+      .references(() => orderFulfillmentExceptions.id, { onDelete: "cascade" }),
+    actionType: text("action_type").$type<ExceptionActionType>().notNull(),
+    note: text("note"),
+    actorUserId: uuid("actor_user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("fulfillment_exception_actions_exception_idx").on(t.exceptionId),
+    oneOf("fulfillment_exception_actions_type_check", t.actionType, EXCEPTION_ACTION_TYPES),
   ],
 );

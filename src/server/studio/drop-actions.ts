@@ -10,6 +10,13 @@ import { assertArtistPublish } from "@/server/auth/guards";
 import { getAuthContext } from "@/server/auth/session";
 import { demoNow } from "@/server/demo/clock";
 import { getEventById } from "@/server/events/queries";
+import {
+  buildActivationAudiencePreview,
+  createShowCohortAudienceSegment,
+  resolveCohortMemberUserIds,
+} from "@/server/activation/queries";
+import { isActivatableCohortStage } from "@/lib/activation/audience";
+import type { CohortFunnelStage } from "@/lib/relationship-intelligence/types";
 
 /** The drop's configuration. Whether to publish it is a separate decision. */
 const flashDropSchema = z.object({
@@ -17,8 +24,9 @@ const flashDropSchema = z.object({
   title: z.string().min(1).max(120),
   description: z.string().max(500).optional(),
   eventId: z.string().min(1),
-  durationMinutes: z.coerce.number().int().min(5).max(1440),
+  durationMinutes: z.coerce.number().int().min(5).max(2880),
   productIds: z.array(z.string().min(1)).min(1).max(20),
+  cohortStage: z.string().optional(),
 });
 
 /**
@@ -37,6 +45,13 @@ export interface FlashDropState {
     durationMinutes: number;
     productIds: string[];
     productCount: number;
+    productNames: string[];
+    cohortStage?: CohortFunnelStage;
+    audienceLabel?: string;
+    eligibleFanCount?: number;
+    originShowLabel?: string;
+    startsAtIso?: string;
+    endsAtIso?: string;
   };
 }
 
@@ -76,6 +91,7 @@ export async function createFlashDropAction(
     eventId: formData.get("eventId"),
     durationMinutes: formData.get("durationMinutes") ?? 60,
     productIds,
+    cohortStage: String(formData.get("cohortStage") ?? "").trim() || undefined,
   });
 
   if (!parsed.success) {
@@ -97,7 +113,7 @@ export async function createFlashDropAction(
   }
 
   const ownedProducts = await db
-    .select({ id: products.id })
+    .select({ id: products.id, name: products.name })
     .from(products)
     .where(
       and(
@@ -111,6 +127,30 @@ export async function createFlashDropAction(
     return { error: "One or more of those products isn't on your account." };
   }
 
+  const eventDetails = await getEventById(parsed.data.eventId);
+  const cohortStage =
+    parsed.data.cohortStage && isActivatableCohortStage(parsed.data.cohortStage)
+      ? parsed.data.cohortStage
+      : undefined;
+
+  const audiencePreview = cohortStage
+    ? await buildActivationAudiencePreview(parsed.data.artistId, parsed.data.eventId, cohortStage)
+    : null;
+
+  if (cohortStage && !audiencePreview) {
+    return { error: "That audience couldn't be resolved for this show." };
+  }
+
+  if (cohortStage && audiencePreview && audiencePreview.eligibleFanCount === 0) {
+    return { error: "No fans match this audience stage for the selected show." };
+  }
+
+  const now = demoNow();
+  const endsAt = new Date(now.getTime() + parsed.data.durationMinutes * 60_000);
+  const productNames = parsed.data.productIds.map(
+    (id) => ownedProducts.find((p) => p.id === id)?.name ?? "Product",
+  );
+
   // Validated, but not confirmed: hand the configuration back for review. Nothing is
   // written, no inventory moves, no drop exists yet.
   if (!publishing) {
@@ -122,13 +162,38 @@ export async function createFlashDropAction(
         durationMinutes: parsed.data.durationMinutes,
         productIds: parsed.data.productIds,
         productCount: parsed.data.productIds.length,
+        productNames,
+        cohortStage,
+        audienceLabel: audiencePreview?.audienceLabel,
+        eligibleFanCount: audiencePreview?.eligibleFanCount,
+        originShowLabel: eventDetails
+          ? `${eventDetails.tourName ?? "Show"} · ${eventDetails.venueCity}`
+          : undefined,
+        startsAtIso: now.toISOString(),
+        endsAtIso: endsAt.toISOString(),
       },
     };
   }
 
   // Confirmed — publish
-  const now = demoNow();
-  const endsAt = new Date(now.getTime() + parsed.data.durationMinutes * 60_000);
+  let audienceSegmentId: string | null = null;
+  if (cohortStage && audiencePreview) {
+    const snapshotUserIds = await resolveCohortMemberUserIds(
+      parsed.data.artistId,
+      parsed.data.eventId,
+      cohortStage,
+    );
+    audienceSegmentId = await createShowCohortAudienceSegment({
+      artistId: parsed.data.artistId,
+      originEventId: parsed.data.eventId,
+      cohortStage,
+      snapshotUserIds,
+      venueCity: audiencePreview.venueCity,
+    });
+  }
+
+  const publishNow = demoNow();
+  const publishEndsAt = new Date(publishNow.getTime() + parsed.data.durationMinutes * 60_000);
 
   const [drop] = await db
     .insert(drops)
@@ -138,13 +203,14 @@ export async function createFlashDropAction(
       slug: `flash-${Date.now()}`,
       title: parsed.data.title,
       description: parsed.data.description ?? null,
-      startsAt: now,
-      endsAt,
+      startsAt: publishNow,
+      endsAt: publishEndsAt,
       status: "live",
       exclusivityType: "flash",
       displayPriority: 100,
       notificationsEnabled: true,
-      publishedAt: now,
+      publishedAt: publishNow,
+      audienceSegmentId,
     })
     .returning({ id: drops.id });
 
@@ -158,7 +224,9 @@ export async function createFlashDropAction(
 
   revalidatePath("/studio/drops");
   revalidatePath("/drops");
-  redirect("/studio/drops");
+  revalidatePath(`/studio/drops/${drop.id}`);
+  revalidatePath(`/studio/fans/cohort/${parsed.data.eventId}`);
+  redirect(`/studio/drops/${drop.id}`);
 }
 
 const liveDropSchema = z.object({

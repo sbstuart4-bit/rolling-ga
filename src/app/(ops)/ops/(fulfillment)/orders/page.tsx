@@ -1,93 +1,79 @@
 import type { Metadata } from "next";
-import { requireAuthWithRole } from "@/server/auth/request";
-import { db } from "@/db";
-import { artists, orders } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import Link from "next/link";
+import { DELIVERY_PROMISE_STATE_LABELS } from "@/lib/fulfillment";
 import { formatMoney } from "@/lib/format";
+import { opsOrderHref } from "@/lib/ops";
+import { FULFILLMENT_STATUS_LABELS } from "@/lib/types";
+import { demoModeEnabled } from "@/lib/demo-mode";
+import { requireAuthWithRole } from "@/server/auth/request";
+import { ensureOpsDemoClock } from "@/server/ops/demo-clock";
+import { loadOpsCommandCenter } from "@/server/ops/fulfillment-queries";
 
-export const metadata: Metadata = { title: "Orders — Fulfillment" };
+export const metadata: Metadata = { title: "Orders — Rolling GA Ops" };
+export const dynamic = "force-dynamic";
 
-const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  pending: { label: "Pending", cls: "bg-muted text-muted-foreground" },
-  paid: { label: "Paid", cls: "bg-success/15 text-success" },
-  allocated: { label: "Allocated", cls: "bg-info/15 text-info" },
-  picking: { label: "Picking", cls: "bg-warning/15 text-warning" },
-  packed: { label: "Packed", cls: "bg-warning/15 text-warning" },
-  ready_to_ship: { label: "Ready", cls: "bg-warning/15 text-warning" },
-  shipped: { label: "Shipped", cls: "bg-info/15 text-info" },
-  delivered: { label: "Delivered", cls: "bg-success/15 text-success" },
-  exception: { label: "Exception", cls: "bg-destructive/15 text-destructive" },
-  returned: { label: "Returned", cls: "bg-muted text-muted-foreground" },
-  cancelled: { label: "Cancelled", cls: "bg-muted text-muted-foreground" },
-};
+export default async function OpsOrdersPage() {
+  const ctx = await requireAuthWithRole(["fulfillment_operator", "rga_admin"], "/ops/orders");
+  if (demoModeEnabled()) {
+    await ensureOpsDemoClock();
+  }
 
-export default async function OpsOrdersPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  await requireAuthWithRole(["fulfillment_operator", "rga_admin"], "/ops/orders");
-  const { event: eventId } = await searchParams;
-
-  const allOrders = await db
-    .select({
-      id: orders.id,
-      orderNumber: orders.orderNumber,
-      status: orders.status,
-      totalCents: orders.totalCents,
-      placedAt: orders.placedAt,
-      shippingName: orders.shippingName,
-      shippingCity: orders.shippingCity,
-      artistName: artists.name,
-    })
-    .from(orders)
-    .innerJoin(artists, eq(artists.id, orders.artistId))
-    .orderBy(desc(orders.placedAt))
-    .limit(200);
-
-  const filtered = typeof eventId === "string"
-    ? allOrders.filter(() => true) // would filter by event in a real impl
-    : allOrders;
+  const snapshot = await loadOpsCommandCenter(ctx, "all");
+  const orders = snapshot.attention;
 
   return (
-    <div className="space-y-5 p-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Orders</h1>
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight">Orders needing review</h1>
+        <p className="mt-1 text-sm text-zinc-500">
+          Prioritized by promise urgency and open exceptions. Full order management ships in later Ops
+          phases.
+        </p>
+      </header>
 
-      {filtered.length === 0 ? (
-        <p className="text-muted-foreground">No orders found.</p>
+      {orders.length === 0 ? (
+        <p className="text-zinc-500">No prioritized orders right now.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-muted-foreground">
-                {["Order #", "Artist", "Ship to", "Total", "Status", "Placed"].map((h) => (
+              <tr className="border-b border-white/10 text-left text-zinc-500">
+                {["Order", "Artist", "Show", "Status", "Promise", "Reason"].map((h) => (
                   <th key={h} className="pb-2 pr-4 font-medium last:pr-0">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.map((order) => {
-                const badge = STATUS_BADGE[order.status] ?? { label: order.status, cls: "" };
-                return (
-                  <tr key={order.id} className="hover:bg-muted/40">
-                    <td className="py-3 pr-4 font-mono text-xs">{order.orderNumber}</td>
-                    <td className="py-3 pr-4 text-muted-foreground">{order.artistName}</td>
-                    <td className="py-3 pr-4">
-                      {order.shippingName}
-                      {order.shippingCity ? `, ${order.shippingCity}` : ""}
-                    </td>
-                    <td className="tabular py-3 pr-4 font-medium">{formatMoney(order.totalCents)}</td>
-                    <td className="py-3 pr-4">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.cls}`}>
-                        {badge.label}
-                      </span>
-                    </td>
-                    <td className="py-3 text-muted-foreground">
-                      {order.placedAt?.toLocaleDateString("en-US", { month: "short", day: "numeric" }) ?? "—"}
-                    </td>
-                  </tr>
-                );
-              })}
+            <tbody className="divide-y divide-white/10">
+              {orders.map((order) => (
+                <tr key={order.orderId} className="hover:bg-white/[0.03]">
+                  <td className="py-3 pr-4">
+                    <Link href={opsOrderHref(order.orderId)} className="font-mono text-sky-300 hover:underline">
+                      {order.orderNumber}
+                    </Link>
+                  </td>
+                  <td className="py-3 pr-4 text-zinc-400">{order.artistName}</td>
+                  <td className="py-3 pr-4 text-zinc-400">{order.showLabel}</td>
+                  <td className="py-3 pr-4">
+                    {order.fulfillmentStatus
+                      ? FULFILLMENT_STATUS_LABELS[order.fulfillmentStatus]
+                      : "—"}
+                  </td>
+                  <td className="py-3 pr-4 text-zinc-400">
+                    {DELIVERY_PROMISE_STATE_LABELS[order.promiseState]}
+                  </td>
+                  <td className="py-3 pr-4 text-amber-200">{order.reasonLabel}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <p className="text-xs text-zinc-600">
+        Tip: open a show from the{" "}
+        <Link href="/ops" className="text-sky-400 hover:underline">command center</Link> for full
+        pipeline context.
+      </p>
     </div>
   );
 }

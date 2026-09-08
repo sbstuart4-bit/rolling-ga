@@ -42,6 +42,7 @@ export default async function StudioInsightsPage({
       <InsightsDashboard
         snapshot={snapshot}
         pilotHref={`/studio/insights/pilot?events=${pilotQuery}`}
+        economicsHref={`/studio/insights/economics/${snapshot.event.id}`}
         eventPicker={
           allEvents.length > 1 ? (
             <EventInsightsPicker

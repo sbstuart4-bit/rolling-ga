@@ -20,7 +20,7 @@ import { DEMO_ARTISTS, type DemoArtistKey } from "@/lib/demo-scenario/types";
 import { cn } from "@/lib/utils";
 
 export const PLATFORM_OPS_NAV: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Overview", href: "/ops", icon: LayoutDashboard },
+  { label: "Overview", href: "/ops/platform", icon: LayoutDashboard },
   { label: "Artists", href: "/ops/artists", icon: Users },
   { label: "Shows", href: "/ops/shows", icon: CalendarDays },
   { label: "Drops", href: "/ops/drops", icon: Disc3 },
@@ -78,8 +78,8 @@ export function PlatformOpsShell({
           <ul className="-mb-px flex gap-1 overflow-x-auto no-scrollbar">
             {PLATFORM_OPS_NAV.map((item) => {
               const active =
-                item.href === "/ops"
-                  ? pathname === "/ops"
+                item.href === "/ops/platform"
+                  ? pathname === "/ops/platform"
                   : pathname.startsWith(item.href);
               const Icon = item.icon;
               return (

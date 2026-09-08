@@ -1,33 +1,50 @@
 import "server-only";
-import { and, count, desc, eq, inArray, notInArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   artistConsents,
   artists,
+  audienceSegments,
   drops,
   events,
-  orderItems,
   orders,
   tours,
   users,
   venues,
   verifiedAttendance,
 } from "@/db/schema";
+import { isFanInAudienceSnapshot, SHOW_COHORT_RULE_KIND } from "@/lib/activation/audience";
+import type { AudienceRuleParams } from "@/lib/types";
 import {
   attributeOrderToEvent,
-  postShowGmvWithinWindow,
   resolveLineEventAttribution,
   sumAttributedGmv,
   type CommerceAttributionPhase,
   type EventWindow,
   type OrderAttributionInput,
 } from "@/lib/fan-attribution";
-import { resolveEventState } from "@/lib/event-state";
 import { assertArtistAccess } from "@/server/auth/guards";
 import type { AuthContext } from "@/server/auth/session";
 import { getEventById } from "@/server/events/queries";
 
-const PAID = notInArray(orders.status, ["cancelled", "pending"]);
+import type {
+  CohortFanRow,
+  CohortTimelinePhase,
+  PostShowWindowMetrics,
+  RelationshipOrigin,
+} from "@/lib/relationship-intelligence/types";
+import { parseCohortStage, type CohortFunnelStage } from "@/lib/relationship-intelligence/types";
+import {
+  analyzeShowCohort,
+  loadCohortFanRows,
+} from "@/server/studio/show-cohort-analysis";
+import {
+  buildEventWindow,
+  groupOrdersByUser,
+  loadOrderLinesForArtist,
+  loadVerifiedEventsByUser,
+  PAID,
+} from "./fan-relationship-queries-internals";
 
 export interface FanRelationshipAggregateMetrics {
   verifiedFans: number;
@@ -63,12 +80,8 @@ export interface FanRelationshipProfile {
   userId: string;
   displayName: string;
   email: string;
-  relationshipStarted: {
-    artistName: string;
-    venueCity: string;
-    startsAt: Date;
-    timezone: string;
-  } | null;
+  relationshipStarted: RelationshipOrigin | null;
+  lastActivityAt: Date | null;
   timeline: FanTimelineEntry[];
   observedValue: ObservedFanValue;
   isDemoData: boolean;
@@ -80,6 +93,7 @@ export interface ShowCohortMetrics {
   connectedAfterShow: number;
   connectedFans: number;
   purchasingFans: number;
+  postShowPurchasers: number;
   repeatPurchasers: number;
   showNightGmvCents: number;
   postShowGmv30DaysCents: number;
@@ -87,7 +101,27 @@ export interface ShowCohortMetrics {
   totalObservedGmvCents: number;
   repeatPurchaseRate: number | null;
   observedGmvPerVerifiedFanCents: number | null;
+  postShowWindows: PostShowWindowMetrics[];
+  timeline: CohortTimelinePhase[];
   isDemoData: boolean;
+}
+
+export interface ShowCohortDetail extends ShowCohortMetrics {
+  fanRows: CohortFanRow[];
+  activeStage: CohortFunnelStage | null;
+}
+
+export interface ShowRelationshipSummary {
+  eventId: string;
+  venueCity: string;
+  tourName: string | null;
+  startsAt: Date;
+  timezone: string;
+  connectedFans: number;
+  purchasingFans: number;
+  postShowPurchasers: number;
+  repeatPurchasers: number;
+  postShowGmvCents: number;
 }
 
 export interface ConsentedFanRow {
@@ -105,98 +139,6 @@ async function loadArtistEventIds(artistId: string) {
     .from(events)
     .where(eq(events.artistId, artistId));
   return rows.map((r) => r.id);
-}
-
-async function loadOrderLinesForArtist(artistId: string, userIds?: string[]) {
-  const conditions = [eq(orders.artistId, artistId), PAID];
-  if (userIds && userIds.length > 0) {
-    conditions.push(inArray(orders.userId, userIds));
-  }
-
-  return db
-    .select({
-      orderId: orders.id,
-      userId: orders.userId,
-      orderEventId: orders.eventId,
-      placedAt: orders.placedAt,
-      commerceSource: orders.commerceSource,
-      isDemo: orders.isDemo,
-      dropId: orderItems.dropId,
-      dropEventId: drops.eventId,
-      lineTotalCents: orderItems.totalCents,
-      nameSnapshot: orderItems.nameSnapshot,
-    })
-    .from(orderItems)
-    .innerJoin(orders, eq(orders.id, orderItems.orderId))
-    .leftJoin(drops, eq(drops.id, orderItems.dropId))
-    .where(and(...conditions))
-    .orderBy(desc(orders.placedAt));
-}
-
-function groupOrdersByUser(
-  lines: Awaited<ReturnType<typeof loadOrderLinesForArtist>>,
-): Map<string, OrderAttributionInput[]> {
-  const map = new Map<string, Map<string, OrderAttributionInput>>();
-
-  for (const line of lines) {
-    const userOrders = map.get(line.userId) ?? new Map<string, OrderAttributionInput>();
-    const existing = userOrders.get(line.orderId) ?? {
-      orderId: line.orderId,
-      orderEventId: line.orderEventId,
-      placedAt: line.placedAt,
-      commerceSource: line.commerceSource,
-      lines: [],
-    };
-    existing.lines.push({
-      dropId: line.dropId,
-      dropEventId: line.dropEventId,
-      lineTotalCents: line.lineTotalCents,
-    });
-    userOrders.set(line.orderId, existing);
-    map.set(line.userId, userOrders);
-  }
-
-  const result = new Map<string, OrderAttributionInput[]>();
-  for (const [userId, orderMap] of map) {
-    result.set(userId, [...orderMap.values()]);
-  }
-  return result;
-}
-
-async function loadVerifiedEventsByUser(artistId: string, userIds?: string[]) {
-  const conditions = [eq(events.artistId, artistId)];
-  if (userIds && userIds.length > 0) {
-    conditions.push(inArray(verifiedAttendance.userId, userIds));
-  }
-
-  const rows = await db
-    .select({
-      userId: verifiedAttendance.userId,
-      eventId: verifiedAttendance.eventId,
-      verifiedAt: verifiedAttendance.verifiedAt,
-      venueCity: venues.city,
-      startsAt: events.startsAt,
-      timezone: events.timezone,
-      endsAt: events.endsAt,
-      postShowWindowMinutes: events.postShowWindowMinutes,
-      cancelled: events.cancelled,
-      tourWindowMinutes: tours.postShowWindowMinutes,
-      isDemo: verifiedAttendance.isDemo,
-    })
-    .from(verifiedAttendance)
-    .innerJoin(events, eq(events.id, verifiedAttendance.eventId))
-    .innerJoin(venues, eq(venues.id, events.venueId))
-    .innerJoin(tours, eq(tours.id, events.tourId))
-    .where(and(...conditions))
-    .orderBy(verifiedAttendance.verifiedAt);
-
-  const byUser = new Map<string, typeof rows>();
-  for (const row of rows) {
-    const list = byUser.get(row.userId) ?? [];
-    list.push(row);
-    byUser.set(row.userId, list);
-  }
-  return byUser;
 }
 
 async function fanHasConsent(userId: string, artistId: string): Promise<boolean> {
@@ -224,21 +166,7 @@ function eventWindow(event: {
   cancelled: boolean;
   tourWindowMinutes: number | null;
 }): EventWindow {
-  const timing = resolveEventState(
-    {
-      startsAt: event.startsAt,
-      endsAt: event.endsAt,
-      postShowWindowMinutes: event.postShowWindowMinutes,
-      cancelled: event.cancelled,
-    },
-    event.tourWindowMinutes,
-  );
-  return {
-    eventId: event.eventId ?? event.id!,
-    startsAt: event.startsAt,
-    endsAt: event.endsAt,
-    postShowClosesAt: timing.postShowClosesAt,
-  };
+  return buildEventWindow(event);
 }
 
 function sumPostShowGmvForUser(
@@ -464,8 +392,12 @@ export async function loadFanRelationshipProfile(
         eventId: drops.eventId,
         exclusivityType: drops.exclusivityType,
         isDemo: drops.isDemo,
+        audienceSegmentId: drops.audienceSegmentId,
+        ruleKind: audienceSegments.ruleKind,
+        segmentParams: audienceSegments.params,
       })
       .from(drops)
+      .leftJoin(audienceSegments, eq(audienceSegments.id, drops.audienceSegmentId))
       .where(eq(drops.artistId, artistId))
       .orderBy(drops.startsAt),
   ]);
@@ -516,6 +448,10 @@ export async function loadFanRelationshipProfile(
 
     const lineName =
       orderLines.find((l) => l.orderId === order.orderId)?.nameSnapshot ?? "Purchase";
+    const orderDropId = order.lines.find((l) => l.dropId)?.dropId ?? null;
+    const activationDrop = orderDropId
+      ? eventDrops.find((d) => d.id === orderDropId && d.ruleKind === SHOW_COHORT_RULE_KIND)
+      : null;
     const phase: CommerceAttributionPhase = orderAttributed
       ? orderPostShow > 0
         ? "post_show"
@@ -526,7 +462,10 @@ export async function loadFanRelationshipProfile(
       id: `order-${order.orderId}`,
       date: order.placedAt ?? new Date(),
       kind: "purchase",
-      label: `Purchased ${lineName}`,
+      label: activationDrop
+        ? `Purchased ${lineName} via ${activationDrop.title}`
+        : `Purchased ${lineName}`,
+      detail: activationDrop ? "Activated post-show purchase" : undefined,
       amountCents: orderGmv,
       phase,
       isDemo: orderLines.some((l) => l.orderId === order.orderId && l.isDemo),
@@ -544,7 +483,19 @@ export async function loadFanRelationshipProfile(
   }
 
   for (const drop of eventDrops) {
+    const params = drop.segmentParams as AudienceRuleParams | null;
+    if (drop.ruleKind === SHOW_COHORT_RULE_KIND && isFanInAudienceSnapshot(userId, params)) {
+      timeline.push({
+        id: `eligible-${drop.id}`,
+        date: drop.startsAt,
+        kind: "drop",
+        label: `Eligible for ${drop.title}`,
+        isDemo: drop.isDemo ?? false,
+      });
+    }
+
     if (!drop.eventId || !verifiedIds.has(drop.eventId)) continue;
+    if (drop.ruleKind === SHOW_COHORT_RULE_KIND) continue;
     const verification = verifications.find((v) => v.eventId === drop.eventId);
     const label =
       drop.exclusivityType === "anniversary"
@@ -563,19 +514,38 @@ export async function loadFanRelationshipProfile(
   timeline.sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const firstVerification = verifications[0];
+  let relationshipStarted: RelationshipOrigin | null = null;
+  if (firstVerification) {
+    const [tourRow] = await db
+      .select({ tourName: tours.name })
+      .from(events)
+      .innerJoin(tours, eq(tours.id, events.tourId))
+      .where(eq(events.id, firstVerification.eventId))
+      .limit(1);
+    relationshipStarted = {
+      eventId: firstVerification.eventId,
+      artistName,
+      tourName: tourRow?.tourName ?? null,
+      venueCity: firstVerification.venueCity,
+      startsAt: firstVerification.startsAt,
+      timezone: firstVerification.timezone,
+    };
+  }
+
+  const lastActivityAt =
+    timeline.length > 0
+      ? timeline.reduce(
+          (latest, entry) => (entry.date > latest ? entry.date : latest),
+          timeline[0].date,
+        )
+      : null;
 
   return {
     userId,
     displayName: user[0].displayName,
     email: user[0].email,
-    relationshipStarted: firstVerification
-      ? {
-          artistName,
-          venueCity: firstVerification.venueCity,
-          startsAt: firstVerification.startsAt,
-          timezone: firstVerification.timezone,
-        }
-      : null,
+    relationshipStarted,
+    lastActivityAt,
     timeline,
     observedValue: {
       showNightGmvCents: showNightGmv,
@@ -607,121 +577,82 @@ export async function loadShowCohortMetrics(
     .from(events)
     .where(eq(events.id, eventId))
     .limit(1);
-  const isDemoData = Boolean(eventDemoRow?.isDemo);
 
-  const window = eventWindow({
-    id: event.id,
-    startsAt: event.startsAt,
-    endsAt: event.endsAt,
-    postShowWindowMinutes: event.postShowWindowMinutes,
-    cancelled: event.cancelled,
-    tourWindowMinutes: event.tourWindowMinutes,
-  });
-
-  const verifiedRows = await db
-    .select({
-      userId: verifiedAttendance.userId,
-    })
-    .from(verifiedAttendance)
-    .where(eq(verifiedAttendance.eventId, eventId));
-
-  const verifiedUserIds = verifiedRows.map((r) => r.userId);
-  const originalVerified = verifiedUserIds.length;
-
-  const connectedAfterShow = await db
-    .select({ total: count(sql`distinct ${artistConsents.userId}`) })
-    .from(artistConsents)
-    .innerJoin(verifiedAttendance, eq(verifiedAttendance.userId, artistConsents.userId))
-    .where(
-      and(
-        eq(verifiedAttendance.eventId, eventId),
-        eq(artistConsents.artistId, artistId),
-        eq(artistConsents.consentType, "attendee_offers"),
-        eq(artistConsents.status, "granted"),
-        sql`${artistConsents.grantedAt} > ${event.endsAt}`,
-      ),
-    );
-
-  const connectedFansRows = await db
-    .select({ total: count(sql`distinct ${artistConsents.userId}`) })
-    .from(artistConsents)
-    .innerJoin(verifiedAttendance, eq(verifiedAttendance.userId, artistConsents.userId))
-    .where(
-      and(
-        eq(verifiedAttendance.eventId, eventId),
-        eq(artistConsents.artistId, artistId),
-        eq(artistConsents.consentType, "attendee_offers"),
-        eq(artistConsents.status, "granted"),
-      ),
-    );
-
-  const connectedFans = Number(connectedFansRows[0]?.total ?? 0);
-
-  if (verifiedUserIds.length === 0) {
-    return {
-      event,
-      originalVerifiedAttendees: 0,
-      connectedAfterShow: Number(connectedAfterShow[0]?.total ?? 0),
-      connectedFans: 0,
-      purchasingFans: 0,
-      repeatPurchasers: 0,
-      showNightGmvCents: 0,
-      postShowGmv30DaysCents: 0,
-      postShowGmv90DaysCents: 0,
-      totalObservedGmvCents: 0,
-      repeatPurchaseRate: null,
-      observedGmvPerVerifiedFanCents: null,
-      isDemoData,
-    };
-  }
-
-  const orderLines = await loadOrderLinesForArtist(artistId, verifiedUserIds);
-  const ordersByUser = groupOrdersByUser(orderLines);
-
-  let showNightGmv = 0;
-  let postShow30 = 0;
-  let postShow90 = 0;
-  let totalObserved = 0;
-  let fansWithRepeat = 0;
-  let purchasingFans = 0;
-
-  for (const userId of verifiedUserIds) {
-    const verifiedSet = new Set([eventId]);
-    const userOrders = ordersByUser.get(userId) ?? [];
-    let attributedOrderCount = 0;
-
-    const allAttributed: ReturnType<typeof attributeOrderToEvent> = [];
-    for (const order of userOrders) {
-      const attributed = attributeOrderToEvent(order, window, verifiedSet);
-      allAttributed.push(...attributed);
-      if (attributed.some((a) => a.attributedEventId === eventId)) {
-        attributedOrderCount += 1;
-      }
-    }
-
-    if (attributedOrderCount >= 1) purchasingFans += 1;
-    if (attributedOrderCount >= 2) fansWithRepeat += 1;
-
-    showNightGmv += sumAttributedGmv(allAttributed, "show_night");
-    postShow30 += postShowGmvWithinWindow(allAttributed, event.endsAt, 30);
-    postShow90 += postShowGmvWithinWindow(allAttributed, event.endsAt, 90);
-    totalObserved += sumAttributedGmv(allAttributed);
-  }
+  const analysis = await analyzeShowCohort(event, Boolean(eventDemoRow?.isDemo));
 
   return {
-    event,
-    originalVerifiedAttendees: originalVerified,
-    connectedAfterShow: Number(connectedAfterShow[0]?.total ?? 0),
-    connectedFans,
-    purchasingFans,
-    repeatPurchasers: fansWithRepeat,
-    showNightGmvCents: showNightGmv,
-    postShowGmv30DaysCents: postShow30,
-    postShowGmv90DaysCents: postShow90,
-    totalObservedGmvCents: totalObserved,
-    repeatPurchaseRate: originalVerified > 0 ? fansWithRepeat / originalVerified : null,
-    observedGmvPerVerifiedFanCents:
-      originalVerified > 0 ? Math.round(totalObserved / originalVerified) : null,
-    isDemoData,
+    event: analysis.event,
+    originalVerifiedAttendees: analysis.funnel.attendees,
+    connectedAfterShow: analysis.connectedAfterShow,
+    connectedFans: analysis.funnel.connectedFans,
+    purchasingFans: analysis.funnel.purchasingFans,
+    postShowPurchasers: analysis.funnel.postShowPurchasers,
+    repeatPurchasers: analysis.funnel.repeatPurchasers,
+    showNightGmvCents: analysis.showNightGmvCents,
+    postShowGmv30DaysCents: analysis.postShowGmv30DaysCents,
+    postShowGmv90DaysCents: analysis.postShowGmv90DaysCents,
+    totalObservedGmvCents: analysis.totalObservedGmvCents,
+    repeatPurchaseRate: analysis.repeatPurchaseRate,
+    observedGmvPerVerifiedFanCents: analysis.observedGmvPerVerifiedFanCents,
+    postShowWindows: analysis.postShowWindows,
+    timeline: analysis.timeline,
+    isDemoData: analysis.isDemoData,
   };
+}
+
+export async function loadShowCohortDetail(
+  ctx: AuthContext,
+  artistId: string,
+  eventId: string,
+  stageParam?: string,
+): Promise<ShowCohortDetail | null> {
+  const metrics = await loadShowCohortMetrics(ctx, artistId, eventId);
+  if (!metrics) return null;
+
+  const event = await getEventById(eventId);
+  if (!event) return null;
+
+  const [eventDemoRow] = await db
+    .select({ isDemo: events.isDemo })
+    .from(events)
+    .where(eq(events.id, eventId))
+    .limit(1);
+
+  const analysis = await analyzeShowCohort(event, Boolean(eventDemoRow?.isDemo));
+  const activeStage = parseCohortStage(stageParam);
+  const fanRows = await loadCohortFanRows(analysis, activeStage);
+
+  return {
+    ...metrics,
+    fanRows,
+    activeStage,
+  };
+}
+
+export async function listShowRelationshipSummaries(
+  ctx: AuthContext,
+  artistId: string,
+): Promise<ShowRelationshipSummary[]> {
+  assertArtistAccess(ctx, artistId);
+  const eventIds = await loadArtistEventIds(artistId);
+  const summaries: ShowRelationshipSummary[] = [];
+
+  for (const eventId of eventIds) {
+    const metrics = await loadShowCohortMetrics(ctx, artistId, eventId);
+    if (!metrics) continue;
+    summaries.push({
+      eventId: metrics.event.id,
+      venueCity: metrics.event.venueCity,
+      tourName: metrics.event.tourName,
+      startsAt: metrics.event.startsAt,
+      timezone: metrics.event.timezone,
+      connectedFans: metrics.connectedFans,
+      purchasingFans: metrics.purchasingFans,
+      postShowPurchasers: metrics.postShowPurchasers,
+      repeatPurchasers: metrics.repeatPurchasers,
+      postShowGmvCents: metrics.postShowGmv90DaysCents,
+    });
+  }
+
+  return summaries;
 }

@@ -9,6 +9,7 @@ import {
   listConsentedFansWithValue,
   loadFanRelationshipMetrics,
 } from "@/server/studio/fan-relationship-queries";
+import { MARISOL_BROOKLYN_EVENT_ID } from "@/lib/demo-user-ids";
 import { formatEventDateShort, formatMoney, initialsOf } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Fans — Artist Studio" };
@@ -30,7 +31,10 @@ export default async function StudioFansPage() {
   ]);
 
   const pastEvents = events.filter((e) => e.endsAt.getTime() < Date.now());
-  const defaultCohortEvent = pastEvents.find((e) => e.venueCity === "Detroit") ?? pastEvents[0];
+  const defaultCohortEvent =
+    pastEvents.find((e) => e.id === MARISOL_BROOKLYN_EVENT_ID) ??
+    pastEvents.find((e) => e.venueCity === "Brooklyn") ??
+    pastEvents[0];
   const cohortHref = defaultCohortEvent
     ? `/studio/fans/cohort/${defaultCohortEvent.id}`
     : undefined;

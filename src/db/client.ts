@@ -94,11 +94,28 @@ export function createDb(url = resolveDatabaseUrl(), options: CreateDbOptions = 
     return createPgliteDb(new PGlite(), "memory://");
   }
 
-  // Always under `data/` so Turbopack can bound the filesystem access it traces.
-  const name = dir.replace(/^data[\\/]/, "");
-  const absolute = resolve(process.cwd(), "data", name);
+  const absolute = resolvePgliteAbsolutePath(dir);
   mkdirSync(absolute, { recursive: true });
-  return createPgliteDb(new PGlite(absolute), `data/${name}`);
+  return createPgliteDb(new PGlite(absolute), dir);
+}
+
+/** Known PGlite dirs only — static segments keep Turbopack from tracing all of `data/**`. */
+function resolvePgliteAbsolutePath(dir: string): string {
+  switch (dir) {
+    case "data/pg-demo":
+      return resolve(process.cwd(), "data", "pg-demo");
+    case "data/pg-verify":
+      return resolve(process.cwd(), "data", "pg-verify");
+    case "data/pg-e2e":
+      return resolve(process.cwd(), "data", "pg-e2e");
+    case "data/pg-run":
+      return resolve(process.cwd(), "data", "pg-run");
+    case DEFAULT_PGLITE_DIR:
+    case "data/pg":
+      return resolve(process.cwd(), "data", "pg");
+    default:
+      return resolve(process.cwd(), "data", "pg");
+  }
 }
 
 /** Wraps an already-constructed PGlite instance. Used by the test harness. */

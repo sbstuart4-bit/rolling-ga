@@ -91,9 +91,24 @@ function isDemoSeedMissingError(error: unknown): boolean {
 function removePgliteDataDir(): void {
   const dir = resolvePgliteDir();
   if (dir === "memory://") return;
-  const name = dir.replace(/^data[\\/]/, "");
-  const absolute = resolve(process.cwd(), "data", name);
-  rmSync(absolute, { recursive: true, force: true });
+  rmSync(resolvePgliteAbsolutePath(dir), { recursive: true, force: true });
+}
+
+function resolvePgliteAbsolutePath(dir: string): string {
+  switch (dir) {
+    case "data/pg-demo":
+      return resolve(process.cwd(), "data", "pg-demo");
+    case "data/pg-verify":
+      return resolve(process.cwd(), "data", "pg-verify");
+    case "data/pg-e2e":
+      return resolve(process.cwd(), "data", "pg-e2e");
+    case "data/pg-run":
+      return resolve(process.cwd(), "data", "pg-run");
+    case "data/pg":
+      return resolve(process.cwd(), "data", "pg");
+    default:
+      return resolve(process.cwd(), "data", "pg");
+  }
 }
 
 /**

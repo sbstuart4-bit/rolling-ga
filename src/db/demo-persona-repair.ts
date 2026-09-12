@@ -16,8 +16,19 @@ const ELENA_EMAIL = "elena@marisolreyes.example";
 const MARCUS_EMAIL = "marcus@thedegens.example";
 
 let repairDb: Db | null = null;
+let boundRepairDb: Db | null = null;
+
+/** Prefer the caller's open handle during build/bootstrap so connections close cleanly. */
+export function bindRepairDb(database: Db): void {
+  boundRepairDb = database;
+}
+
+export function clearRepairDb(): void {
+  boundRepairDb = null;
+}
 
 function getRepairDb(): Db {
+  if (boundRepairDb) return boundRepairDb;
   repairDb ??= createDb().db;
   return repairDb;
 }

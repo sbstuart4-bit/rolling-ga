@@ -4,6 +4,8 @@ import { canSeedProductionDemoDatabase } from "./demo-bootstrap-policy";
 import { createDb, truncateAllTables, type DbHandle } from "./client";
 import {
   areRequiredDemoPersonasReady,
+  bindRepairDb,
+  clearRepairDb,
   repairElenaMarisolDemoAccount,
   repairMarcusValeDemoAccount,
   repairScottDemoAccount,
@@ -41,6 +43,7 @@ export async function prepareHostedDemoDatabase(): Promise<void> {
   const handle = createDb();
 
   try {
+    bindRepairDb(handle.db);
     await runMigrations(handle);
 
     let personasPresent = await areRequiredDemoPersonasReady();
@@ -77,6 +80,7 @@ export async function prepareHostedDemoDatabase(): Promise<void> {
     const summary = await seedDemoData(handle.db, demoAnchorDate());
     console.log(`Seeded ${handle.label}: ${summary}`);
   } finally {
+    clearRepairDb();
     await handle.close();
   }
 }

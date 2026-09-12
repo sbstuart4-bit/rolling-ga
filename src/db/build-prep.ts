@@ -1,7 +1,5 @@
-import { execSync } from "node:child_process";
 import { shouldSeedDemoDatabaseAtBuildTime } from "./demo-bootstrap-policy";
-import { createDb } from "./client";
-import { runMigrations } from "./migrate";
+import { prepareHostedDemoDatabase } from "./dev-bootstrap";
 import { resolveDatabaseUrl } from "@/lib/production-env";
 
 /**
@@ -20,14 +18,6 @@ async function main() {
     return;
   }
 
-  const handle = createDb(databaseUrl);
-  try {
-    await runMigrations(handle);
-    console.log(`Migrations applied to ${handle.label}`);
-  } finally {
-    await handle.close();
-  }
-
   if (!shouldSeedDemoDatabaseAtBuildTime()) {
     console.log(
       "Skipping demo seed at build time (set ROLLING_GA_PUBLIC_GUIDED_DEMO=1, ROLLING_GA_DEMO=1, or ROLLING_GA_ALLOW_DEMO_SEED=1).",
@@ -35,7 +25,7 @@ async function main() {
     return;
   }
 
-  execSync("npm run db:seed", { stdio: "inherit" });
+  await prepareHostedDemoDatabase();
 }
 
 main().catch((error) => {

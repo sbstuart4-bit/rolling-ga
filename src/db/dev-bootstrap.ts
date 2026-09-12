@@ -172,6 +172,7 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
       personasPresent = await requiredDemoPersonasPresent();
     }
     if (personasPresent) {
+      console.log("Demo personas already present — skipping seed.");
       return;
     }
 
@@ -184,6 +185,7 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
         personasPresent: false,
       })
     ) {
+      console.log("Skipping demo seed — database is not empty and auto-seed is not allowed.");
       return;
     }
 
@@ -191,10 +193,16 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
       await truncateAllTables(handle);
     }
 
-    await seedDemoData(handle.db, demoAnchorDate());
+    const summary = await seedDemoData(handle.db, demoAnchorDate());
+    console.log(`Seeded ${handle.label}: ${summary}`);
   } finally {
     await handle.close();
   }
+}
+
+/** Idempotent migrate/repair/seed for Vercel build prep and runtime bootstrap. */
+export async function prepareHostedDemoDatabase(): Promise<void> {
+  await bootstrapProductionDemoDatabase();
 }
 
 async function bootstrapDevDatabase(): Promise<void> {

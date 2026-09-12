@@ -1,5 +1,5 @@
 import { shouldSeedDemoDatabaseAtBuildTime } from "./demo-bootstrap-policy";
-import { prepareHostedDemoDatabase } from "./dev-bootstrap";
+import { prepareHostedDemoDatabase } from "./hosted-demo-bootstrap";
 import { resolveDatabaseUrl } from "@/lib/production-env";
 
 /**

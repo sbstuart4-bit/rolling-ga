@@ -1,19 +1,13 @@
 import { rmSync } from "node:fs";
 import { resolve } from "node:path";
-import { sql } from "drizzle-orm";
 import { demoAnchorDate } from "@/lib/demo-calendar";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { resolveDatabaseUrl } from "@/lib/production-env";
-import { canSeedProductionDemoDatabase } from "./demo-bootstrap-policy";
-import { createDb, resolvePgliteDir, truncateAllTables, type DbHandle } from "./client";
+import { prepareHostedDemoDatabase } from "./hosted-demo-bootstrap";
+import { createDb, resolvePgliteDir, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
-import {
-  areRequiredDemoPersonasReady,
-  repairElenaMarisolDemoAccount,
-  repairMarcusValeDemoAccount,
-  repairScottDemoAccount,
-} from "@/server/demo/ensure-demo-personas";
+import { areRequiredDemoPersonasReady } from "./demo-persona-repair";
 
 /** Guided demos hard-fail when either persona is missing — not just when the user row exists. */
 let bootstrapPromise: Promise<void> | null = null;
@@ -58,31 +52,9 @@ function collectErrorText(error: unknown): string {
   return parts.join(" ");
 }
 
-async function demoUserCount(handle: DbHandle): Promise<number | null> {
-  try {
-    const rows = await handle.db.execute<{ count: number }>(
-      sql`select count(*)::int as count from users where is_demo = true`,
-    );
-    return Number(rows[0]?.count ?? 0);
-  } catch {
-    return null;
-  }
-}
-
 async function requiredDemoPersonasPresent(): Promise<boolean | null> {
   try {
     return await areRequiredDemoPersonasReady();
-  } catch {
-    return null;
-  }
-}
-
-async function countAllUsers(handle: DbHandle): Promise<number | null> {
-  try {
-    const rows = await handle.db.execute<{ count: number }>(
-      sql`select count(*)::int as count from users`,
-    );
-    return Number(rows[0]?.count ?? 0);
   } catch {
     return null;
   }
@@ -157,52 +129,7 @@ export async function ensureDevDatabaseReady(): Promise<void> {
 }
 
 async function bootstrapProductionDemoDatabase(): Promise<void> {
-  const handle = createDb();
-
-  try {
-    await runMigrations(handle);
-
-    let personasPresent = await requiredDemoPersonasPresent();
-    if (!personasPresent) {
-      await Promise.all([
-        repairElenaMarisolDemoAccount(),
-        repairMarcusValeDemoAccount(),
-        repairScottDemoAccount(),
-      ]);
-      personasPresent = await requiredDemoPersonasPresent();
-    }
-    if (personasPresent) {
-      console.log("Demo personas already present — skipping seed.");
-      return;
-    }
-
-    const userCount = await countAllUsers(handle);
-    const seededDemoUsers = await demoUserCount(handle);
-    if (
-      !canSeedProductionDemoDatabase({
-        userCount,
-        demoUserCount: seededDemoUsers,
-        personasPresent: false,
-      })
-    ) {
-      console.log("Skipping demo seed — database is not empty and auto-seed is not allowed.");
-      return;
-    }
-
-    if ((userCount ?? 0) > 0) {
-      await truncateAllTables(handle);
-    }
-
-    const summary = await seedDemoData(handle.db, demoAnchorDate());
-    console.log(`Seeded ${handle.label}: ${summary}`);
-  } finally {
-    await handle.close();
-  }
-}
-
-/** Idempotent migrate/repair/seed for Vercel build prep and runtime bootstrap. */
-export async function prepareHostedDemoDatabase(): Promise<void> {
-  await bootstrapProductionDemoDatabase();
+  await prepareHostedDemoDatabase();
 }
 
 async function bootstrapDevDatabase(): Promise<void> {

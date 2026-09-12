@@ -21,8 +21,8 @@ export default async function WelcomePage(props: PageProps<"/welcome">) {
   const signUpHref = nextPath ? `/sign-up?next=${encodeURIComponent(nextPath)}` : "/sign-up";
   const signInHref = nextPath ? `/sign-in?next=${encodeURIComponent(nextPath)}` : "/sign-in";
   const guestHref = nextPath
-    ? `/sign-in?guest=1&next=${encodeURIComponent(nextPath)}`
-    : "/sign-in?guest=1";
+    ? `/demo?perspective=fan&next=${encodeURIComponent(nextPath)}`
+    : "/demo?perspective=fan";
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#121212]">
@@ -61,7 +61,7 @@ export default async function WelcomePage(props: PageProps<"/welcome">) {
             href={guestHref}
             className="block text-sm font-medium uppercase tracking-wider text-primary hover:text-primary/80"
           >
-            Continue as guest
+            Try as a fan
           </Link>
           <Link
             href="/demo"

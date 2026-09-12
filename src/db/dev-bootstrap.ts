@@ -11,6 +11,7 @@ import { seedDemoData } from "./seed";
 import {
   areRequiredDemoPersonasReady,
   repairElenaMarisolDemoAccount,
+  repairMarcusValeDemoAccount,
   repairScottDemoAccount,
 } from "@/server/demo/ensure-demo-personas";
 
@@ -163,7 +164,11 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
 
     let personasPresent = await requiredDemoPersonasPresent();
     if (!personasPresent) {
-      await Promise.all([repairElenaMarisolDemoAccount(), repairScottDemoAccount()]);
+      await Promise.all([
+        repairElenaMarisolDemoAccount(),
+        repairMarcusValeDemoAccount(),
+        repairScottDemoAccount(),
+      ]);
       personasPresent = await requiredDemoPersonasPresent();
     }
     if (personasPresent) {

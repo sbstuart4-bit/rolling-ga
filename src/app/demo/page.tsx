@@ -21,7 +21,7 @@ import { demoModeEnabled, listDemoAccounts, type DemoAccount } from "@/server/de
 import { getDemoClockState } from "@/server/demo/clock";
 import { getDemoScenario } from "@/server/demo/scenario-state";
 import { startPersonaAction, startScottMarisolBrooklynLiveAction } from "@/server/demo/persona-actions";
-import { startArtistGuidedDemoAction } from "@/server/demo/artist-guided-demo-actions";
+import { MARCUS_VALE_EMAIL } from "@/server/demo/persona-destinations";
 
 export const metadata: Metadata = { title: "Demo board — Rolling GA" };
 export const dynamic = "force-dynamic";
@@ -156,17 +156,16 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
                   Featured artist walkthrough
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground text-balance">
-                  Six-step guided tour of Marisol Reyes Artist Studio — Brooklyn · A Tender Night.
-                  Signs in as Elena Vasquez and walks the real show → merch → fans → activation
-                  story.
+                  Signs in as Marcus Vale and opens The Degens Artist Studio — tour, live show
+                  control, drops, and fan CRM.
                 </p>
-                <form action={startArtistGuidedDemoAction} className="mt-4">
-                  <input type="hidden" name="journeyId" value="marisol-artist-studio" />
+                <form action={startPersonaAction} className="mt-4">
+                  <input type="hidden" name="email" value={MARCUS_VALE_EMAIL} />
                   <Button
                     type="submit"
                     className="h-11 w-full bg-primary uppercase tracking-wider hover:bg-primary/90 sm:w-auto"
                   >
-                    Run Marisol Artist Studio demo
+                    Start The Degens Artist Studio
                   </Button>
                 </form>
               </section>
@@ -182,9 +181,9 @@ export default async function DemoBoardPage(props: PageProps<"/demo">) {
 
         {boardAccess && perspective !== "ops" && (
           <p className="text-center text-sm text-muted-foreground">
-            Rather sign in by hand?{" "}
+            Have a real account?{" "}
             <Link href="/sign-in" className="font-medium text-primary hover:underline">
-              Use the sign-in form
+              Log in
             </Link>
           </p>
         )}

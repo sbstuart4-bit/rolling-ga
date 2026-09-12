@@ -9,6 +9,7 @@ import { credentialProvider } from "./credentials";
 import { assertUser } from "./guards";
 import { hashPassword } from "./password";
 import { demoModeEnabled } from "@/lib/demo-mode";
+import { getPersonaDestination } from "@/server/demo/persona-destinations";
 import {
   createSession,
   destroySession,
@@ -57,8 +58,14 @@ export async function signInAction(
   }
 
   await pruneExpiredSessions();
+  await destroySession();
   await createSession(result.userId);
-  redirect(safeRedirectTarget(parsed.data.next));
+
+  const explicitNext = parsed.data.next?.trim();
+  const personaDestination =
+    demoModeEnabled() && !explicitNext ? getPersonaDestination(parsed.data.email) : undefined;
+
+  redirect(personaDestination ?? safeRedirectTarget(explicitNext));
 }
 
 export interface SignUpState {
@@ -117,8 +124,12 @@ export async function signUpAction(_prev: SignUpState, formData: FormData): Prom
   redirect(`/onboarding${target !== "/" ? `?next=${encodeURIComponent(target)}` : ""}`);
 }
 
-export async function signOutAction(): Promise<void> {
+export async function signOutAction(formData?: FormData): Promise<void> {
   await destroySession();
+  const returnTo = formData?.get("returnTo");
+  if (typeof returnTo === "string" && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+    redirect(returnTo);
+  }
   redirect(demoModeEnabled() ? "/demo" : "/sign-in");
 }
 

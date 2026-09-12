@@ -1,7 +1,7 @@
 import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
 import { StudioDesktopFrame } from "@/components/marketing/studio-desktop-frame";
 import { MktEyebrow, MktSectionShell } from "@/components/marketing/site";
-import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
+import { experienceMarisolArtistStudioAction } from "@/server/marketing/demo-entry";
 
 /**
  * Homepage Artist Studio — Marisol Reyes tour overview mockup.
@@ -22,7 +22,7 @@ export function HomeArtistStudio() {
             to keep the conversation going after the show.
           </p>
 
-          <form action={experienceArtistStudioAction} className="mt-10">
+          <form action={experienceMarisolArtistStudioAction} className="mt-10">
             <ExperienceNovaButton label="Explore the Artist Studio" />
           </form>
         </div>

@@ -20,7 +20,7 @@ export function ExperienceNovaButton({
 }) {
   const { pending } = useFormStatus();
   const resolvedLabel =
-    label ?? (compact ? "See the Artist Demo" : "See the Artist Demo");
+    label ?? (compact ? "Experience the Demo" : "Experience the Demo");
 
   return (
     <button

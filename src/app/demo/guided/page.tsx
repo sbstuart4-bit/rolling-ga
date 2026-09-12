@@ -37,17 +37,17 @@ export default async function GuidedDemoChooserPage({
           <p className="mt-3 max-w-sm text-sm text-muted-foreground text-balance">
             {seedMissing ? (
               <>
-                Demo mode is enabled, but Scott Weller and Elena Vasquez are not in this database
-                yet. If this is a fresh deploy, try the homepage demo again in a minute — the
-                first visit seeds the database. If it keeps failing, confirm{" "}
+                Demo mode is enabled, but the seeded demo personas are missing from this database
+                (Scott Weller for fan demos, Marcus Vale for Artist Studio). Locally, run{" "}
                 <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
-                  ROLLING_GA_PUBLIC_GUIDED_DEMO=1
+                  npm run db:reset
                 </code>{" "}
-                is set on Vercel and redeploy so the build can run{" "}
+                and restart{" "}
                 <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
-                  db:seed
+                  npm run dev
                 </code>
-                .
+                . On a hosted deploy, run migrations and the demo seed against the production
+                database, then redeploy.
               </>
             ) : (
               <>

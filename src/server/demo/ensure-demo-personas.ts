@@ -5,8 +5,10 @@ import { db } from "@/db";
 import { artistMembers, artists, userRoles, users } from "@/db/schema";
 import {
   DEMO_ELENA_MARISOL_ID,
+  DEMO_MARCUS_DEGENS_ID,
   DEMO_SCOTT_FAN_ID,
   MARISOL_ARTIST_ID,
+  THE_DEGENS_ARTIST_ID,
 } from "@/lib/demo-user-ids";
 import { DEMO_PASSWORD } from "@/db/seed";
 import { canAccessArtist, hasAnyRole } from "@/server/auth/guards";
@@ -15,6 +17,7 @@ import type { AuthContext } from "@/server/auth/session";
 
 const SCOTT_EMAIL = "scott@example.com";
 const ELENA_EMAIL = "elena@marisolreyes.example";
+const MARCUS_EMAIL = "marcus@thedegens.example";
 
 let cachedDemoPasswordHash: string | null = null;
 
@@ -52,20 +55,20 @@ async function hasFanRole(userId: string): Promise<boolean> {
   return Boolean(row);
 }
 
-async function hasMarisolMembership(userId: string): Promise<boolean> {
+async function artistExists(artistId: string): Promise<boolean> {
   const [row] = await db
-    .select({ artistId: artistMembers.artistId })
-    .from(artistMembers)
-    .where(and(eq(artistMembers.userId, userId), eq(artistMembers.artistId, MARISOL_ARTIST_ID)))
+    .select({ id: artists.id })
+    .from(artists)
+    .where(eq(artists.id, artistId))
     .limit(1);
   return Boolean(row);
 }
 
-async function marisolArtistExists(): Promise<boolean> {
+async function hasArtistMembership(userId: string, artistId: string): Promise<boolean> {
   const [row] = await db
-    .select({ id: artists.id })
-    .from(artists)
-    .where(eq(artists.id, MARISOL_ARTIST_ID))
+    .select({ artistId: artistMembers.artistId })
+    .from(artistMembers)
+    .where(and(eq(artistMembers.userId, userId), eq(artistMembers.artistId, artistId)))
     .limit(1);
   return Boolean(row);
 }
@@ -74,9 +77,18 @@ async function marisolArtistExists(): Promise<boolean> {
 export async function isElenaMarisolDemoAccountReady(): Promise<boolean> {
   const userId = await userIdForEmail(ELENA_EMAIL);
   if (!userId) return false;
-  if (!(await marisolArtistExists())) return false;
+  if (!(await artistExists(MARISOL_ARTIST_ID))) return false;
   if (!(await hasArtistMemberRole(userId))) return false;
-  return hasMarisolMembership(userId);
+  return hasArtistMembership(userId, MARISOL_ARTIST_ID);
+}
+
+/** True when Marcus can run The Degens Artist Studio demo. */
+export async function isMarcusValeDemoAccountReady(): Promise<boolean> {
+  const userId = await userIdForEmail(MARCUS_EMAIL);
+  if (!userId) return false;
+  if (!(await artistExists(THE_DEGENS_ARTIST_ID))) return false;
+  if (!(await hasArtistMemberRole(userId))) return false;
+  return hasArtistMembership(userId, THE_DEGENS_ARTIST_ID);
 }
 
 /** True when Scott can run the fan guided demo. */
@@ -99,7 +111,7 @@ export async function areRequiredDemoPersonasReady(): Promise<boolean> {
  * Safe to call repeatedly — only inserts missing rows.
  */
 export async function repairElenaMarisolDemoAccount(): Promise<boolean> {
-  if (!(await marisolArtistExists())) return false;
+  if (!(await artistExists(MARISOL_ARTIST_ID))) return false;
 
   let userId = await userIdForEmail(ELENA_EMAIL);
   if (!userId) {
@@ -141,6 +153,51 @@ export async function repairElenaMarisolDemoAccount(): Promise<boolean> {
     });
 
   return isElenaMarisolDemoAccountReady();
+}
+
+export async function repairMarcusValeDemoAccount(): Promise<boolean> {
+  if (!(await artistExists(THE_DEGENS_ARTIST_ID))) return false;
+
+  let userId = await userIdForEmail(MARCUS_EMAIL);
+  if (!userId) {
+    userId = DEMO_MARCUS_DEGENS_ID;
+    await db
+      .insert(users)
+      .values({
+        id: userId,
+        email: MARCUS_EMAIL,
+        displayName: "Marcus Vale",
+        passwordHash: await demoPasswordHash(),
+        onboardingCompletedAt: new Date(),
+        isDemo: true,
+      })
+      .onConflictDoNothing();
+  }
+
+  await db
+    .insert(userRoles)
+    .values({ userId, role: "artist_member" })
+    .onConflictDoNothing();
+
+  await db
+    .insert(artistMembers)
+    .values({
+      artistId: THE_DEGENS_ARTIST_ID,
+      userId,
+      role: "management",
+      canPublish: true,
+      isDemo: true,
+    })
+    .onConflictDoUpdate({
+      target: [artistMembers.artistId, artistMembers.userId],
+      set: {
+        role: "management",
+        canPublish: true,
+        isDemo: true,
+      },
+    });
+
+  return isMarcusValeDemoAccountReady();
 }
 
 export async function repairScottDemoAccount(): Promise<boolean> {

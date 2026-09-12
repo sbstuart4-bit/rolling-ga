@@ -10,20 +10,14 @@ import { demoMarisolBrooklynEventSlug } from "@/lib/demo-calendar";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
 import { applyDemoClockForPhase } from "./apply-demo-clock";
 import { setFanShowContextSlug } from "@/server/fans/show-context";
+import {
+  getPersonaDestination,
+  MARCUS_VALE_EMAIL,
+} from "@/server/demo/persona-destinations";
+import { repairMarcusValeDemoAccount } from "@/server/demo/ensure-demo-personas";
 import { demoModeEnabled } from "./accounts";
 
 const SCOTT_EMAIL = "scott@example.com";
-
-/** Where each curated persona lands — the part of the product their role actually owns. */
-const PERSONA_DESTINATIONS: Record<string, string> = {
-  "scott@example.com": "/",
-  "marcus@thedegens.example": "/studio/live",
-  "elena@marisolreyes.example": "/studio/live/evt_marisol_brooklyn",
-  "dana@novakestrel.example": "/studio/drops",
-  "priya@thelowcountry.example": "/studio/tour",
-  "admin@rollingga.example": "/studio/insights",
-  "ops@rollingga.example": "/ops",
-};
 
 /**
  * Signs straight in as a curated demo persona — no password required. This only ever
@@ -35,8 +29,12 @@ export async function startPersonaAction(formData: FormData): Promise<void> {
   if (!(await hasDemoBoardAccess())) redirect("/demo");
 
   const email = String(formData.get("email") ?? "");
-  const destination = PERSONA_DESTINATIONS[email];
+  const destination = getPersonaDestination(email);
   if (!destination) redirect("/demo");
+
+  if (email === MARCUS_VALE_EMAIL) {
+    await repairMarcusValeDemoAccount();
+  }
 
   const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
   if (!user) redirect("/demo");

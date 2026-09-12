@@ -1,70 +1,119 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { activeArtistGuidedJourneyId } from "@/lib/artist-guided-demo";
-import { activeGuidedJourneyId, getGuidedJourney, resolveGuidedRoute } from "@/lib/guided-demo";
-import { MARISOL_BROOKLYN_EVENT_ID } from "@/lib/demo-user-ids";
-import { getDemoShow } from "@/lib/demo-scenario/shows";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { withDevDatabaseRecovery } from "@/db/dev-bootstrap";
+import { users } from "@/db/schema";
+import { MARISOL_ARTIST_ID, THE_DEGENS_ARTIST_ID } from "@/lib/demo-user-ids";
 import { demoModeEnabled } from "@/lib/demo-mode";
+import {
+  ELENA_MARISOL_EMAIL,
+  getPersonaDestination,
+  MARCUS_VALE_EMAIL,
+} from "@/server/demo/persona-destinations";
+import {
+  repairElenaMarisolDemoAccount,
+  repairMarcusValeDemoAccount,
+} from "@/server/demo/ensure-demo-personas";
+import {
+  createSession,
+  destroySession,
+  getAuthContext,
+  setActiveArtist,
+} from "@/server/auth/session";
 
-function redirectToEnterGuidedDemo(returnTo: string): void {
+const PERSONA_ACTIVE_ARTIST: Record<string, string> = {
+  [MARCUS_VALE_EMAIL]: THE_DEGENS_ARTIST_ID,
+  [ELENA_MARISOL_EMAIL]: MARISOL_ARTIST_ID,
+};
+
+const PERSONA_REPAIR: Partial<Record<string, () => Promise<boolean>>> = {
+  [MARCUS_VALE_EMAIL]: repairMarcusValeDemoAccount,
+  [ELENA_MARISOL_EMAIL]: repairElenaMarisolDemoAccount,
+};
+
+/**
+ * Signs in as a curated demo persona from marketing CTAs — no password or demo-board
+ * access cookie required. Bootstraps and repairs the persona before signing in.
+ */
+async function enterDemoPersona(email: string): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
-  redirect(`/api/demo/enter-guided?returnTo=${encodeURIComponent(returnTo)}`);
-}
 
-function fanMarketingDemoReturnTo(): string {
-  const journeyId = activeGuidedJourneyId();
-  const journey = getGuidedJourney(journeyId);
-  const step = journey?.steps[0];
-  const show = journey ? getDemoShow(journey.showKey) : undefined;
-  if (!step || !show) return "/demo/guided";
+  const destination = getPersonaDestination(email);
+  if (!destination) redirect("/demo");
 
-  const route = resolveGuidedRoute(step.route, show);
-  return `${route}?guided=${journeyId}&step=1`;
-}
+  await withDevDatabaseRecovery(async () => {
+    await PERSONA_REPAIR[email]?.();
 
-function artistMarketingDemoReturnTo(): string {
-  const journeyId = activeArtistGuidedJourneyId();
-  return `/studio/live/${MARISOL_BROOKLYN_EVENT_ID}?guided=${journeyId}&step=1`;
+    const [user] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    if (!user) redirect("/demo/guided?unavailable=seed");
+
+    await destroySession();
+    await createSession(user.id);
+
+    const activeArtist = PERSONA_ACTIVE_ARTIST[email];
+    if (activeArtist) {
+      const ctx = await getAuthContext();
+      if (ctx) await setActiveArtist(ctx.sessionId, activeArtist);
+    }
+
+    redirect(destination);
+  });
 }
 
 /**
- * Marketing's primary artist conversion path: Marisol Artist Studio guided demo.
- *
- * Public marketing entry skips the demo-board access cookie — the board gate
- * still protects manual persona login on /demo for hosted deployments.
+ * Marketing artist conversion — Marcus Vale in The Degens Artist Studio.
  */
 export async function experienceArtistStudioAction(): Promise<void> {
-  redirectToEnterGuidedDemo(artistMarketingDemoReturnTo());
+  await enterDemoPersona(MARCUS_VALE_EMAIL);
+}
+
+/**
+ * Homepage hero — Elena Vasquez in Marisol Reyes Artist Studio (Brooklyn live show).
+ */
+export async function experienceMarisolArtistStudioAction(): Promise<void> {
+  await enterDemoPersona(ELENA_MARISOL_EMAIL);
 }
 
 /**
  * Fan-side Marisol guided journey — for /for-fans and fan-focused marketing surfaces.
  */
 export async function experienceMarisolReyesFanAction(): Promise<void> {
-  redirectToEnterGuidedDemo(fanMarketingDemoReturnTo());
+  const { activeGuidedJourneyId, getGuidedJourney, resolveGuidedRoute } = await import(
+    "@/lib/guided-demo"
+  );
+  const { getDemoShow } = await import("@/lib/demo-scenario/shows");
+
+  if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
+
+  const journeyId = activeGuidedJourneyId();
+  const journey = getGuidedJourney(journeyId);
+  const step = journey?.steps[0];
+  const show = journey ? getDemoShow(journey.showKey) : undefined;
+  if (!step || !show) redirect("/demo/guided");
+
+  const route = resolveGuidedRoute(step.route, show);
+  redirect(`/api/demo/enter-guided?returnTo=${encodeURIComponent(`${route}?guided=${journeyId}&step=1`)}`);
 }
 
 /**
  * @deprecated Prefer experienceArtistStudioAction or experienceMarisolReyesFanAction.
- * Routes to the artist studio guided demo for legacy CTAs labeled "See the Artist Demo".
  */
 export async function experienceMarisolReyesAction(): Promise<void> {
-  redirectToEnterGuidedDemo(artistMarketingDemoReturnTo());
+  await experienceArtistStudioAction();
 }
 
-/**
- * Legacy Nova entry — retained for bookmarks and pages that still call it.
- * Routes to the active Marisol guided journey.
- */
+/** @deprecated Legacy Nova entry — routes to Marcus Vale Artist Studio. */
 export async function experienceNovaKestrelAction(): Promise<void> {
-  redirectToEnterGuidedDemo(artistMarketingDemoReturnTo());
+  await experienceArtistStudioAction();
 }
 
-/**
- * Legacy Degens entry — retained for pages that still call it until the approved
- * site fully replaces them.
- */
+/** @deprecated Legacy Degens entry — routes to the fan guided journey. */
 export async function experienceDegensDetroitAction(): Promise<void> {
-  redirectToEnterGuidedDemo(fanMarketingDemoReturnTo());
+  await experienceMarisolReyesFanAction();
 }

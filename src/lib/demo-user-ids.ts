@@ -20,7 +20,9 @@ export function demoUserId(key: string): string {
 
 export const DEMO_SCOTT_FAN_ID = demoUserId("fan_scott");
 export const DEMO_ELENA_MARISOL_ID = demoUserId("team_marisol");
+export const DEMO_MARCUS_DEGENS_ID = demoUserId("team_degens");
 
+export const THE_DEGENS_ARTIST_ID = "art_the_degens";
 export const MARISOL_ARTIST_ID = "art_marisol_reyes";
 export const MARISOL_BROOKLYN_EVENT_ID = "evt_marisol_brooklyn";
 export const BROOKLYN_ENCORE_ACTIVATION_DROP_ID = "drp_brooklyn_encore_activation";

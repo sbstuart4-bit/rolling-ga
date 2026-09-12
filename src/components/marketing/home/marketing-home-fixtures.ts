@@ -83,8 +83,8 @@ export const MARISOL_REYES_MY_SHOWS_SCREENSHOT = `/marketing/marisol-reyes-my-sh
 export const MARISOL_REYES_CREDENTIAL_SCREENSHOT = `/marketing/marisol-reyes-credential-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
 export const MARISOL_REYES_STUDIO_SCREENSHOT = `/marketing/marisol-reyes-artist-studio-desktop.png?v=${MARKETING_SCREENSHOT_VERSION}`;
 
-/** Primary marketing demo CTA label across the site. */
-export const MARKETING_DEMO_CTA_LABEL = "See the Artist Demo";
+/** Primary marketing demo CTA label — enters Marcus Vale Artist Studio directly. */
+export const MARKETING_DEMO_CTA_LABEL = "Experience the Demo";
 
 /** Fan-journey demo CTA for /for-fans and fan-focused sections. */
 export const MARKETING_FAN_DEMO_CTA_LABEL = "Experience Marisol's Show";

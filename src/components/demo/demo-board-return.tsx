@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, LayoutGrid } from "lucide-react";
+import { ChevronRight, Users } from "lucide-react";
 import { returnToDemoBoardAction } from "@/server/demo/session-actions";
 import { cn } from "@/lib/utils";
 
@@ -25,10 +25,10 @@ export function DemoBoardReturn({
             "flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
             className,
           )}
-          aria-label="Demo board"
-          title="Demo board — switch persona or clock"
+          aria-label="Switch persona"
+          title="Switch persona — try fan, artist, or ops views"
         >
-          <LayoutGrid className="size-[18px]" aria-hidden />
+          <Users className="size-[18px]" aria-hidden />
         </button>
       </form>
     );
@@ -44,10 +44,10 @@ export function DemoBoardReturn({
             className,
           )}
         >
-          <LayoutGrid className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+          <Users className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">Demo board</p>
-            <p className="text-xs text-muted-foreground">Switch persona or adjust the clock</p>
+            <p className="text-sm font-medium">Switch persona</p>
+            <p className="text-xs text-muted-foreground">Try fan, artist, or ops views</p>
           </div>
           <ChevronRight className="size-4 shrink-0 text-muted-foreground/50" aria-hidden />
         </button>
@@ -61,7 +61,7 @@ export function DemoBoardReturn({
         type="submit"
         className={cn("text-sm font-medium text-primary hover:underline", className)}
       >
-        Demo board
+        Switch persona
       </button>
     </form>
   );

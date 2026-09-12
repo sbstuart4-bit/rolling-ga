@@ -10,7 +10,7 @@ import {
   MktEyebrow,
   MktOutlineButton,
 } from "@/components/marketing/site";
-import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
+import { experienceMarisolArtistStudioAction } from "@/server/marketing/demo-entry";
 
 /**
  * Approved homepage hero — full-bleed stage photography with artist-focused copy.
@@ -55,10 +55,10 @@ export function HomeHero() {
           </p>
 
           <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5">
-            <form action={experienceArtistStudioAction} className="w-full sm:w-auto">
+            <form action={experienceMarisolArtistStudioAction} className="w-full sm:w-auto">
               <ExperienceNovaButton
                 size="large"
-                label="See the Artist Demo"
+                label="Experience the Demo"
                 className="w-full sm:w-auto"
               />
             </form>

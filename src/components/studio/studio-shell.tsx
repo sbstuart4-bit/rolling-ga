@@ -76,7 +76,10 @@ export function StudioShell({
               {sidebar}
             </SheetContent>
           </Sheet>
-          <span className="text-sm font-semibold">{activeArtist?.name ?? "Artist Studio"}</span>
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+            {activeArtist?.name ?? "Artist Studio"}
+          </span>
+          {demoMode && <DemoBoardReturn variant="compact" show />}
         </header>
 
         <main

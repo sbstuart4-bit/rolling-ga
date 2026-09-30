@@ -1,11 +1,12 @@
 import { and, eq, inArray } from "drizzle-orm";
-import { artistMembers, artists, userRoles, users } from "@/db/schema";
+import { artistMembers, artists, events, userRoles, users } from "@/db/schema";
 import { createDb, type Db } from "./client";
 import {
   DEMO_ELENA_MARISOL_ID,
   DEMO_MARCUS_DEGENS_ID,
   DEMO_SCOTT_FAN_ID,
   MARISOL_ARTIST_ID,
+  MARISOL_BROOKLYN_EVENT_ID,
   THE_DEGENS_ARTIST_ID,
 } from "@/lib/demo-user-ids";
 import { hashPassword } from "@/server/auth/password";
@@ -118,6 +119,27 @@ export async function areRequiredDemoPersonasReady(): Promise<boolean> {
     isElenaMarisolDemoAccountReady(),
   ]);
   return scott && elena;
+}
+
+/** Flagship Marisol show + artist rows required for guided fan and Artist Studio demos. */
+export async function isGuidedDemoCatalogReady(): Promise<boolean> {
+  try {
+    const [artist, event] = await Promise.all([
+      getRepairDb()
+        .select({ id: artists.id })
+        .from(artists)
+        .where(eq(artists.id, MARISOL_ARTIST_ID))
+        .limit(1),
+      getRepairDb()
+        .select({ id: events.id })
+        .from(events)
+        .where(eq(events.id, MARISOL_BROOKLYN_EVENT_ID))
+        .limit(1),
+    ]);
+    return Boolean(artist[0] && event[0]);
+  } catch {
+    return false;
+  }
 }
 
 export async function repairElenaMarisolDemoAccount(): Promise<boolean> {

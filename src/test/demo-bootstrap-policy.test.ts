@@ -64,7 +64,7 @@ describe("canSeedProductionDemoDatabase", () => {
     ).toBe(false);
   });
 
-  it("skips when personas are already present", () => {
+  it("skips when personas and catalog are already present", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("ROLLING_GA_PUBLIC_GUIDED_DEMO", "1");
 
@@ -73,8 +73,23 @@ describe("canSeedProductionDemoDatabase", () => {
         userCount: 0,
         demoUserCount: 0,
         personasPresent: true,
+        catalogReady: true,
       }),
     ).toBe(false);
+  });
+
+  it("re-seeds demo-only databases when personas exist but catalog is incomplete", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ROLLING_GA_PUBLIC_GUIDED_DEMO", "1");
+
+    expect(
+      canSeedProductionDemoDatabase({
+        userCount: 3,
+        demoUserCount: 3,
+        personasPresent: true,
+        catalogReady: false,
+      }),
+    ).toBe(true);
   });
 });
 

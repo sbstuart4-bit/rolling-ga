@@ -8,6 +8,8 @@ export interface ProductionDemoSeedDecisionInput {
   userCount: number | null;
   demoUserCount: number | null;
   personasPresent: boolean;
+  /** Marisol Brooklyn event + artist rows from the full demo seed. */
+  catalogReady?: boolean;
 }
 
 /**
@@ -21,18 +23,24 @@ export function canSeedProductionDemoDatabase({
   userCount,
   demoUserCount,
   personasPresent,
+  catalogReady = false,
 }: ProductionDemoSeedDecisionInput): boolean {
-  if (personasPresent) return false;
+  if (personasPresent && catalogReady) return false;
   if (process.env.ROLLING_GA_ALLOW_DEMO_SEED === "1") return true;
   if (!isProductionRuntime() || !demoModeEnabled()) return false;
   if (userCount === 0) return true;
 
-  return (
+  const demoOnlyDatabase =
     userCount !== null &&
     demoUserCount !== null &&
     userCount === demoUserCount &&
-    userCount > 0
-  );
+    userCount > 0;
+
+  if (personasPresent && !catalogReady) {
+    return demoOnlyDatabase;
+  }
+
+  return demoOnlyDatabase;
 }
 
 /** Whether Vercel should seed during vercel-build. */

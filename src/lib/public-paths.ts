@@ -70,6 +70,23 @@ export function shouldRewriteRootToMarketing({
 }
 
 /**
+ * Marketing hosts (`ROLLING_GA_PUBLIC_GUIDED_DEMO` without full demo board): a fresh
+ * open of `/` shows `/home` even when a demo session cookie is still present.
+ * In-app navigation (e.g. Live tab) keeps the fan feed at `/`.
+ */
+export function shouldRewritePublicDemoRootToMarketing({
+  pathname,
+  fullDemoBoard,
+  inAppNavigation,
+}: {
+  pathname: string;
+  fullDemoBoard: boolean;
+  inAppNavigation: boolean;
+}): boolean {
+  return pathname === "/" && !fullDemoBoard && !inAppNavigation;
+}
+
+/**
  * `npm run dev` opens the marketing homepage. In-app navigation to `/` still
  * reaches the fan feed; production demo-board routing is unchanged.
  */

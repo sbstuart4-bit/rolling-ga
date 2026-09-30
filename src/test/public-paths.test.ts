@@ -4,6 +4,7 @@ import {
   isStaticAssetPath,
   MARKETING_PATHS,
   shouldRewriteDevRootToMarketing,
+  shouldRewritePublicDemoRootToMarketing,
   shouldRewriteRootToMarketing,
 } from "@/lib/public-paths";
 
@@ -55,6 +56,30 @@ describe("public paths", () => {
       shouldRewriteDevRootToMarketing({
         pathname: "/",
         isProduction: true,
+        inAppNavigation: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("rewrites public guided-demo root for fresh visits even with a session", () => {
+    expect(
+      shouldRewritePublicDemoRootToMarketing({
+        pathname: "/",
+        fullDemoBoard: false,
+        inAppNavigation: false,
+      }),
+    ).toBe(true);
+    expect(
+      shouldRewritePublicDemoRootToMarketing({
+        pathname: "/",
+        fullDemoBoard: false,
+        inAppNavigation: true,
+      }),
+    ).toBe(false);
+    expect(
+      shouldRewritePublicDemoRootToMarketing({
+        pathname: "/",
+        fullDemoBoard: true,
         inAppNavigation: false,
       }),
     ).toBe(false);

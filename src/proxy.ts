@@ -12,6 +12,7 @@ import {
   isPublicPath,
   isStaticAssetPath,
   shouldRewriteDevRootToMarketing,
+  shouldRewritePublicDemoRootToMarketing,
   shouldRewriteRootToMarketing,
 } from "@/lib/public-paths";
 import { shouldAllowGuidedDemoRequest, GUIDED_DEMO_ENTRY_HEADER } from "@/lib/guided-demo-entry";
@@ -152,6 +153,16 @@ export async function proxy(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(GUIDED_DEMO_ENTRY_HEADER, `${pathname}${search}`);
     return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  if (
+    shouldRewritePublicDemoRootToMarketing({
+      pathname,
+      fullDemoBoard,
+      inAppNavigation,
+    })
+  ) {
+    return NextResponse.rewrite(new URL("/home", request.url));
   }
 
   if (sessionId) return NextResponse.next();

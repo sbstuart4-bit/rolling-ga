@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { DemoAssetAuditEntry, DemoAssetArtist } from "@/lib/demo-asset-audit";
+import type { DemoAssetAuditEntry, DemoAssetArtist } from "@/lib/demo-asset-audit-types";
 
 const FILTER_LABELS: Record<string, string> = {
   all: "All",

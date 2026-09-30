@@ -1,6 +1,8 @@
 /**
  * Demo asset inventory and audit helpers for Rolling GA Ops Asset QA.
  */
+import "server-only";
+
 import { existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -9,59 +11,25 @@ import {
   DEMO_PRODUCT_IMAGES,
   THE_DEGENS_DEMO_ASSETS,
 } from "@/lib/demo-assets";
+import type {
+  ArtistQaResult,
+  ArtistQaSurface,
+  DemoAssetArtist,
+  DemoAssetAuditEntry,
+  DemoAssetStatus,
+  DemoAssetType,
+  UnmappedReason,
+} from "@/lib/demo-asset-audit-types";
 
-export type DemoAssetArtist =
-  | "the_degens"
-  | "nova_kestrel"
-  | "the_low_country"
-  | "marisol_reyes"
-  | "shared"
-  | "unknown";
-
-export type DemoAssetType =
-  | "artist_portrait"
-  | "band_portrait"
-  | "artist_logo"
-  | "show_hero"
-  | "show_poster"
-  | "product"
-  | "drop"
-  | "city"
-  | "placeholder_svg"
-  | "other"
-  | "unknown";
-
-export type DemoAssetStatus =
-  | "mapped"
-  | "unused"
-  | "unmapped"
-  | "missing"
-  | "broken"
-  | "placeholder_active";
-
-export type UnmappedReason =
-  | "no_catalog_entity"
-  | "duplicate_png"
-  | "unknown";
-
-export interface DemoAssetAuditEntry {
-  filename: string;
-  path: string;
-  extension: string;
-  artist: DemoAssetArtist;
-  assetType: DemoAssetType;
-  entityId: string | null;
-  referenced: boolean;
-  referenceLocations: string[];
-  fileExists: boolean;
-  broken: boolean;
-  status: DemoAssetStatus;
-  statusLabel: string;
-  /** When status is unmapped/unused — why the file is not wired into the registry. */
-  unmappedReason?: UnmappedReason;
-  /** Paired placeholder or canonical file, e.g. svg ↔ png. */
-  duplicateOf?: string;
-}
+export type {
+  ArtistQaResult,
+  ArtistQaSurface,
+  DemoAssetArtist,
+  DemoAssetAuditEntry,
+  DemoAssetStatus,
+  DemoAssetType,
+  UnmappedReason,
+} from "@/lib/demo-asset-audit-types";
 
 const PUBLIC_DEMO = resolve(process.cwd(), "public", "demo");
 
@@ -348,23 +316,6 @@ export function missingProductAssets(entries: DemoAssetAuditEntry[]): string[] {
     .map(([id]) => id);
 }
 
-export type ArtistQaSurface =
-  | "artist_card"
-  | "artist_band_image"
-  | "show_hero"
-  | "product_grid"
-  | "drop"
-  | "product_detail"
-  | "my_shows";
-
-export interface ArtistQaResult {
-  surface: ArtistQaSurface;
-  pass: boolean;
-  expected?: string;
-  actual?: string;
-  rootCause?: string;
-}
-
 const ARTIST_QA_LABELS: Record<ArtistQaSurface, string> = {
   artist_card: "Artist card",
   artist_band_image: "Artist/band image",
@@ -453,19 +404,4 @@ export function buildArtistQaMatrix(
 
 export function qaSurfaceLabel(surface: ArtistQaSurface): string {
   return ARTIST_QA_LABELS[surface];
-}
-
-/** Best preview URL for the Asset QA grid — prefers PNG pairs over raw SVG when available. */
-export function resolveAssetPreviewPath(entry: DemoAssetAuditEntry): string {
-  if (/\.(png|jpe?g|webp)$/i.test(entry.path) && entry.fileExists) {
-    return entry.path;
-  }
-  if (entry.duplicateOf && /\.(png|jpe?g|webp)$/i.test(entry.duplicateOf)) {
-    return `/demo/${entry.duplicateOf}`;
-  }
-  return entry.path;
-}
-
-export function isVectorAssetPath(path: string): boolean {
-  return /\.svg(\?.*)?$/i.test(path);
 }

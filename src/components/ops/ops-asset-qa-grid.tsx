@@ -3,11 +3,11 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { DemoAssetAuditEntry, DemoAssetStatus } from "@/lib/demo-asset-audit";
+import type { DemoAssetAuditEntry, DemoAssetStatus } from "@/lib/demo-asset-audit-types";
 import {
   isVectorAssetPath,
   resolveAssetPreviewPath,
-} from "@/lib/demo-asset-audit";
+} from "@/lib/demo-asset-audit-preview";
 
 const FILTER_LABELS: Record<string, string> = {
   all: "All",

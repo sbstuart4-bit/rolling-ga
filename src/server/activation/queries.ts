@@ -226,7 +226,8 @@ export async function listActivationsForEvent(
   const summaries: ActivationDropSummary[] = [];
 
   for (const row of rows) {
-    const params = row.segment.params as AudienceRuleParams;
+    const params = row.segment.params as AudienceRuleParams | null;
+    if (!params || !isShowCohortParams(params)) continue;
     if (params.originEventId !== originEventId) continue;
 
     const results = await loadActivationResults(artistId, row.drop.id);

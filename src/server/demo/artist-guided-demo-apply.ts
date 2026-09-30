@@ -3,7 +3,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { withDevDatabaseRecovery } from "@/db/dev-bootstrap";
+import { ensureDevDatabaseReady, withDevDatabaseRecovery } from "@/db/dev-bootstrap";
 import { users } from "@/db/schema";
 import {
   getArtistGuidedJourney,
@@ -89,6 +89,7 @@ export async function applyArtistGuidedStepState(
 ): Promise<void> {
   const { step, show, session } = ctx;
 
+  await ensureDevDatabaseReady();
   await applyDemoClockForPhase(show, step.timePhase);
   await ensureElenaSession();
   await setArtistGuidedDemoSession(session);
@@ -115,7 +116,7 @@ export async function ensureArtistGuidedDemoFromSearchParams(
   });
   if (!ctx) return null;
 
-  await applyArtistGuidedStepState(ctx);
+  await applyArtistGuidedStepState(ctx, { revalidateLayout: false });
   return ctx;
 }
 

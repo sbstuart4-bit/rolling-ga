@@ -1,5 +1,5 @@
-import { and, eq, inArray } from "drizzle-orm";
-import { artistMembers, artists, events, userRoles, users } from "@/db/schema";
+import { and, count, eq, inArray } from "drizzle-orm";
+import { artistMembers, artists, events, orders, tours, userRoles, users, venues, verifiedAttendance } from "@/db/schema";
 import { createDb, type Db } from "./client";
 import {
   DEMO_ELENA_MARISOL_ID,
@@ -121,22 +121,32 @@ export async function areRequiredDemoPersonasReady(): Promise<boolean> {
   return scott && elena;
 }
 
-/** Flagship Marisol show + artist rows required for guided fan and Artist Studio demos. */
+/** Flagship Marisol Brooklyn seed — required for Artist Studio insights and fan guided steps. */
 export async function isGuidedDemoCatalogReady(): Promise<boolean> {
   try {
-    const [artist, event] = await Promise.all([
-      getRepairDb()
-        .select({ id: artists.id })
-        .from(artists)
-        .where(eq(artists.id, MARISOL_ARTIST_ID))
-        .limit(1),
-      getRepairDb()
-        .select({ id: events.id })
-        .from(events)
-        .where(eq(events.id, MARISOL_BROOKLYN_EVENT_ID))
-        .limit(1),
-    ]);
-    return Boolean(artist[0] && event[0]);
+    const db = getRepairDb();
+    const [joined] = await db
+      .select({ eventId: events.id })
+      .from(events)
+      .innerJoin(artists, eq(artists.id, events.artistId))
+      .innerJoin(tours, eq(tours.id, events.tourId))
+      .innerJoin(venues, eq(venues.id, events.venueId))
+      .where(and(eq(events.id, MARISOL_BROOKLYN_EVENT_ID), eq(artists.id, MARISOL_ARTIST_ID)))
+      .limit(1);
+    if (!joined) return false;
+
+    const [attendanceRow] = await db
+      .select({ total: count() })
+      .from(verifiedAttendance)
+      .where(eq(verifiedAttendance.eventId, MARISOL_BROOKLYN_EVENT_ID));
+    const verifiedCount = Number(attendanceRow?.total ?? 0);
+    if (verifiedCount < 1) return false;
+
+    const [orderRow] = await db
+      .select({ total: count() })
+      .from(orders)
+      .where(and(eq(orders.artistId, MARISOL_ARTIST_ID), eq(orders.status, "paid")));
+    return Number(orderRow?.total ?? 0) > 0;
   } catch {
     return false;
   }

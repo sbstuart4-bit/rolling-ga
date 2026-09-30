@@ -1,7 +1,8 @@
 "use server";
 
+import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import { demoModeEnabled } from "@/lib/demo-mode";
-import { syncArtistGuidedDemoFromSearchParams } from "@/server/demo/artist-guided-demo-state";
+import { ensureArtistGuidedDemoFromSearchParams } from "@/server/demo/artist-guided-demo-apply";
 
 export async function ensureArtistGuidedDemoFromUrlAction(params: {
   guided: string;
@@ -10,7 +11,8 @@ export async function ensureArtistGuidedDemoFromUrlAction(params: {
   autoplay?: string;
 }): Promise<void> {
   if (!demoModeEnabled()) return;
-  await syncArtistGuidedDemoFromSearchParams({
+  await ensureDevDatabaseReady();
+  await ensureArtistGuidedDemoFromSearchParams({
     guided: params.guided,
     step: params.step,
     presenter: params.presenter,

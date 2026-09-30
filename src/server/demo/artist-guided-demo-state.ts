@@ -102,22 +102,10 @@ export function resolveArtistGuidedStepRoute(step: ArtistGuidedDemoStep): string
   });
 }
 
+/** @deprecated Use `ensureArtistGuidedDemoFromSearchParams` — applies demo clock and session. */
 export async function syncArtistGuidedDemoFromSearchParams(
   params: Record<string, string | string[] | undefined>,
 ): Promise<void> {
-  const guided = typeof params.guided === "string" ? params.guided : undefined;
-  const stepRaw = typeof params.step === "string" ? params.step : undefined;
-  const step = stepRaw ? Number.parseInt(stepRaw, 10) : NaN;
-  if (!guided || !isArtistGuidedJourney(guided) || !Number.isFinite(step) || step < 1) return;
-
-  const journey = getArtistGuidedJourney(guided);
-  if (!journey) return;
-
-  const existing = await getArtistGuidedDemoSession();
-  await setArtistGuidedDemoSession({
-    journeyId: journey.id as ArtistGuidedJourneyId,
-    step,
-    autoplay: existing?.autoplay ?? false,
-    presenter: existing?.presenter ?? params.presenter === "1",
-  });
+  const { ensureArtistGuidedDemoFromSearchParams } = await import("./artist-guided-demo-apply");
+  await ensureArtistGuidedDemoFromSearchParams(params);
 }

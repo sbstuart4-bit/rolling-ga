@@ -22,6 +22,7 @@ import {
   isElenaMarisolDemoSession,
   syncArtistGuidedDemoClock,
 } from "@/server/demo/artist-guided-demo-apply";
+import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import { hydrateDemoClockFromCookie } from "@/server/demo/clock";
 
 async function parseArtistGuidedEntryFromHeaders(): Promise<{
@@ -80,6 +81,9 @@ export default async function StudioLayout({ children }: LayoutProps<"/studio">)
     getActiveArtistGuidedDemoContext(),
     hasDemoBoardAccess(),
   ]);
+  if (artistGuidedDemo && demoModeEnabled()) {
+    await ensureDevDatabaseReady();
+  }
   await hydrateDemoClockFromCookie();
   if (artistGuidedDemo) {
     syncArtistGuidedDemoClock(artistGuidedDemo);

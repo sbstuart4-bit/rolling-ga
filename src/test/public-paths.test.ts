@@ -65,21 +65,21 @@ describe("public paths", () => {
     expect(
       shouldRewritePublicDemoRootToMarketing({
         pathname: "/",
-        fullDemoBoard: false,
+        publicGuidedDemo: true,
         inAppNavigation: false,
       }),
     ).toBe(true);
     expect(
       shouldRewritePublicDemoRootToMarketing({
         pathname: "/",
-        fullDemoBoard: false,
+        publicGuidedDemo: true,
         inAppNavigation: true,
       }),
     ).toBe(false);
     expect(
       shouldRewritePublicDemoRootToMarketing({
         pathname: "/",
-        fullDemoBoard: true,
+        publicGuidedDemo: false,
         inAppNavigation: false,
       }),
     ).toBe(false);

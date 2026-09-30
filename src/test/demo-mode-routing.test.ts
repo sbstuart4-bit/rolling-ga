@@ -35,6 +35,18 @@ describe("demo mode root routing", () => {
     ).toBe(false);
   });
 
+  it("does not redirect when public guided demo keeps marketing at /", () => {
+    expect(
+      shouldRedirectRootToDemoBoard({
+        pathname: "/",
+        demoMode: true,
+        hasSession: false,
+        inAppNavigation: false,
+        publicGuidedDemo: true,
+      }),
+    ).toBe(false);
+  });
+
   it("does not redirect production or non-root paths", () => {
     expect(
       shouldRedirectRootToDemoBoard({

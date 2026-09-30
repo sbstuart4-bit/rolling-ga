@@ -61,11 +61,15 @@ export function shouldRedirectRootToDemoBoard({
   demoMode,
   hasSession,
   inAppNavigation,
+  publicGuidedDemo = false,
 }: {
   pathname: string;
   demoMode: boolean;
   hasSession: boolean;
   inAppNavigation: boolean;
+  /** When set, `/` stays on marketing — do not bounce to the demo board. */
+  publicGuidedDemo?: boolean;
 }): boolean {
+  if (publicGuidedDemo) return false;
   return pathname === "/" && demoMode && (!hasSession || !inAppNavigation);
 }

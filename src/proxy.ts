@@ -5,6 +5,7 @@ import {
   demoModeEnabled,
   fullDemoBoardEnabled,
   isSameOriginReferer,
+  publicGuidedDemoEnabled,
   shouldRedirectRootToDemoBoard,
   unauthenticatedEntryPath,
 } from "@/lib/demo-mode";
@@ -115,6 +116,7 @@ export async function proxy(request: NextRequest) {
   const sessionId = await readSessionIdFromRequest(request);
   const demoMode = demoModeEnabled();
   const fullDemoBoard = fullDemoBoardEnabled();
+  const publicGuidedDemo = publicGuidedDemoEnabled();
   const inAppNavigation = isSameOriginReferer(request.headers, request.nextUrl.origin);
 
   if (demoMode && isDemoPlatformOpsPath(pathname)) {
@@ -132,11 +134,22 @@ export async function proxy(request: NextRequest) {
   }
 
   if (
+    shouldRewritePublicDemoRootToMarketing({
+      pathname,
+      publicGuidedDemo,
+      inAppNavigation,
+    })
+  ) {
+    return NextResponse.rewrite(new URL("/home", request.url));
+  }
+
+  if (
     shouldRedirectRootToDemoBoard({
       pathname,
       demoMode: fullDemoBoard,
       hasSession: Boolean(sessionId),
       inAppNavigation,
+      publicGuidedDemo,
     })
   ) {
     const response = NextResponse.redirect(new URL("/demo", request.url));
@@ -153,16 +166,6 @@ export async function proxy(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(GUIDED_DEMO_ENTRY_HEADER, `${pathname}${search}`);
     return NextResponse.next({ request: { headers: requestHeaders } });
-  }
-
-  if (
-    shouldRewritePublicDemoRootToMarketing({
-      pathname,
-      fullDemoBoard,
-      inAppNavigation,
-    })
-  ) {
-    return NextResponse.rewrite(new URL("/home", request.url));
   }
 
   if (sessionId) return NextResponse.next();

@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createRng } from "@/lib/rng";
 
@@ -29,10 +29,35 @@ function hashSeed(input: string): number {
   return hash >>> 0;
 }
 
+function isReadOnlyFilesystemError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error.code === "EROFS" || error.code === "EPERM")
+  );
+}
+
+/** Hosted runtimes ship `public/demo` read-only — return stable URLs without writing. */
 function write(name: string, svg: string): string {
-  mkdirSync(OUTPUT_DIR, { recursive: true });
-  writeFileSync(resolve(OUTPUT_DIR, `${name}.svg`), svg.trim(), "utf8");
-  return `/demo/${name}.svg`;
+  const publicPath = `/demo/${name}.svg`;
+  const filePath = resolve(OUTPUT_DIR, `${name}.svg`);
+
+  if (existsSync(filePath) || process.env.VERCEL === "1") {
+    return publicPath;
+  }
+
+  try {
+    mkdirSync(OUTPUT_DIR, { recursive: true });
+    writeFileSync(filePath, svg.trim(), "utf8");
+  } catch (error) {
+    if (isReadOnlyFilesystemError(error)) {
+      return publicPath;
+    }
+    throw error;
+  }
+
+  return publicPath;
 }
 
 function escapeXml(value: string): string {

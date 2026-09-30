@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { demoAnchorDate } from "@/lib/demo-calendar";
+import { resolveBootstrapDatabaseUrl } from "@/lib/production-env";
 import { canSeedProductionDemoDatabase } from "./demo-bootstrap-policy";
 import { createDb, truncateAllTables, type DbHandle } from "./client";
 import {
@@ -37,12 +38,23 @@ async function demoUserCount(handle: DbHandle): Promise<number | null> {
   }
 }
 
+export type PrepareHostedDemoDatabaseOptions = {
+  /**
+   * When false, only migrate and repair personas/slugs — never truncate or full seed.
+   * Vercel builds use this so a long re-seed cannot fail the deployment.
+   */
+  allowDestructiveSeed?: boolean;
+};
+
 /**
  * Idempotent migrate/repair/seed for Vercel build prep and runtime bootstrap.
  * Lives in the db layer so build scripts never import server-only modules.
  */
-export async function prepareHostedDemoDatabase(): Promise<void> {
-  const handle = createDb();
+export async function prepareHostedDemoDatabase(
+  options: PrepareHostedDemoDatabaseOptions = {},
+): Promise<void> {
+  const { allowDestructiveSeed = true } = options;
+  const handle = createDb(resolveBootstrapDatabaseUrl(), { maxConnections: 1 });
 
   try {
     bindRepairDb(handle.db);
@@ -61,6 +73,15 @@ export async function prepareHostedDemoDatabase(): Promise<void> {
     const catalogReady = await isGuidedDemoCatalogReady();
     if (personasPresent && catalogReady) {
       console.log("Demo personas and catalog already present — skipping seed.");
+      return;
+    }
+
+    if (!allowDestructiveSeed) {
+      if (!catalogReady) {
+        console.log(
+          "Skipping demo seed at build time — catalog will be prepared at runtime on the first guided demo visit.",
+        );
+      }
       return;
     }
 

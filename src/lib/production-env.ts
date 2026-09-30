@@ -10,6 +10,23 @@ export function resolveDatabaseUrl(): string | undefined {
   return url && url.trim().length > 0 ? url : undefined;
 }
 
+/**
+ * Prefer a direct Postgres URL for migrations and full demo seeds.
+ * Transaction-pooler connections can surface FK errors mid-seed when writes
+ * and reads land on different pooler backends.
+ */
+export function resolveBootstrapDatabaseUrl(): string | undefined {
+  const explicit = process.env.ROLLING_GA_DATABASE_URL?.trim();
+  if (explicit) return explicit;
+
+  const unpooled =
+    process.env.DATABASE_URL_UNPOOLED?.trim() ||
+    process.env.POSTGRES_URL_NON_POOLING?.trim();
+  if (unpooled) return unpooled;
+
+  return resolveDatabaseUrl();
+}
+
 export function isProductionRuntime(): boolean {
   return process.env.NODE_ENV === "production";
 }

@@ -25,7 +25,7 @@ async function main() {
     return;
   }
 
-  await prepareHostedDemoDatabase();
+  await prepareHostedDemoDatabase({ allowDestructiveSeed: false });
 }
 
 main().catch((error) => {

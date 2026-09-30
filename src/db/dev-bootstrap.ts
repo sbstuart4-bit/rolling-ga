@@ -7,7 +7,11 @@ import { prepareHostedDemoDatabase } from "./hosted-demo-bootstrap";
 import { createDb, resolvePgliteDir, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
-import { areRequiredDemoPersonasReady, bindRepairDb } from "./demo-persona-repair";
+import {
+  areRequiredDemoPersonasReady,
+  bindRepairDb,
+  isGuidedDemoCatalogReady,
+} from "./demo-persona-repair";
 
 /** Guided demos hard-fail when either persona is missing — not just when the user row exists. */
 let bootstrapPromise: Promise<void> | null = null;
@@ -146,6 +150,9 @@ export async function ensureDevDatabaseReady(): Promise<void> {
 
 async function bootstrapProductionDemoDatabase(): Promise<void> {
   await prepareHostedDemoDatabase();
+  if (!(await isGuidedDemoCatalogReady())) {
+    bootstrapPromise = null;
+  }
 }
 
 async function bootstrapDevDatabase(): Promise<void> {

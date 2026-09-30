@@ -1,5 +1,17 @@
 import { and, count, eq, inArray } from "drizzle-orm";
-import { artistMembers, artists, events, orders, tours, userRoles, users, venues, verifiedAttendance } from "@/db/schema";
+import {
+  artistMembers,
+  artists,
+  events,
+  orders,
+  products,
+  tours,
+  userRoles,
+  users,
+  venues,
+  verifiedAttendance,
+} from "@/db/schema";
+import { demoMarisolBrooklynEventSlug } from "@/lib/demo-calendar";
 import { createDb, type Db } from "./client";
 import {
   DEMO_ELENA_MARISOL_ID,
@@ -121,12 +133,33 @@ export async function areRequiredDemoPersonasReady(): Promise<boolean> {
   return scott && elena;
 }
 
+const FLAGSHIP_BROOKLYN_PRODUCT_SLUG = "tender-night-brooklyn-tee";
+
+/** Aligns a partially seeded Brooklyn event row with the app’s demo calendar slug. */
+export async function repairGuidedDemoCatalogSlug(): Promise<boolean> {
+  try {
+    const db = getRepairDb();
+    const expectedSlug = demoMarisolBrooklynEventSlug();
+    const [event] = await db
+      .select({ id: events.id, slug: events.slug })
+      .from(events)
+      .where(eq(events.id, MARISOL_BROOKLYN_EVENT_ID))
+      .limit(1);
+    if (!event || event.slug === expectedSlug) return false;
+
+    await db.update(events).set({ slug: expectedSlug }).where(eq(events.id, MARISOL_BROOKLYN_EVENT_ID));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Flagship Marisol Brooklyn seed — required for Artist Studio insights and fan guided steps. */
 export async function isGuidedDemoCatalogReady(): Promise<boolean> {
   try {
     const db = getRepairDb();
     const [joined] = await db
-      .select({ eventId: events.id })
+      .select({ eventId: events.id, slug: events.slug })
       .from(events)
       .innerJoin(artists, eq(artists.id, events.artistId))
       .innerJoin(tours, eq(tours.id, events.tourId))
@@ -134,6 +167,16 @@ export async function isGuidedDemoCatalogReady(): Promise<boolean> {
       .where(and(eq(events.id, MARISOL_BROOKLYN_EVENT_ID), eq(artists.id, MARISOL_ARTIST_ID)))
       .limit(1);
     if (!joined) return false;
+    if (joined.slug !== demoMarisolBrooklynEventSlug()) return false;
+
+    const [productRow] = await db
+      .select({ id: products.id })
+      .from(products)
+      .where(
+        and(eq(products.artistId, MARISOL_ARTIST_ID), eq(products.slug, FLAGSHIP_BROOKLYN_PRODUCT_SLUG)),
+      )
+      .limit(1);
+    if (!productRow) return false;
 
     const [attendanceRow] = await db
       .select({ total: count() })

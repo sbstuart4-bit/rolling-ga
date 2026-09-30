@@ -15,6 +15,7 @@ import { requireAuth } from "@/server/auth/request";
 import { getAuthContext } from "@/server/auth/session";
 import { countCartItems } from "@/server/commerce/cart";
 import { fanHasLiveVerifiedShow } from "@/server/fans/live-tab";
+import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import {
   buildEnterGuidedDemoUrl,
   GUIDED_DEMO_ENTRY_HEADER,
@@ -77,6 +78,9 @@ export default async function FanLayout({ children }: LayoutProps<"/">) {
     hasDemoBoardAccess(),
   ]);
 
+  if (guidedDemo && demoModeEnabled()) {
+    await ensureDevDatabaseReady();
+  }
   await hydrateDemoClockFromCookie();
   if (guidedDemo) {
     syncGuidedDemoClock(guidedDemo);

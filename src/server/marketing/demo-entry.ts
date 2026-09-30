@@ -1,16 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import { demoModeEnabled } from "@/lib/demo-mode";
-import { buildArtistMarketingEnterGuidedHref } from "@/server/marketing/demo-entry-hrefs";
 import {
-  applyGuidedStepState,
-  loadGuidedStepContext,
-} from "@/server/demo/guided-demo-apply";
-import { redirectToFanGuidedStep } from "@/server/demo/guided-demo-redirect";
-
-const MARKETING_APPLY_OPTIONS = { revalidateLayout: false } as const;
+  buildArtistMarketingEnterGuidedHref,
+  buildFanMarketingEnterGuidedHref,
+} from "@/server/marketing/demo-entry-hrefs";
 
 /** Legacy form posts — prefer `<ArtistGuidedDemoLink />` on marketing pages. */
 export async function experienceMarisolArtistStudioGuidedAction(): Promise<void> {
@@ -32,17 +27,7 @@ export async function experienceMarisolArtistStudioAction(): Promise<void> {
  */
 export async function experienceMarisolReyesFanAction(): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
-
-  const { activeGuidedJourneyId } = await import("@/lib/guided-demo");
-
-  await ensureDevDatabaseReady();
-
-  const journeyId = activeGuidedJourneyId();
-  const ctx = await loadGuidedStepContext(journeyId, 1);
-  if (!ctx) redirect("/demo/guided");
-
-  await applyGuidedStepState(ctx, MARKETING_APPLY_OPTIONS);
-  redirectToFanGuidedStep(ctx);
+  redirect(buildFanMarketingEnterGuidedHref());
 }
 
 /**

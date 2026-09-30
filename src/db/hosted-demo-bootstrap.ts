@@ -7,6 +7,7 @@ import {
   bindRepairDb,
   clearRepairDb,
   isGuidedDemoCatalogReady,
+  repairGuidedDemoCatalogSlug,
   repairElenaMarisolDemoAccount,
   repairMarcusValeDemoAccount,
   repairScottDemoAccount,
@@ -56,6 +57,7 @@ export async function prepareHostedDemoDatabase(): Promise<void> {
       ]);
       personasPresent = await areRequiredDemoPersonasReady();
     }
+    await repairGuidedDemoCatalogSlug();
     const catalogReady = await isGuidedDemoCatalogReady();
     if (personasPresent && catalogReady) {
       console.log("Demo personas and catalog already present — skipping seed.");
@@ -72,7 +74,13 @@ export async function prepareHostedDemoDatabase(): Promise<void> {
         catalogReady,
       })
     ) {
-      console.log("Skipping demo seed — database is not empty and auto-seed is not allowed.");
+      if (personasPresent && !catalogReady) {
+        console.warn(
+          "Guided demo catalog is incomplete and auto-seed was skipped. Use a demo-only database, empty host, or set ROLLING_GA_ALLOW_DEMO_SEED=1 for a one-time full seed.",
+        );
+      } else {
+        console.log("Skipping demo seed — database is not empty and auto-seed is not allowed.");
+      }
       return;
     }
 

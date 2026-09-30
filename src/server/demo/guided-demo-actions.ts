@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { redirectAfterLeavingDemoSession } from "@/server/demo/demo-exit-redirect";
 import { demoModeEnabled } from "@/lib/demo-mode";
@@ -28,6 +29,7 @@ function journeyIdFromForm(formData: FormData): GuidedJourneyId | null {
 
 export async function startGuidedDemoAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
+  await ensureDevDatabaseReady();
 
   const publicMarketingEntry = formData.get("publicMarketingEntry") === "1";
   if (!publicMarketingEntry && !(await hasDemoBoardAccess())) redirect("/demo");
@@ -45,6 +47,7 @@ export async function startGuidedDemoAction(formData: FormData): Promise<void> {
 
 export async function guidedDemoNextAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
+  await ensureDevDatabaseReady();
 
   const journeyId = journeyIdFromForm(formData);
   if (!journeyId) redirect("/demo/guided");
@@ -70,6 +73,7 @@ export async function guidedDemoNextAction(formData: FormData): Promise<void> {
 
 export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
+  await ensureDevDatabaseReady();
 
   const journeyId = journeyIdFromForm(formData);
   if (!journeyId) redirect("/demo/guided");
@@ -85,6 +89,7 @@ export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
 
 export async function guidedDemoGoToStepAction(formData: FormData): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
+  await ensureDevDatabaseReady();
 
   const journeyId = journeyIdFromForm(formData);
   if (!journeyId) redirect("/demo/guided");

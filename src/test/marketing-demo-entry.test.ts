@@ -65,6 +65,31 @@ describe("marketing demo entry actions", () => {
     vi.doUnmock("@/server/demo/guided-demo-redirect");
   });
 
+  it("builds fan enter-guided href for marketing links", async () => {
+    vi.doMock("@/lib/demo-mode", () => ({ demoModeEnabled: () => true }));
+    vi.doMock("@/lib/guided-demo", () => ({
+      activeGuidedJourneyId: () => "marisol-tender-night",
+      getGuidedJourney: () => ({
+        showKey: "marisol-brooklyn",
+        steps: [{ step: 1, route: "/event/{slug}" }],
+      }),
+      resolveGuidedRoute: () => "/event/marisol-reyes-a-tender-night-brooklyn-2026",
+    }));
+    vi.doMock("@/lib/demo-scenario/shows", () => ({
+      getDemoShow: () => ({ slug: "marisol-reyes-a-tender-night-brooklyn-2026" }),
+    }));
+
+    const { buildFanMarketingEnterGuidedHref } = await import("@/server/marketing/demo-entry-hrefs");
+    const href = buildFanMarketingEnterGuidedHref();
+
+    expect(href).toContain("/api/demo/enter-guided?returnTo=");
+    expect(href).toContain(
+      encodeURIComponent(
+        "/event/marisol-reyes-a-tender-night-brooklyn-2026?guided=marisol-tender-night&step=1",
+      ),
+    );
+  });
+
   it("builds artist enter-guided href for marketing links", async () => {
     vi.doMock("@/lib/demo-mode", () => ({ demoModeEnabled: () => true }));
     vi.doMock("@/db/dev-bootstrap", () => ({
@@ -91,6 +116,27 @@ describe("marketing demo entry actions", () => {
     expect(await getArtistMarketingEnterGuidedHref()).toContain(
       "guided%3Dmarisol-artist-studio%26step%3D1",
     );
+  });
+
+  it("routes fan marketing form actions to enter-guided", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ROLLING_GA_PUBLIC_GUIDED_DEMO", "1");
+    vi.doMock("@/lib/demo-mode", () => ({ demoModeEnabled: () => true }));
+    vi.doMock("@/server/marketing/demo-entry-hrefs", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("@/server/marketing/demo-entry-hrefs")>();
+      return {
+        ...actual,
+        buildFanMarketingEnterGuidedHref: () =>
+          "/api/demo/enter-guided?returnTo=%2Fevent%2Fmarisol-reyes-a-tender-night-brooklyn-2026%3Fguided%3Dmarisol-tender-night%26step%3D1",
+      };
+    });
+    const redirect = vi.fn((url: string) => {
+      throw new Error(`redirect:${url}`);
+    });
+    vi.doMock("next/navigation", () => ({ redirect }));
+
+    const { experienceMarisolReyesFanAction } = await import("@/server/marketing/demo-entry");
+    await expect(experienceMarisolReyesFanAction()).rejects.toThrow("redirect:/api/demo/enter-guided");
   });
 
   it("routes legacy artist form actions to enter-guided", async () => {

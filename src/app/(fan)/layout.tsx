@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { FanAppShell } from "@/components/fan/fan-app-shell";
-import { GuidedDemoAuthGate } from "@/components/demo/guided-demo-auth-gate";
 import { GuidedDemoMobileChromeGate } from "@/components/demo/guided-demo-mobile-chrome-gate";
 import { GuidedDemoShell } from "@/components/demo/guided-demo-shell";
 import {
@@ -10,11 +9,14 @@ import {
 } from "@/server/demo/guided-demo-state";
 import { isScottDemoSession, syncGuidedDemoClock } from "@/server/demo/guided-demo-apply";
 import { hydrateDemoClockFromCookie } from "@/server/demo/clock";
+import { hasDemoBoardAccess } from "@/lib/demo-board-access";
+import { demoModeEnabled } from "@/lib/demo-mode";
 import { requireAuth } from "@/server/auth/request";
 import { getAuthContext } from "@/server/auth/session";
 import { countCartItems } from "@/server/commerce/cart";
 import { fanHasLiveVerifiedShow } from "@/server/fans/live-tab";
 import {
+  buildEnterGuidedDemoUrl,
   GUIDED_DEMO_ENTRY_HEADER,
   parseGuidedDemoQuery,
 } from "@/lib/guided-demo-entry";
@@ -48,10 +50,16 @@ async function parseGuidedEntryFromHeaders(): Promise<{
  * on desktop so Live never becomes a website layout.
  */
 export default async function FanLayout({ children }: LayoutProps<"/">) {
+  const headerStore = await headers();
+  const guidedEntryPath = headerStore.get(GUIDED_DEMO_ENTRY_HEADER);
   const pendingGuided = await parseGuidedEntryFromHeaders();
   const existingAuth = await getAuthContext();
-  if (pendingGuided && (!existingAuth || !isScottDemoSession(existingAuth))) {
-    return <GuidedDemoAuthGate {...pendingGuided} />;
+  if (
+    guidedEntryPath &&
+    pendingGuided &&
+    (!existingAuth || !isScottDemoSession(existingAuth))
+  ) {
+    redirect(buildEnterGuidedDemoUrl(guidedEntryPath));
   }
 
   const ctx = await requireAuth();
@@ -62,10 +70,11 @@ export default async function FanLayout({ children }: LayoutProps<"/">) {
     redirect("/onboarding");
   }
 
-  const [cartCount, liveVerifiedShow, guidedDemo] = await Promise.all([
+  const [cartCount, liveVerifiedShow, guidedDemo, demoBoardAccess] = await Promise.all([
     countCartItems(ctx.userId),
     fanHasLiveVerifiedShow(ctx.userId),
     getActiveGuidedDemoContext(),
+    hasDemoBoardAccess(),
   ]);
 
   await hydrateDemoClockFromCookie();
@@ -81,6 +90,8 @@ export default async function FanLayout({ children }: LayoutProps<"/">) {
         displayName={ctx.displayName}
         cartCount={cartCount}
         liveVerifiedShow={liveVerifiedShow}
+        demoMode={demoModeEnabled()}
+        useDemoBoard={guidedDemo ? false : demoBoardAccess}
         presentation={guidedDemo ? "guided" : "default"}
         guidedMobileChrome={
           guidedDemo && guidedContext ? (

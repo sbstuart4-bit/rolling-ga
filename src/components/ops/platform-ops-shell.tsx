@@ -50,7 +50,7 @@ export function PlatformOpsShell({
     <div className="flex min-h-dvh flex-col bg-[#0c0e12] text-foreground">
       <header className="border-b border-sky-500/20 bg-[#0f1318]">
         <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-4 px-4 sm:px-6">
-          <Link href="/ops" aria-label="Rolling GA Ops home">
+          <Link href="/ops/platform" aria-label="Rolling GA Ops home">
             <RollingGaMark size="sm" className="text-sky-400/80" />
           </Link>
           <div>

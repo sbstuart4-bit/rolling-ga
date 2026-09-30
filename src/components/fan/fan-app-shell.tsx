@@ -14,6 +14,8 @@ export function FanAppShell({
   liveVerifiedShow = false,
   presentation = "default",
   guidedMobileChrome,
+  useDemoBoard = true,
+  demoMode = false,
   children,
 }: {
   displayName: string;
@@ -23,9 +25,13 @@ export function FanAppShell({
   presentation?: "default" | "guided";
   /** Compact guided controls — mobile only, above the tab bar. */
   guidedMobileChrome?: ReactNode;
+  useDemoBoard?: boolean;
+  /** When true, logo and exit always offer a path back to the marketing site. */
+  demoMode?: boolean;
   children: ReactNode;
 }) {
   const isGuided = presentation === "guided";
+  const marketingHome = demoMode || isGuided;
 
   const device = (
     <div
@@ -45,10 +51,16 @@ export function FanAppShell({
           <span className="h-5 w-24 rounded-full bg-black" />
           <span>5G</span>
         </div>
-        <FanHeader displayName={displayName} cartCount={cartCount} homeHref={isGuided ? "/home" : "/"} />
+        <FanHeader
+          displayName={displayName}
+          cartCount={cartCount}
+          homeHref={marketingHome ? "/home" : "/"}
+          showMarketingExit={demoMode}
+          marketingExitUsesDemoBoard={useDemoBoard && !isGuided}
+        />
         <div
           className={cn(
-            "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]",
             guidedMobileChrome && "pb-safe-guided md:pb-0",
           )}
         >

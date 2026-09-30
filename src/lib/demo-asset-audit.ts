@@ -266,7 +266,34 @@ export function listDemoAssetFilenames(): string[] {
 }
 
 export function buildDemoAssetAudit(): DemoAssetAuditEntry[] {
-  return listDemoAssetFilenames().map(auditDemoAssetFile);
+  const fileEntries = listDemoAssetFilenames().map(auditDemoAssetFile);
+  const pathsOnDisk = new Set(fileEntries.filter((e) => e.fileExists).map((e) => e.path));
+
+  const missingEntries: DemoAssetAuditEntry[] = Object.entries(DEMO_PRODUCT_IMAGES)
+    .filter(([, path]) => !pathsOnDisk.has(path))
+    .map(([productId, path]) => {
+      const filename = path.replace(/^\/demo\//, "");
+      const base = {
+        filename,
+        path,
+        extension: filename.split(".").pop() ?? "",
+        artist: inferArtist(filename),
+        assetType: "product" as const,
+        entityId: productId,
+        referenced: true,
+        referenceLocations: [`DEMO_PRODUCT_IMAGES.${productId}`],
+        fileExists: false,
+        broken: true,
+      };
+      const status = computeAssetStatus(base);
+      return {
+        ...base,
+        status,
+        statusLabel: STATUS_LABELS[status],
+      };
+    });
+
+  return [...fileEntries, ...missingEntries];
 }
 
 export function summarizeDemoAssetAudit(entries: DemoAssetAuditEntry[]) {
@@ -426,4 +453,19 @@ export function buildArtistQaMatrix(
 
 export function qaSurfaceLabel(surface: ArtistQaSurface): string {
   return ARTIST_QA_LABELS[surface];
+}
+
+/** Best preview URL for the Asset QA grid — prefers PNG pairs over raw SVG when available. */
+export function resolveAssetPreviewPath(entry: DemoAssetAuditEntry): string {
+  if (/\.(png|jpe?g|webp)$/i.test(entry.path) && entry.fileExists) {
+    return entry.path;
+  }
+  if (entry.duplicateOf && /\.(png|jpe?g|webp)$/i.test(entry.duplicateOf)) {
+    return `/demo/${entry.duplicateOf}`;
+  }
+  return entry.path;
+}
+
+export function isVectorAssetPath(path: string): boolean {
+  return /\.svg(\?.*)?$/i.test(path);
 }

@@ -2,9 +2,8 @@ import {
   MARISOL_REYES_UNLOCK_SCREENSHOT,
   MARKETING_DEMO_CTA_LABEL,
 } from "@/components/marketing/home/marketing-home-fixtures";
-import { ExperienceNovaForm } from "@/components/marketing/experience-nova-form";
+import { ArtistGuidedDemoLink } from "@/components/marketing/artist-guided-demo-link";
 import { MktDisplayHeading, MktEyebrow, MktPhoneFrame } from "@/components/marketing/site";
-import { experienceArtistStudioAction } from "@/server/marketing/demo-entry";
 
 export function HowItWorksHero() {
   return (
@@ -33,12 +32,9 @@ export function HowItWorksHero() {
               shop and artists a way to keep the relationship going after the encore.
             </p>
 
-            <ExperienceNovaForm
-              size="large"
-              demoLabel={MARKETING_DEMO_CTA_LABEL}
-              action={experienceArtistStudioAction}
-              className="mt-10"
-            />
+            <div className="mt-10">
+              <ArtistGuidedDemoLink size="large" label={MARKETING_DEMO_CTA_LABEL} />
+            </div>
           </div>
 
           <div className="mx-auto w-full max-w-[320px] sm:max-w-[360px] lg:mx-0 lg:ml-auto lg:max-w-[400px]">

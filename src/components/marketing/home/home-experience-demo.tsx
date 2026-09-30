@@ -16,7 +16,11 @@ import { experienceMarisolReyesFanAction } from "@/server/marketing/demo-entry";
  */
 export function HomeExperienceDemo() {
   return (
-    <MktSectionShell tone="dark" className="overflow-x-clip py-16 md:py-20 lg:py-24">
+    <MktSectionShell
+      id="experience-demo"
+      tone="dark"
+      className="overflow-x-clip py-16 md:py-20 lg:py-24"
+    >
       <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-16">
         <div>
           <MktEyebrow>See it as a fan</MktEyebrow>

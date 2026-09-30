@@ -21,7 +21,7 @@ export default function Error({
       <RollingGaLogo size="default" />
       <h1 className="mt-8 font-display text-3xl tracking-wide">Something went wrong</h1>
       <p className="mt-3 max-w-md text-sm text-muted-foreground text-balance">
-        Rolling GA hit an unexpected error. You can try again, or return to the demo board to
+        Rolling GA hit an unexpected error. You can try again, or return to the homepage to
         restart your walkthrough.
       </p>
       <form className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -29,7 +29,7 @@ export default function Error({
           Try again
         </Button>
         <Button type="submit" variant="outline" formAction={returnToDemoBoardAction}>
-          Back to demo board
+          Exit demo
         </Button>
       </form>
       {error.digest && (

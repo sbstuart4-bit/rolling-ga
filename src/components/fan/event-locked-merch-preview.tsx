@@ -39,9 +39,9 @@ export function EventLockedMerchPreview({
 
   return (
     <section className="space-y-4">
-      <div className="rounded-2xl border border-artist-border bg-artist-surface px-4 py-3">
+      <div className="rounded-2xl border border-artist-border bg-artist-surface px-4 py-3 text-center">
         <p className="eyebrow text-artist-accent">Tonight&apos;s merchandise</p>
-        <p className="mt-1 text-sm text-artist-muted">
+        <p className="mt-1 text-sm text-artist-muted text-balance">
           {previewMessage ??
             `Exclusive to fans inside the venue at ${artistName}'s show tonight.`}
         </p>

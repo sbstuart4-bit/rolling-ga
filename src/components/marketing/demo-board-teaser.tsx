@@ -1,4 +1,7 @@
-import Link from "next/link";
+import {
+  experienceArtistStudioAction,
+  experienceMarisolReyesFanAction,
+} from "@/server/marketing/demo-entry";
 import { Disc3, Mic2, ShieldCheck, Truck } from "lucide-react";
 import { ClaimLabel } from "@/components/marketing/claim-label";
 import { MarketingGlow } from "@/components/marketing/visual/marketing-glow";
@@ -20,21 +23,35 @@ export function DemoBoardTeaser() {
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr]">
         <ScrollReveal>
           <p className="eyebrow text-primary">Live demo</p>
-          <h2 className="display-xl mt-4 text-4xl sm:text-5xl md:text-6xl">Explore every persona</h2>
+          <h2 className="display-xl mt-4 text-4xl sm:text-5xl md:text-6xl">Try the real product</h2>
           <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
-            Slide the clock from June 1 toward The Degens&rsquo; June 30 show in Detroit. Same
-            codebase as production — seeded demo data, real fan app and Artist Studio.
+            Walk through Marisol Reyes&rsquo; Brooklyn show as a fan, or explore Artist Studio as
+            her merch team — guided step-by-step, no account required.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <ClaimLabel kind="demo" />
           </div>
-          <Button
-            asChild
-            size="lg"
-            className="mt-8 h-12 rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.16em]"
-          >
-            <Link href="/demo">Open demo board</Link>
-          </Button>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <form action={experienceMarisolReyesFanAction}>
+              <Button
+                type="submit"
+                size="lg"
+                className="h-12 w-full rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.16em] sm:w-auto"
+              >
+                Fan journey
+              </Button>
+            </form>
+            <form action={experienceArtistStudioAction}>
+              <Button
+                type="submit"
+                variant="outline"
+                size="lg"
+                className="h-12 w-full rounded-xl px-6 text-sm font-semibold uppercase tracking-[0.16em] sm:w-auto"
+              >
+                Artist Studio
+              </Button>
+            </form>
+          </div>
         </ScrollReveal>
 
         <ScrollReveal delay={120}>

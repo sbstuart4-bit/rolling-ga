@@ -3,19 +3,18 @@ import {
   HOME_HERO_BENEFITS,
   MKT_PHOTOS,
 } from "@/components/marketing/home/marketing-home-fixtures";
-import { ExperienceNovaButton } from "@/components/marketing/experience-nova-cta";
+import { ArtistGuidedDemoLink } from "@/components/marketing/artist-guided-demo-link";
 import {
   MktBenefitRow,
   MktDisplayHeading,
   MktEyebrow,
   MktOutlineButton,
 } from "@/components/marketing/site";
-import { experienceMarisolArtistStudioAction } from "@/server/marketing/demo-entry";
 
 /**
  * Approved homepage hero — full-bleed stage photography with artist-focused copy.
  */
-export function HomeHero() {
+export async function HomeHero() {
   return (
     <section className="relative isolate min-h-[calc(100dvh-4.75rem)] overflow-hidden lg:min-h-[calc(100dvh-5.75rem)]">
       <Image
@@ -55,13 +54,11 @@ export function HomeHero() {
           </p>
 
           <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5">
-            <form action={experienceMarisolArtistStudioAction} className="w-full sm:w-auto">
-              <ExperienceNovaButton
-                size="large"
-                label="Experience the Demo"
-                className="w-full sm:w-auto"
-              />
-            </form>
+            <ArtistGuidedDemoLink
+              size="large"
+              label="Experience the Demo"
+              className="w-full sm:w-auto"
+            />
             <MktOutlineButton href="/pilot#conversation" className="w-full justify-center sm:w-auto">
               Talk to Our Team
             </MktOutlineButton>

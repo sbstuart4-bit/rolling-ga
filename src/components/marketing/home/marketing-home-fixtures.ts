@@ -28,8 +28,8 @@ export const MKT_PHOTOS = {
   backstageAmp: "/marketing/backstage-amp.png",
   /** Problem card crops — same documentary set as the opportunity backdrop. */
   problemLongLines: "/marketing/merch-line-bw.png",
-  problemSoldOut: "/marketing/merch-line-bw.png",
-  problemCarryAll: "/marketing/pilot-merch-table.png",
+  problemSoldOut: "/marketing/problem-sold-out-queue.jpg",
+  problemCarryAll: "/marketing/problem-fans-carry.png",
 } as const;
 
 export const HOME_HERO_BENEFITS = [
@@ -51,15 +51,15 @@ export const HOME_PROBLEM_ITEMS = [
     title: "Sold-out sizes",
     body: "Limited inventory means lost sales.",
     photo: MKT_PHOTOS.problemSoldOut,
-    photoAlt: "Sold-out sizes on the official merchandise display",
-    objectPosition: "50% 18%",
+    photoAlt: "Fans waiting in line at an official merchandise stand",
+    objectPosition: "50% 45%",
   },
   {
     title: "Fans carry it all",
     body: "It gets in the way of the show experience.",
     photo: MKT_PHOTOS.problemCarryAll,
-    photoAlt: "Fans carrying multiple shirts away from the merch table",
-    objectPosition: "72% 55%",
+    photoAlt: "Fan carrying a poster tube away from the venue",
+    objectPosition: "50% 35%",
   },
 ] as const;
 
@@ -83,7 +83,7 @@ export const MARISOL_REYES_MY_SHOWS_SCREENSHOT = `/marketing/marisol-reyes-my-sh
 export const MARISOL_REYES_CREDENTIAL_SCREENSHOT = `/marketing/marisol-reyes-credential-mobile.png?v=${MARKETING_SCREENSHOT_VERSION}`;
 export const MARISOL_REYES_STUDIO_SCREENSHOT = `/marketing/marisol-reyes-artist-studio-desktop.png?v=${MARKETING_SCREENSHOT_VERSION}`;
 
-/** Primary marketing demo CTA label — enters Marcus Vale Artist Studio directly. */
+/** Primary marketing demo CTA label — enters Marisol artist guided demo. */
 export const MARKETING_DEMO_CTA_LABEL = "Experience the Demo";
 
 /** Fan-journey demo CTA for /for-fans and fan-focused sections. */

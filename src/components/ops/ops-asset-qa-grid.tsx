@@ -4,6 +4,10 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { DemoAssetAuditEntry, DemoAssetStatus } from "@/lib/demo-asset-audit";
+import {
+  isVectorAssetPath,
+  resolveAssetPreviewPath,
+} from "@/lib/demo-asset-audit";
 
 const FILTER_LABELS: Record<string, string> = {
   all: "All",
@@ -29,7 +33,7 @@ const STATUS_CLASS: Record<DemoAssetStatus, string> = {
 export function OpsAssetQaGrid({
   entries,
   summary,
-  backHref = "/ops",
+  backHref = "/ops/platform",
   backLabel = "← Platform ops",
 }: {
   entries: DemoAssetAuditEntry[];
@@ -119,31 +123,39 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 function AssetCard({ entry }: { entry: DemoAssetAuditEntry }) {
-  const isSvg = entry.extension === "svg";
+  const previewSrc = resolveAssetPreviewPath(entry);
+  const isVector = isVectorAssetPath(previewSrc);
   const [loadFailed, setLoadFailed] = React.useState(false);
   const statusClass = STATUS_CLASS[entry.status];
+  const showBroken = entry.broken || loadFailed || (!entry.fileExists && entry.status === "missing");
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card/50">
       <div className="relative aspect-[4/5] bg-muted/30">
-        {isSvg ? (
-          <div className="flex size-full items-center justify-center p-4 text-xs text-muted-foreground">
-            SVG placeholder
+        {showBroken ? (
+          <div className="flex size-full flex-col items-center justify-center gap-2 p-4 text-center text-xs text-muted-foreground">
+            <span className="rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+              No preview
+            </span>
+            <span>{entry.status === "missing" ? "File missing on disk" : "Image failed to load"}</span>
           </div>
+        ) : isVector ? (
+          // eslint-disable-next-line @next/next/no-img-element -- SVG previews for Asset QA
+          <img
+            src={previewSrc}
+            alt=""
+            className="absolute inset-0 size-full object-contain p-2"
+            onError={() => setLoadFailed(true)}
+          />
         ) : (
           <Image
-            src={entry.path}
+            src={previewSrc}
             alt=""
             fill
             className="object-contain p-2"
             sizes="320px"
             onError={() => setLoadFailed(true)}
           />
-        )}
-        {(entry.broken || loadFailed) && (
-          <span className="absolute left-2 top-2 rounded bg-red-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-            Broken
-          </span>
         )}
       </div>
       <div className="space-y-1 p-3 text-left text-xs">

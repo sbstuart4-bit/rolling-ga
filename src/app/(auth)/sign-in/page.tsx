@@ -15,7 +15,7 @@ export default async function SignInPage(props: PageProps<"/sign-in">) {
   const target = typeof next === "string" ? next : undefined;
 
   if (guest === "1" && demoModeEnabled()) {
-    redirect(target ? `/demo?perspective=fan&next=${encodeURIComponent(target)}` : "/demo?perspective=fan");
+    redirect(target ? `/home?next=${encodeURIComponent(target)}` : "/home#experience-demo");
   }
 
   const ctx = await getAuthContext();
@@ -58,8 +58,8 @@ export default async function SignInPage(props: PageProps<"/sign-in">) {
           {demoModeEnabled() && (
             <p className="text-center text-sm text-muted-foreground">
               Exploring the demo?{" "}
-              <Link href="/demo" className="font-medium text-primary hover:underline">
-                Try different personas
+              <Link href="/home#experience-demo" className="font-medium text-primary hover:underline">
+                Try the fan journey
               </Link>
             </p>
           )}

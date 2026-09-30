@@ -24,8 +24,12 @@ export function GuidedDemoAuthGate({
 }) {
   const [error, setError] = React.useState<string | null>(null);
   const [redirectTo, setRedirectTo] = React.useState<string | null>(null);
+  const started = React.useRef(false);
 
   React.useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+
     const returnTo = `${window.location.pathname}${window.location.search}`;
     const attempts = Number(sessionStorage.getItem(BOOTSTRAP_ATTEMPTS_KEY) ?? "0");
 

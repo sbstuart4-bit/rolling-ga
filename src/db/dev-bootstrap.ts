@@ -7,7 +7,7 @@ import { prepareHostedDemoDatabase } from "./hosted-demo-bootstrap";
 import { createDb, resolvePgliteDir, type DbHandle } from "./client";
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
-import { areRequiredDemoPersonasReady } from "./demo-persona-repair";
+import { areRequiredDemoPersonasReady, bindRepairDb } from "./demo-persona-repair";
 
 /** Guided demos hard-fail when either persona is missing — not just when the user row exists. */
 let bootstrapPromise: Promise<void> | null = null;
@@ -79,6 +79,7 @@ async function reopenPgliteFromDisk(): Promise<DbHandle> {
   await closeGlobalHandle();
   bootstrapPromise = null;
   const handle = createDb();
+  bindRepairDb(handle.db);
   globalDbSlot().__rollingGaDb = handle;
   return handle;
 }
@@ -149,7 +150,11 @@ async function bootstrapProductionDemoDatabase(): Promise<void> {
 
 async function bootstrapDevDatabase(): Promise<void> {
   let handle = globalDbSlot().__rollingGaDb ?? createDb();
-  if (handle.driver !== "pglite") return;
+  bindRepairDb(handle.db);
+  if (handle.driver !== "pglite") {
+    globalDbSlot().__rollingGaDb = handle;
+    return;
+  }
 
   try {
     await runMigrations(handle);
@@ -188,6 +193,7 @@ export async function recoverPgliteCluster(): Promise<void> {
   removePgliteDataDir();
 
   const handle = createDb();
+  bindRepairDb(handle.db);
   await runMigrations(handle);
   await seedDemoData(handle.db, demoAnchorDate());
   globalDbSlot().__rollingGaDb = handle;

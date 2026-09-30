@@ -1,4 +1,5 @@
 import "server-only";
+import { bindRepairDb } from "./demo-persona-repair";
 import { createDb, type Db, type DbHandle } from "./client";
 
 /**
@@ -10,7 +11,10 @@ const globalForDb = globalThis as unknown as {
 };
 
 export function dbHandle(): DbHandle {
-  globalForDb.__rollingGaDb ??= createDb();
+  if (!globalForDb.__rollingGaDb) {
+    globalForDb.__rollingGaDb = createDb();
+    bindRepairDb(globalForDb.__rollingGaDb.db);
+  }
   return globalForDb.__rollingGaDb;
 }
 

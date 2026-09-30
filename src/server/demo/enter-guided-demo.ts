@@ -41,7 +41,7 @@ export async function handleEnterGuidedDemoRequest(request: Request): Promise<Re
 
   const parsed = parseGuidedDemoQuery(new URL(returnTo, base).searchParams);
   if (!parsed) {
-    return NextResponse.redirect(new URL("/demo/guided", base));
+    return NextResponse.redirect(new URL("/home", base));
   }
 
   try {
@@ -51,10 +51,10 @@ export async function handleEnterGuidedDemoRequest(request: Request): Promise<Re
         autoplay: parsed.autoplay,
       });
       if (!ctx) {
-        return NextResponse.redirect(new URL("/demo/guided", base));
+        return NextResponse.redirect(new URL("/home", base));
       }
 
-      await applyArtistGuidedStepState(ctx);
+      await applyArtistGuidedStepState(ctx, { revalidateLayout: false });
       return NextResponse.redirect(new URL(returnTo, base));
     }
 
@@ -63,10 +63,10 @@ export async function handleEnterGuidedDemoRequest(request: Request): Promise<Re
       autoplay: parsed.autoplay,
     });
     if (!ctx) {
-      return NextResponse.redirect(new URL("/demo/guided", base));
+      return NextResponse.redirect(new URL("/home", base));
     }
 
-    await applyGuidedStepState(ctx);
+    await applyGuidedStepState(ctx, { revalidateLayout: false });
     return NextResponse.redirect(new URL(returnTo, base));
   } catch (error) {
     if (error instanceof Error && error.message.includes("not seeded")) {

@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { exitGuidedDemoAction } from "@/server/demo/guided-demo-actions";
+import { MarketingWebsiteExit } from "@/components/demo/marketing-website-exit";
 import { Button } from "@/components/ui/button";
 import {
   type GuidedDemoChromeProps,
@@ -38,17 +39,20 @@ export function GuidedDemoMobileChrome(props: GuidedDemoChromeProps) {
         className="shrink-0 border-t border-border bg-[#0f0f10]/95 backdrop-blur-lg md:hidden"
         aria-label="Guided demo controls"
       >
-        <button
-          type="button"
-          onClick={() => setSheetOpen(true)}
-          className="flex w-full items-center gap-2 px-3 py-2 text-left"
-          aria-expanded={sheetOpen}
-        >
-          <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground">
-            {stepLine}
-          </p>
-          <ChevronUp className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        </button>
+        <div className="flex items-center gap-2 px-3 py-2">
+          <MarketingWebsiteExit variant="text" label="Site" className="shrink-0" />
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            className="flex min-w-0 flex-1 items-center gap-2 text-left"
+            aria-expanded={sheetOpen}
+          >
+            <p className="min-w-0 flex-1 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground">
+              {stepLine}
+            </p>
+            <ChevronUp className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+          </button>
+        </div>
 
         <div className="border-t border-border/60 px-3 pb-2 pt-1">
           <GuidedDemoStepNav

@@ -2,18 +2,24 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { RollingGaHomeLink, RollingGaMark } from "@/components/brand/rolling-ga-mark";
 import { DemoBoardReturn } from "@/components/demo/demo-board-return";
+import { MarketingWebsiteExit } from "@/components/demo/marketing-website-exit";
 import { initialsOf } from "@/lib/format";
-import { demoModeEnabled } from "@/lib/demo-mode";
 
 export function FanHeader({
   displayName,
   cartCount,
   homeHref = "/",
+  showMarketingExit = false,
+  marketingExitUsesDemoBoard = false,
 }: {
   displayName: string;
   cartCount: number;
   /** Marketing homepage when presenting the public guided demo. */
   homeHref?: "/" | "/home";
+  /** Demo mode — show exit-to-website control in the header. */
+  showMarketingExit?: boolean;
+  /** When false, exit returns to `/home` instead of the internal demo board. */
+  marketingExitUsesDemoBoard?: boolean;
 }) {
   return (
     <header className="z-30 shrink-0 border-b border-border bg-[#121212]/95 pt-safe backdrop-blur-lg">
@@ -44,7 +50,13 @@ export function FanHeader({
           )}
         </Link>
 
-        <DemoBoardReturn variant="compact" show={demoModeEnabled()} />
+        {showMarketingExit ? (
+          marketingExitUsesDemoBoard ? (
+            <DemoBoardReturn variant="compact" show useDemoBoard />
+          ) : (
+            <MarketingWebsiteExit variant="compact" />
+          )
+        ) : null}
 
         <Link
           href="/profile"

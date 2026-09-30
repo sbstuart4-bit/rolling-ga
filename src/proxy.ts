@@ -8,7 +8,12 @@ import {
   shouldRedirectRootToDemoBoard,
   unauthenticatedEntryPath,
 } from "@/lib/demo-mode";
-import { isPublicPath, isStaticAssetPath, shouldRewriteRootToMarketing } from "@/lib/public-paths";
+import {
+  isPublicPath,
+  isStaticAssetPath,
+  shouldRewriteDevRootToMarketing,
+  shouldRewriteRootToMarketing,
+} from "@/lib/public-paths";
 import { shouldAllowGuidedDemoRequest, GUIDED_DEMO_ENTRY_HEADER } from "@/lib/guided-demo-entry";
 import {
   hostedDemoBoardGateRequired,
@@ -77,6 +82,7 @@ async function grantDemoBoardAccess(request: NextRequest): Promise<NextResponse 
 /** Platform ops areas reachable without auth in demo mode (Asset QA, cross-artist inspection). */
 function isDemoPlatformOpsPath(pathname: string): boolean {
   if (pathname === "/ops") return true;
+  if (pathname === "/ops/platform" || pathname.startsWith("/ops/platform/")) return true;
   if (pathname.startsWith("/ops/artists")) return true;
   if (pathname === "/ops/assets") return true;
   if (pathname === "/ops/shows") return true;
@@ -115,6 +121,16 @@ export async function proxy(request: NextRequest) {
   }
 
   if (
+    shouldRewriteDevRootToMarketing({
+      pathname,
+      isProduction: process.env.NODE_ENV === "production",
+      inAppNavigation,
+    })
+  ) {
+    return NextResponse.rewrite(new URL("/home", request.url));
+  }
+
+  if (
     shouldRedirectRootToDemoBoard({
       pathname,
       demoMode: fullDemoBoard,
@@ -130,6 +146,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (shouldAllowGuidedDemoRequest(request)) {
+    if (sessionId) {
+      return NextResponse.next();
+    }
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set(GUIDED_DEMO_ENTRY_HEADER, `${pathname}${search}`);
     return NextResponse.next({ request: { headers: requestHeaders } });

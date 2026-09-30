@@ -18,10 +18,8 @@ import {
   getAuthContext,
   setActiveArtist,
 } from "@/server/auth/session";
-import {
-  isElenaMarisolDemoSession,
-  repairElenaMarisolDemoAccount,
-} from "@/server/demo/ensure-demo-personas";
+import { isElenaMarisolDemoAccountReady, repairElenaMarisolDemoAccount } from "@/db/demo-persona-repair";
+import { isElenaMarisolDemoSession } from "@/server/demo/ensure-demo-personas";
 import { applyDemoClockForPhase, applyDemoClockForPhaseInMemory } from "./apply-demo-clock";
 import {
   getArtistGuidedDemoSession,
@@ -35,7 +33,9 @@ export { isElenaMarisolDemoSession } from "@/server/demo/ensure-demo-personas";
 
 export async function ensureElenaSession(): Promise<string> {
   return withDevDatabaseRecovery(async () => {
-    await repairElenaMarisolDemoAccount();
+    if (!(await isElenaMarisolDemoAccountReady())) {
+      await repairElenaMarisolDemoAccount();
+    }
 
     const [user] = await db
       .select({ id: users.id })
@@ -83,13 +83,18 @@ export async function loadArtistGuidedStepContext(
   };
 }
 
-export async function applyArtistGuidedStepState(ctx: ActiveArtistGuidedDemoContext): Promise<void> {
+export async function applyArtistGuidedStepState(
+  ctx: ActiveArtistGuidedDemoContext,
+  options?: { revalidateLayout?: boolean },
+): Promise<void> {
   const { step, show, session } = ctx;
 
   await applyDemoClockForPhase(show, step.timePhase);
   await ensureElenaSession();
   await setArtistGuidedDemoSession(session);
-  revalidatePath("/", "layout");
+  if (options?.revalidateLayout !== false) {
+    revalidatePath("/", "layout");
+  }
 }
 
 export async function ensureArtistGuidedDemoFromSearchParams(

@@ -58,10 +58,80 @@ describe("production demo mode flags", () => {
   });
 });
 
+describe("marketing demo entry actions", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+    vi.doUnmock("@/server/demo/guided-demo-redirect");
+  });
+
+  it("builds artist enter-guided href for marketing links", async () => {
+    vi.doMock("@/lib/demo-mode", () => ({ demoModeEnabled: () => true }));
+    vi.doMock("@/db/dev-bootstrap", () => ({
+      ensureDevDatabaseReady: vi.fn(async () => undefined),
+    }));
+    vi.doMock("@/lib/artist-guided-demo", () => ({
+      activeArtistGuidedJourneyId: () => "marisol-artist-studio",
+      getArtistGuidedJourney: () => ({
+        id: "marisol-artist-studio",
+        steps: [{ step: 1, route: "/studio/live/{eventId}" }],
+      }),
+    }));
+    vi.doMock("@/server/demo/artist-guided-demo-state", () => ({
+      resolveArtistGuidedStepRoute: () => "/studio/live/evt_marisol_brooklyn",
+    }));
+
+    const { getArtistMarketingEnterGuidedHref } = await import(
+      "@/server/marketing/demo-entry-hrefs"
+    );
+
+    expect(await getArtistMarketingEnterGuidedHref()).toContain(
+      "/api/demo/enter-guided?returnTo=",
+    );
+    expect(await getArtistMarketingEnterGuidedHref()).toContain(
+      "guided%3Dmarisol-artist-studio%26step%3D1",
+    );
+  });
+
+  it("routes legacy artist form actions to enter-guided", async () => {
+    const redirect = vi.fn((url: string) => {
+      throw new Error(`redirect:${url}`);
+    });
+
+    vi.doMock("@/lib/demo-mode", () => ({ demoModeEnabled: () => true }));
+    vi.doMock("@/db/dev-bootstrap", () => ({
+      ensureDevDatabaseReady: vi.fn(async () => undefined),
+    }));
+    vi.doMock("@/lib/artist-guided-demo", () => ({
+      activeArtistGuidedJourneyId: () => "marisol-artist-studio",
+      getArtistGuidedJourney: () => ({
+        id: "marisol-artist-studio",
+        steps: [{ step: 1, route: "/studio/live/{eventId}" }],
+      }),
+    }));
+    vi.doMock("@/server/demo/artist-guided-demo-state", () => ({
+      resolveArtistGuidedStepRoute: () => "/studio/live/evt_marisol_brooklyn",
+    }));
+    vi.doMock("next/navigation", () => ({ redirect }));
+
+    const { experienceMarisolArtistStudioGuidedAction } = await import(
+      "@/server/marketing/demo-entry"
+    );
+
+    await expect(experienceMarisolArtistStudioGuidedAction()).rejects.toThrow(
+      "redirect:/api/demo/enter-guided?returnTo=",
+    );
+    expect(redirect).toHaveBeenCalledWith(
+      expect.stringContaining("guided%3Dmarisol-artist-studio%26step%3D1"),
+    );
+  });
+});
+
 describe("public marketing guided demo entry", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.resetModules();
+    vi.doUnmock("@/server/demo/guided-demo-redirect");
   });
 
   it("bypasses demo-board access for the marketing CTA", async () => {
@@ -95,6 +165,13 @@ describe("public marketing guided demo entry", () => {
     }));
     vi.doMock("@/server/demo/guided-demo-state", () => ({
       guidedDemoQuery: () => "guided=marisol-tender-night&step=1",
+    }));
+    vi.doMock("@/server/demo/guided-demo-redirect", () => ({
+      redirectToFanGuidedStep: () => {
+        redirect(
+          "/event/marisol-reyes-a-tender-night-brooklyn-2026?guided=marisol-tender-night&step=1",
+        );
+      },
     }));
     vi.doMock("next/navigation", () => ({ redirect }));
 

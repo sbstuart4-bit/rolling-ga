@@ -12,10 +12,8 @@ import {
 } from "@/lib/guided-demo";
 import { getDemoShow } from "@/lib/demo-scenario/shows";
 import { createSession, destroySession } from "@/server/auth/session";
-import {
-  isScottDemoSession,
-  repairScottDemoAccount,
-} from "@/server/demo/ensure-demo-personas";
+import { isScottDemoAccountReady, repairScottDemoAccount } from "@/db/demo-persona-repair";
+import { isScottDemoSession } from "@/server/demo/ensure-demo-personas";
 import { getActiveEventToken } from "@/server/events/queries";
 import { setFanShowContextSlug } from "@/server/fans/show-context";
 import { verifyAttendance } from "@/server/verification/service";
@@ -35,7 +33,9 @@ export { isScottDemoSession } from "@/server/demo/ensure-demo-personas";
 
 export async function ensureScottSession(): Promise<string> {
   return withDevDatabaseRecovery(async () => {
-    await repairScottDemoAccount();
+    if (!(await isScottDemoAccountReady())) {
+      await repairScottDemoAccount();
+    }
 
     const [user] = await db
       .select({ id: users.id })
@@ -74,7 +74,10 @@ export async function loadGuidedStepContext(
   };
 }
 
-export async function applyGuidedStepState(ctx: ActiveGuidedDemoContext): Promise<void> {
+export async function applyGuidedStepState(
+  ctx: ActiveGuidedDemoContext,
+  options?: { revalidateLayout?: boolean },
+): Promise<void> {
   const { step, show, session } = ctx;
 
   await applyDemoClockForPhase(show, step.scenario.timePhase);
@@ -96,7 +99,9 @@ export async function applyGuidedStepState(ctx: ActiveGuidedDemoContext): Promis
   }
 
   await setGuidedDemoSession(session);
-  revalidatePath("/", "layout");
+  if (options?.revalidateLayout !== false) {
+    revalidatePath("/", "layout");
+  }
 }
 
 export async function ensureGuidedDemoFromSearchParams(

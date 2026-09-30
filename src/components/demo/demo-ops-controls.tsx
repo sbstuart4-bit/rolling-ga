@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { ClipboardCheck, LayoutDashboard, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { demoPerspectiveHref } from "@/lib/demo-perspective";
+import { cn } from "@/lib/utils";
+
+const PLATFORM_OPS_OVERVIEW = "/ops/platform";
+const FAN_DEMO_QA = `${demoPerspectiveHref("fan")}#demo-perspective-content`;
 
 /** Demo Board panel when Rolling GA Ops perspective is selected. */
 export function DemoOpsControls() {
@@ -17,31 +22,34 @@ export function DemoOpsControls() {
 
       <div className="grid gap-3 sm:grid-cols-3">
         <QuickAction
-          href="/ops"
+          href={PLATFORM_OPS_OVERVIEW}
           icon={LayoutDashboard}
           label="Enter Ops"
           description="Platform overview and operational areas"
+          external
         />
         <QuickAction
           href="/ops/assets"
           icon={ClipboardCheck}
           label="Asset QA"
           description="Audit all demo imagery across four artists"
+          external
         />
         <QuickAction
-          href="/demo?perspective=fan"
+          href={FAN_DEMO_QA}
           icon={PlayCircle}
           label="Run demo QA"
           description="Return to fan scenario controls"
+          external
         />
       </div>
 
       <div className="flex flex-wrap gap-2">
         <Button asChild className="h-11 bg-sky-600 uppercase tracking-wider hover:bg-sky-600/90">
-          <Link href="/ops">Enter Rolling GA Ops</Link>
+          <a href={PLATFORM_OPS_OVERVIEW}>Enter Rolling GA Ops</a>
         </Button>
         <Button asChild variant="outline" className="h-11 uppercase tracking-wider">
-          <Link href="/ops/assets">Open asset QA</Link>
+          <a href="/ops/assets">Open asset QA</a>
         </Button>
       </div>
     </section>
@@ -53,17 +61,32 @@ function QuickAction({
   icon: Icon,
   label,
   description,
+  external = false,
 }: {
   href: string;
   icon: typeof LayoutDashboard;
   label: string;
   description: string;
+  /** Full document navigation — avoids client-router issues on the demo board. */
+  external?: boolean;
 }) {
+  const className = cn(
+    "flex flex-col gap-2 rounded-xl border border-border bg-card/80 p-4 transition-colors",
+    "hover:border-sky-500/40 hover:bg-card",
+  );
+
+  if (external) {
+    return (
+      <a href={href} className={className}>
+        <Icon className="size-5 text-sky-400" aria-hidden />
+        <span className="text-sm font-semibold">{label}</span>
+        <span className="text-xs text-muted-foreground">{description}</span>
+      </a>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className="flex flex-col gap-2 rounded-xl border border-border bg-card/80 p-4 transition-colors hover:border-sky-500/40 hover:bg-card"
-    >
+    <Link href={href} className={className}>
       <Icon className="size-5 text-sky-400" aria-hidden />
       <span className="text-sm font-semibold">{label}</span>
       <span className="text-xs text-muted-foreground">{description}</span>

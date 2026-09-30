@@ -1,10 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { DEMO_BOARD_ACCESS_COOKIE } from "@/lib/auth-cookies";
-import {
-  hostedDemoBoardGateRequired,
-  resolveDemoBoardSecret,
-} from "@/lib/production-env";
+import { resolveDemoBoardSecret } from "@/lib/production-env";
 
 export { DEMO_BOARD_ACCESS_COOKIE } from "@/lib/auth-cookies";
 const DEMO_BOARD_ACCESS_PAYLOAD = "granted";
@@ -46,10 +43,12 @@ export function readDemoBoardAccessCookie(raw: string | undefined): boolean {
   return true;
 }
 
-/** Server components and actions call this before exposing passwordless demo login. */
+/**
+ * True when the visitor has unlocked the internal demo board (password gate in hosted demo).
+ * Local dev does not auto-grant this — marketing guided demos stay on `/home` until the
+ * board access cookie is set (e.g. via `/demo?access=…` in production).
+ */
 export async function hasDemoBoardAccess(): Promise<boolean> {
-  if (!hostedDemoBoardGateRequired()) return true;
-
   const jar = await cookies();
   return readDemoBoardAccessCookie(jar.get(DEMO_BOARD_ACCESS_COOKIE)?.value);
 }

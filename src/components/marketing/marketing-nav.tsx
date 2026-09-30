@@ -31,6 +31,10 @@ import {
 } from "@/components/ui/sheet";
 
 import { cn } from "@/lib/utils";
+import { experienceMarisolReyesFanAction } from "@/server/marketing/demo-entry";
+
+const tryDemoButtonClassName =
+  "inline-flex items-center justify-center gap-2 rounded-full bg-mkt-purple px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-mkt-purple-fg transition-opacity hover:opacity-90";
 
 
 
@@ -120,19 +124,17 @@ export function MarketingNav() {
 
           </Link>
 
-          <Link
+          <form action={experienceMarisolReyesFanAction}>
 
-            href="/demo?perspective=artist"
+            <button type="submit" className={tryDemoButtonClassName}>
 
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-mkt-purple px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-mkt-purple-fg transition-opacity hover:opacity-90"
+              Try the Demo
 
-          >
+              <span aria-hidden>&rarr;</span>
 
-            Try the Demo
+            </button>
 
-            <span aria-hidden>&rarr;</span>
-
-          </Link>
+          </form>
 
         </div>
 
@@ -220,19 +222,23 @@ export function MarketingNav() {
 
               <SheetClose asChild>
 
-                <Link
+                <form action={experienceMarisolReyesFanAction} className="w-full">
 
-                  href="/demo?perspective=artist"
+                  <button
 
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-mkt-purple px-7 py-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-mkt-purple-fg"
+                    type="submit"
 
-                >
+                    className={`${tryDemoButtonClassName} w-full px-7 py-3.5 tracking-[0.12em]`}
 
-                  Try the Demo
+                  >
 
-                  <span aria-hidden>&rarr;</span>
+                    Try the Demo
 
-                </Link>
+                    <span aria-hidden>&rarr;</span>
+
+                  </button>
+
+                </form>
 
               </SheetClose>
 

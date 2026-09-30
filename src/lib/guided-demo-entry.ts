@@ -59,6 +59,11 @@ export function requestHasGuidedDemoCookie(request: NextRequest): boolean {
   return Boolean(request.cookies.get(GUIDED_DEMO_COOKIE)?.value);
 }
 
+/** Route handler that signs in demo personas and applies guided step state (reliable cookies). */
+export function buildEnterGuidedDemoUrl(returnTo: string): string {
+  return `/api/demo/enter-guided?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
 /** Anonymous guided-demo routes must reach the server to establish the demo session. */
 export function shouldAllowGuidedDemoRequest(request: NextRequest): boolean {
   if (requestHasGuidedDemoCookie(request)) return true;

@@ -81,7 +81,7 @@ export default async function GuidedDemoChooserPage({
       <AuthSplashBackdrop />
 
       <div className="relative flex flex-col items-center px-6 pt-14 pb-8 text-center">
-        <Link href="/demo?perspective=fan" className="inline-block" aria-label="Back to demo board">
+        <Link href="/home" className="inline-block" aria-label="Rolling GA home">
           <RollingGaLogo size="default" />
         </Link>
         <h1 className="mt-6 font-display text-3xl tracking-wide">Guided demo</h1>
@@ -99,7 +99,9 @@ export default async function GuidedDemoChooserPage({
               You finished Marisol Reyes — Full Rolling GA Journey.
             </p>
             <Button asChild className="mt-4 uppercase tracking-wider">
-              <Link href="/demo?perspective=fan">Back to demo board</Link>
+              <Link href={boardAccess ? "/demo?perspective=fan" : "/home"}>
+                {boardAccess ? "Back to demo board" : "Back to homepage"}
+              </Link>
             </Button>
           </section>
         ) : null}
@@ -133,26 +135,19 @@ export default async function GuidedDemoChooserPage({
                 Approximate duration: {journey.durationLabel}
               </p>
 
-              {boardAccess ? (
-                <form action={startGuidedDemoAction} className="mt-5 space-y-3">
-                  <input type="hidden" name="journeyId" value={journey.id} />
-                  <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <input type="checkbox" name="presenter" value="1" className="rounded border-border" />
-                    Start with presenter mode on
-                  </label>
-                  <Button type="submit" className="h-11 w-full uppercase tracking-wider sm:w-auto">
-                    Start guided demo
-                  </Button>
-                </form>
-              ) : (
-                <p className="mt-4 text-sm text-muted-foreground">
-                  Demo board access is required to start a guided journey.{" "}
-                  <Link href="/demo?perspective=fan" className="text-primary hover:underline">
-                    Return to demo board
-                  </Link>
-                  .
-                </p>
-              )}
+              <form action={startGuidedDemoAction} className="mt-5 space-y-3">
+                <input type="hidden" name="journeyId" value={journey.id} />
+                {!boardAccess ? (
+                  <input type="hidden" name="publicMarketingEntry" value="1" />
+                ) : null}
+                <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <input type="checkbox" name="presenter" value="1" className="rounded border-border" />
+                  Start with presenter mode on
+                </label>
+                <Button type="submit" className="h-11 w-full uppercase tracking-wider sm:w-auto">
+                  Start guided demo
+                </Button>
+              </form>
               </div>
             </section>
           ))}
@@ -172,8 +167,11 @@ export default async function GuidedDemoChooserPage({
         </div>
 
         <p className="text-center text-sm text-muted-foreground">
-          <Link href="/demo?perspective=fan" className="font-medium text-primary hover:underline">
-            ← Back to demo board
+          <Link
+            href={boardAccess ? "/demo?perspective=fan" : "/home"}
+            className="font-medium text-primary hover:underline"
+          >
+            {boardAccess ? "← Back to demo board" : "← Back to homepage"}
           </Link>
         </p>
       </div>

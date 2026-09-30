@@ -68,3 +68,19 @@ export function shouldRewriteRootToMarketing({
 }): boolean {
   return pathname === "/" && !hasSession && !demoMode;
 }
+
+/**
+ * `npm run dev` opens the marketing homepage. In-app navigation to `/` still
+ * reaches the fan feed; production demo-board routing is unchanged.
+ */
+export function shouldRewriteDevRootToMarketing({
+  pathname,
+  isProduction,
+  inAppNavigation,
+}: {
+  pathname: string;
+  isProduction: boolean;
+  inAppNavigation: boolean;
+}): boolean {
+  return !isProduction && pathname === "/" && !inAppNavigation;
+}

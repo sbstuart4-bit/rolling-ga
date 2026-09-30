@@ -38,7 +38,7 @@ export function EventShopProductCard({
               fill
               sizes="(min-width: 768px) 320px, 45vw"
               className={cn(
-                "object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02]",
+                "object-contain object-center p-2 transition-transform duration-500 group-hover:scale-[1.02]",
                 locked && "opacity-80 saturate-[0.65]",
               )}
             />
@@ -47,7 +47,7 @@ export function EventShopProductCard({
           )}
 
           {tag && (
-            <span className="absolute left-2 top-2 rounded-full border border-artist-border/80 bg-artist-bg/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-artist-fg backdrop-blur-sm">
+            <span className="absolute left-1/2 top-2 z-10 max-w-[calc(100%-1rem)] -translate-x-1/2 truncate rounded-full border border-artist-border/80 bg-artist-bg/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-artist-fg backdrop-blur-sm">
               {tag}
             </span>
           )}
@@ -64,7 +64,7 @@ export function EventShopProductCard({
           )}
         </div>
 
-        <div className="space-y-2 p-3">
+        <div className="space-y-2 p-3 text-center">
           <div className="space-y-0.5">
             <p className="line-clamp-2 text-sm font-medium leading-snug text-artist-fg">{name}</p>
             {tagline && (
@@ -75,7 +75,7 @@ export function EventShopProductCard({
           <p className="tabular text-base font-semibold text-artist-accent">{formatMoney(priceCents)}</p>
 
           {lockLabel && (
-            <p className="text-[11px] leading-snug text-artist-muted">{lockLabel}</p>
+            <p className="text-[11px] leading-snug text-artist-muted text-balance">{lockLabel}</p>
           )}
 
           <span

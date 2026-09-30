@@ -235,7 +235,7 @@ export const MARKETING_FOOTER_COLUMNS: readonly MarketingFooterColumn[] = [
     links: [
       { href: "/how-it-works", label: "How it works" },
       { href: "/for-fans", label: "FAQ" },
-      { href: "/demo", label: "Demo" },
+      { href: "/home#experience-demo", label: "Try the demo" },
       { href: "/for-fans", label: "Upcoming shows" },
     ],
   },
@@ -265,6 +265,6 @@ export const MARKETING_FOOTER_NAV = [
   { href: "/for-artists", label: "For Artists" },
   { href: "/product", label: "Product" },
   { href: "/how-it-works", label: "How it works" },
-  { href: "/demo", label: "Demo" },
+  { href: "/home#experience-demo", label: "Try the demo" },
   { href: "/pilot", label: "Pilot" },
 ] as const;

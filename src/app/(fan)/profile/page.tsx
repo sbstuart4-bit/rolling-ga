@@ -3,16 +3,23 @@ import Link from "next/link";
 import { ChevronRight, Globe, Package, ShoppingBag, User } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { DemoBoardReturn } from "@/components/demo/demo-board-return";
+import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { initialsOf } from "@/lib/format";
 import { requireAuth } from "@/server/auth/request";
 import { getPassportStats } from "@/server/attendance/queries";
+import { getActiveGuidedDemoContext } from "@/server/demo/guided-demo-state";
 
 export const metadata: Metadata = { title: "Profile — Rolling GA" };
 
 export default async function ProfilePage() {
   const ctx = await requireAuth("/profile");
-  const stats = await getPassportStats(ctx.userId);
+  const [stats, demoBoardAccess, guidedDemo] = await Promise.all([
+    getPassportStats(ctx.userId),
+    hasDemoBoardAccess(),
+    getActiveGuidedDemoContext(),
+  ]);
+  const demoMode = demoModeEnabled();
 
   return (
     <div className="mx-auto max-w-lg">
@@ -42,9 +49,15 @@ export default async function ProfilePage() {
             <ProfileLink href="/profile/preferences" icon={User} label="Preferences & sizes" description="Shirt size, categories" />
             <ProfileLink href="/profile/shipping" icon={Package} label="Shipping address" description="Default delivery address" />
             <ProfileLink href="/profile/connections" icon={Globe} label="Artist connections" description="Manage consent and permissions" />
-            <li>
-              <DemoBoardReturn variant="row" show={demoModeEnabled()} />
-            </li>
+            {demoMode ? (
+              <li>
+                <DemoBoardReturn
+                  variant="row"
+                  show
+                  useDemoBoard={!guidedDemo && demoBoardAccess}
+                />
+              </li>
+            ) : null}
           </ul>
         </nav>
 

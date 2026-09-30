@@ -21,6 +21,7 @@ export function StudioShell({
   userName,
   demoMode = false,
   guidedDemoActive = false,
+  useDemoBoard = true,
   children,
 }: {
   artists: StudioArtistOption[];
@@ -28,6 +29,7 @@ export function StudioShell({
   userName: string;
   demoMode?: boolean;
   guidedDemoActive?: boolean;
+  useDemoBoard?: boolean;
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -49,7 +51,9 @@ export function StudioShell({
       </div>
 
       <div className="border-t border-sidebar-border pt-4 space-y-2">
-        {demoMode && <DemoBoardReturn variant="link" show />}
+        {demoMode && !guidedDemoActive && (
+          <DemoBoardReturn variant="link" show useDemoBoard={useDemoBoard} />
+        )}
         <p className="truncate text-xs text-muted-foreground">Signed in as {userName}</p>
       </div>
     </div>
@@ -79,7 +83,9 @@ export function StudioShell({
           <span className="min-w-0 flex-1 truncate text-sm font-semibold">
             {activeArtist?.name ?? "Artist Studio"}
           </span>
-          {demoMode && <DemoBoardReturn variant="compact" show />}
+          {demoMode && !guidedDemoActive && (
+            <DemoBoardReturn variant="compact" show useDemoBoard={useDemoBoard} />
+          )}
         </header>
 
         <main

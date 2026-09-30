@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
+import { redirectAfterLeavingDemoSession } from "@/server/demo/demo-exit-redirect";
 import {
   activeArtistGuidedJourneyId,
   getArtistGuidedJourney,
@@ -15,19 +16,10 @@ import {
   loadArtistGuidedStepContext,
 } from "./artist-guided-demo-apply";
 import {
-  artistGuidedDemoQuery,
   clearArtistGuidedDemoSession,
-  resolveArtistGuidedStepRoute,
   setArtistGuidedDemoSession,
-  type ActiveArtistGuidedDemoContext,
 } from "./artist-guided-demo-state";
-
-function redirectToArtistStep(ctx: ActiveArtistGuidedDemoContext): never {
-  const route = resolveArtistGuidedStepRoute(ctx.step);
-  const qs = artistGuidedDemoQuery(ctx.session);
-  const join = route.includes("?") ? "&" : "?";
-  redirect(`${route}${join}${qs}`);
-}
+import { redirectToArtistGuidedStep } from "./guided-demo-redirect";
 
 function journeyIdFromForm(formData: FormData): ArtistGuidedJourneyId | null {
   return normalizeArtistGuidedJourneyId(String(formData.get("journeyId") ?? "")) ?? null;
@@ -46,7 +38,7 @@ export async function startArtistGuidedDemoAction(formData: FormData): Promise<v
   if (!ctx) redirect("/demo/guided");
 
   await applyArtistGuidedStepState(ctx);
-  redirectToArtistStep(ctx);
+  redirectToArtistGuidedStep(ctx);
 }
 
 export async function artistGuidedDemoNextAction(formData: FormData): Promise<void> {
@@ -59,7 +51,9 @@ export async function artistGuidedDemoNextAction(formData: FormData): Promise<vo
   if (!journey) redirect("/demo/guided");
 
   if (currentStep >= journey.steps.length) {
-    redirect("/studio/insights?guided=complete");
+    await clearArtistGuidedDemoSession();
+    revalidatePath("/", "layout");
+    await redirectAfterLeavingDemoSession();
   }
 
   const nextStep = currentStep + 1;
@@ -67,7 +61,7 @@ export async function artistGuidedDemoNextAction(formData: FormData): Promise<vo
   if (!ctx) redirect("/demo/guided");
 
   await applyArtistGuidedStepState(ctx);
-  redirectToArtistStep(ctx);
+  redirectToArtistGuidedStep(ctx);
 }
 
 export async function artistGuidedDemoPrevAction(formData: FormData): Promise<void> {
@@ -82,7 +76,7 @@ export async function artistGuidedDemoPrevAction(formData: FormData): Promise<vo
   if (!ctx) redirect("/demo/guided");
 
   await applyArtistGuidedStepState(ctx);
-  redirectToArtistStep(ctx);
+  redirectToArtistGuidedStep(ctx);
 }
 
 export async function artistGuidedDemoGoToStepAction(formData: FormData): Promise<void> {
@@ -96,7 +90,7 @@ export async function artistGuidedDemoGoToStepAction(formData: FormData): Promis
   if (!ctx) redirect("/demo/guided");
 
   await applyArtistGuidedStepState(ctx);
-  redirectToArtistStep(ctx);
+  redirectToArtistGuidedStep(ctx);
 }
 
 export async function toggleArtistGuidedDemoAutoplayAction(formData: FormData): Promise<void> {
@@ -133,11 +127,11 @@ export async function exitArtistGuidedDemoAction(): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
   await clearArtistGuidedDemoSession();
   revalidatePath("/", "layout");
-  redirect("/studio/insights");
+  await redirectAfterLeavingDemoSession();
 }
 
 export async function completeArtistGuidedDemoAction(): Promise<void> {
   await clearArtistGuidedDemoSession();
   revalidatePath("/", "layout");
-  redirect("/studio/insights");
+  await redirectAfterLeavingDemoSession();
 }

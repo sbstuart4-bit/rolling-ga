@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { StudioShell } from "@/components/studio/studio-shell";
-import { ArtistGuidedDemoAuthGate } from "@/components/demo/artist-guided-demo-auth-gate";
 import { ArtistGuidedDemoMobileChrome } from "@/components/demo/artist-guided-demo-mobile-chrome";
 import { ArtistGuidedDemoShell } from "@/components/demo/artist-guided-demo-shell";
 import type { StudioArtistOption } from "@/components/studio/artist-switcher";
+import { hasDemoBoardAccess } from "@/lib/demo-board-access";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import {
+  buildEnterGuidedDemoUrl,
   GUIDED_DEMO_ENTRY_HEADER,
   parseGuidedDemoQuery,
 } from "@/lib/guided-demo-entry";
@@ -48,10 +49,16 @@ async function parseArtistGuidedEntryFromHeaders(): Promise<{
 }
 
 export default async function StudioLayout({ children }: LayoutProps<"/studio">) {
+  const headerStore = await headers();
+  const guidedEntryPath = headerStore.get(GUIDED_DEMO_ENTRY_HEADER);
   const pendingGuided = await parseArtistGuidedEntryFromHeaders();
   const existingAuth = await getAuthContext();
-  if (pendingGuided && (!existingAuth || !isElenaMarisolDemoSession(existingAuth))) {
-    return <ArtistGuidedDemoAuthGate {...pendingGuided} />;
+  if (
+    guidedEntryPath &&
+    pendingGuided &&
+    (!existingAuth || !isElenaMarisolDemoSession(existingAuth))
+  ) {
+    redirect(buildEnterGuidedDemoUrl(guidedEntryPath));
   }
 
   const ctx = await requireAuthWithRole(["artist_member", "rga_admin"], "/studio");
@@ -69,7 +76,10 @@ export default async function StudioLayout({ children }: LayoutProps<"/studio">)
       ? ctx.activeArtistId
       : artists[0].id;
 
-  const artistGuidedDemo = await getActiveArtistGuidedDemoContext();
+  const [artistGuidedDemo, demoBoardAccess] = await Promise.all([
+    getActiveArtistGuidedDemoContext(),
+    hasDemoBoardAccess(),
+  ]);
   await hydrateDemoClockFromCookie();
   if (artistGuidedDemo) {
     syncArtistGuidedDemoClock(artistGuidedDemo);
@@ -86,6 +96,7 @@ export default async function StudioLayout({ children }: LayoutProps<"/studio">)
       userName={ctx.displayName}
       demoMode={demoModeEnabled()}
       guidedDemoActive={Boolean(artistGuidedDemo)}
+      useDemoBoard={demoBoardAccess}
     >
       {children}
     </StudioShell>

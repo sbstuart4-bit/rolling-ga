@@ -15,14 +15,14 @@ export default async function WelcomePage(props: PageProps<"/welcome">) {
   const { next } = await props.searchParams;
   const nextPath = typeof next === "string" && next.startsWith("/") ? next : undefined;
 
-  if (!ctx && demoModeEnabled()) redirect("/demo");
+  if (!ctx && demoModeEnabled()) redirect("/home");
   if (ctx) redirect(nextPath ?? "/");
 
   const signUpHref = nextPath ? `/sign-up?next=${encodeURIComponent(nextPath)}` : "/sign-up";
   const signInHref = nextPath ? `/sign-in?next=${encodeURIComponent(nextPath)}` : "/sign-in";
   const guestHref = nextPath
-    ? `/demo?perspective=fan&next=${encodeURIComponent(nextPath)}`
-    : "/demo?perspective=fan";
+    ? `/home?next=${encodeURIComponent(nextPath)}`
+    : "/home#experience-demo";
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden bg-[#121212]">
@@ -64,10 +64,10 @@ export default async function WelcomePage(props: PageProps<"/welcome">) {
             Try as a fan
           </Link>
           <Link
-            href="/demo"
+            href="/home#artist-studio"
             className="block text-xs font-medium uppercase tracking-wider text-foreground/50 hover:text-foreground/80"
           >
-            Explore every persona →
+            Explore Artist Studio →
           </Link>
         </div>
       </div>

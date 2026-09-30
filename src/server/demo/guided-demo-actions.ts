@@ -3,12 +3,12 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { hasDemoBoardAccess } from "@/lib/demo-board-access";
+import { redirectAfterLeavingDemoSession } from "@/server/demo/demo-exit-redirect";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import {
   getGuidedJourney,
   getGuidedStep,
   normalizeGuidedJourneyId,
-  resolveGuidedRoute,
   type GuidedJourneyId,
 } from "@/lib/guided-demo";
 import {
@@ -18,17 +18,9 @@ import {
 } from "./guided-demo-apply";
 import {
   clearGuidedDemoSession,
-  guidedDemoQuery,
   setGuidedDemoSession,
-  type ActiveGuidedDemoContext,
 } from "./guided-demo-state";
-
-function redirectToStep(ctx: ActiveGuidedDemoContext): never {
-  const route = resolveGuidedRoute(ctx.step.route, ctx.show);
-  const qs = guidedDemoQuery(ctx.session);
-  const join = route.includes("?") ? "&" : "?";
-  redirect(`${route}${join}${qs}`);
-}
+import { redirectToFanGuidedStep } from "./guided-demo-redirect";
 
 function journeyIdFromForm(formData: FormData): GuidedJourneyId | null {
   return normalizeGuidedJourneyId(String(formData.get("journeyId") ?? "")) ?? null;
@@ -47,8 +39,8 @@ export async function startGuidedDemoAction(formData: FormData): Promise<void> {
   const ctx = await loadGuidedStepContext(journeyId, 1, { presenter });
   if (!ctx) redirect("/demo/guided");
 
-  await applyGuidedStepState(ctx);
-  redirectToStep(ctx);
+  await applyGuidedStepState(ctx, { revalidateLayout: false });
+  redirectToFanGuidedStep(ctx);
 }
 
 export async function guidedDemoNextAction(formData: FormData): Promise<void> {
@@ -61,7 +53,11 @@ export async function guidedDemoNextAction(formData: FormData): Promise<void> {
   if (!journey) redirect("/demo/guided");
 
   if (currentStep >= journey.steps.length) {
-    redirect("/demo/guided?complete=1");
+    if (await hasDemoBoardAccess()) {
+      redirect("/demo/guided?complete=1");
+    }
+    await clearGuidedDemoSession();
+    redirect("/home");
   }
 
   const nextStep = currentStep + 1;
@@ -69,7 +65,7 @@ export async function guidedDemoNextAction(formData: FormData): Promise<void> {
   if (!ctx) redirect("/demo/guided");
 
   await applyGuidedStepState(ctx);
-  redirectToStep(ctx);
+  redirectToFanGuidedStep(ctx);
 }
 
 export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
@@ -84,7 +80,7 @@ export async function guidedDemoPrevAction(formData: FormData): Promise<void> {
   if (!ctx) redirect("/demo/guided");
 
   await applyGuidedStepState(ctx);
-  redirectToStep(ctx);
+  redirectToFanGuidedStep(ctx);
 }
 
 export async function guidedDemoGoToStepAction(formData: FormData): Promise<void> {
@@ -98,7 +94,7 @@ export async function guidedDemoGoToStepAction(formData: FormData): Promise<void
   if (!ctx) redirect("/demo/guided");
 
   await applyGuidedStepState(ctx);
-  redirectToStep(ctx);
+  redirectToFanGuidedStep(ctx);
 }
 
 export async function toggleGuidedDemoAutoplayAction(formData: FormData): Promise<void> {
@@ -135,5 +131,5 @@ export async function exitGuidedDemoAction(): Promise<void> {
   if (!demoModeEnabled()) redirect("/demo/guided?unavailable=1");
   await clearGuidedDemoSession();
   revalidatePath("/", "layout");
-  redirect("/demo?perspective=fan");
+  await redirectAfterLeavingDemoSession();
 }

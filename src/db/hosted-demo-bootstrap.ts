@@ -16,6 +16,14 @@ import {
 import { runMigrations } from "./migrate";
 import { seedDemoData } from "./seed";
 
+export type PrepareHostedDemoDatabaseOptions = {
+  /**
+   * When false, only migrate and repair personas/slugs — never truncate or full seed.
+   * Vercel builds use this so a long re-seed cannot fail the deployment.
+   */
+  allowDestructiveSeed?: boolean;
+};
+
 async function countAllUsers(handle: DbHandle): Promise<number | null> {
   try {
     const rows = await handle.db.execute<{ count: number }>(
@@ -38,20 +46,10 @@ async function demoUserCount(handle: DbHandle): Promise<number | null> {
   }
 }
 
-export type PrepareHostedDemoDatabaseOptions = {
-  /**
-   * When false, only migrate and repair personas/slugs — never truncate or full seed.
-   * Vercel builds use this so a long re-seed cannot fail the deployment.
-   */
-  allowDestructiveSeed?: boolean;
-};
+let activePrepare: Promise<void> | null = null;
 
-/**
- * Idempotent migrate/repair/seed for Vercel build prep and runtime bootstrap.
- * Lives in the db layer so build scripts never import server-only modules.
- */
-export async function prepareHostedDemoDatabase(
-  options: PrepareHostedDemoDatabaseOptions = {},
+async function executePrepareHostedDemoDatabase(
+  options: PrepareHostedDemoDatabaseOptions,
 ): Promise<void> {
   const { allowDestructiveSeed = true } = options;
   const handle = createDb(resolveBootstrapDatabaseUrl(), { maxConnections: 1 });
@@ -119,4 +117,16 @@ export async function prepareHostedDemoDatabase(
     clearRepairDb();
     await handle.close();
   }
+}
+
+/** One migrate/repair/seed flight at a time — concurrent enter-guided requests share it. */
+export async function prepareHostedDemoDatabase(
+  options: PrepareHostedDemoDatabaseOptions = {},
+): Promise<void> {
+  if (!activePrepare) {
+    activePrepare = executePrepareHostedDemoDatabase(options).finally(() => {
+      activePrepare = null;
+    });
+  }
+  await activePrepare;
 }

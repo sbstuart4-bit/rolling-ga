@@ -18,6 +18,13 @@ describe("enter guided demo route handler", () => {
       session: { journeyId: "marisol-tender-night", step: 1, autoplay: false, presenter: false },
     }));
 
+    vi.doMock("@/db/dev-bootstrap", () => ({
+      ensureDevDatabaseReady: vi.fn(async () => undefined),
+    }));
+    vi.doMock("@/db/demo-persona-repair", () => ({
+      isGuidedDemoCatalogReady: vi.fn(async () => true),
+      isScottDemoAccountReady: vi.fn(async () => true),
+    }));
     vi.doMock("@/server/demo/guided-demo-apply", () => ({
       applyGuidedStepState,
       loadGuidedStepContext,
@@ -38,10 +45,46 @@ describe("enter guided demo route handler", () => {
     expect(applyGuidedStepState).toHaveBeenCalledOnce();
   });
 
+  it("redirects to seed unavailable when the catalog is not ready", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ROLLING_GA_PUBLIC_GUIDED_DEMO", "1");
+
+    vi.doMock("@/db/dev-bootstrap", () => ({
+      ensureDevDatabaseReady: vi.fn(async () => undefined),
+    }));
+    vi.doMock("@/db/demo-persona-repair", () => ({
+      isGuidedDemoCatalogReady: vi.fn(async () => false),
+      isScottDemoAccountReady: vi.fn(async () => true),
+    }));
+    vi.doMock("@/server/demo/guided-demo-apply", () => ({
+      applyGuidedStepState: vi.fn(),
+      loadGuidedStepContext: vi.fn(),
+    }));
+
+    const { handleEnterGuidedDemoRequest } = await import("@/server/demo/enter-guided-demo");
+
+    const returnTo =
+      "/event/marisol-reyes-a-tender-night-brooklyn-2026?guided=marisol-tender-night&step=1";
+    const response = await handleEnterGuidedDemoRequest(
+      new Request(`https://rollingga.com/api/demo/enter-guided?returnTo=${encodeURIComponent(returnTo)}`),
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "https://rollingga.com/demo/guided?unavailable=seed",
+    );
+  });
+
   it("redirects to seed unavailable when Scott is missing", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("ROLLING_GA_PUBLIC_GUIDED_DEMO", "1");
 
+    vi.doMock("@/db/dev-bootstrap", () => ({
+      ensureDevDatabaseReady: vi.fn(async () => undefined),
+    }));
+    vi.doMock("@/db/demo-persona-repair", () => ({
+      isGuidedDemoCatalogReady: vi.fn(async () => true),
+      isScottDemoAccountReady: vi.fn(async () => true),
+    }));
     vi.doMock("@/server/demo/guided-demo-apply", () => ({
       loadGuidedStepContext: vi.fn(async () => ({
         journey: { steps: [{ step: 1 }] },

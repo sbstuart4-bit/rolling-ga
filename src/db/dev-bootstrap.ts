@@ -151,7 +151,9 @@ export async function ensureDevDatabaseReady(): Promise<void> {
 async function bootstrapProductionDemoDatabase(): Promise<void> {
   await prepareHostedDemoDatabase();
   if (!(await isGuidedDemoCatalogReady())) {
-    bootstrapPromise = null;
+    console.warn(
+      "Guided demo catalog is still incomplete after bootstrap — guided routes may 404 until the database is fully seeded.",
+    );
   }
 }
 

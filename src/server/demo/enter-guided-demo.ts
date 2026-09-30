@@ -2,6 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 import { ensureDevDatabaseReady } from "@/db/dev-bootstrap";
+import { isGuidedDemoCatalogReady, isScottDemoAccountReady } from "@/db/demo-persona-repair";
 import { demoModeEnabled } from "@/lib/demo-mode";
 import { parseGuidedDemoQuery } from "@/lib/guided-demo-entry";
 import {
@@ -32,7 +33,19 @@ export async function handleEnterGuidedDemoRequest(request: Request): Promise<Re
     return NextResponse.redirect(new URL("/demo/guided?unavailable=1", base));
   }
 
-  await ensureDevDatabaseReady();
+  try {
+    await Promise.race([
+      ensureDevDatabaseReady(),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("guided-demo-bootstrap-timeout")), 45_000);
+      }),
+    ]);
+  } catch (error) {
+    if (error instanceof Error && error.message === "guided-demo-bootstrap-timeout") {
+      return NextResponse.redirect(new URL("/demo/guided?unavailable=seed", base));
+    }
+    throw error;
+  }
 
   const returnTo = safeReturnPath(new URL(base).searchParams.get("returnTo"), base);
   if (!returnTo) {
@@ -42,6 +55,16 @@ export async function handleEnterGuidedDemoRequest(request: Request): Promise<Re
   const parsed = parseGuidedDemoQuery(new URL(returnTo, base).searchParams);
   if (!parsed) {
     return NextResponse.redirect(new URL("/home", base));
+  }
+
+  if (parsed.perspective === "fan") {
+    const [catalogReady, scottReady] = await Promise.all([
+      isGuidedDemoCatalogReady(),
+      isScottDemoAccountReady(),
+    ]);
+    if (!catalogReady || !scottReady) {
+      return NextResponse.redirect(new URL("/demo/guided?unavailable=seed", base));
+    }
   }
 
   try {

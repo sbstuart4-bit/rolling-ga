@@ -3,7 +3,7 @@ import "server-only";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { ensureDevDatabaseReady, withDevDatabaseRecovery } from "@/db/dev-bootstrap";
+import { withDevDatabaseRecovery } from "@/db/dev-bootstrap";
 import { users } from "@/db/schema";
 import {
   getGuidedJourney,
@@ -80,7 +80,6 @@ export async function applyGuidedStepState(
 ): Promise<void> {
   const { step, show, session } = ctx;
 
-  await ensureDevDatabaseReady();
   await applyDemoClockForPhase(show, step.scenario.timePhase);
   await setDemoScenarioCookie(step.scenario);
   await setFanShowContextSlug(show.slug);
